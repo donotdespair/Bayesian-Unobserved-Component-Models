@@ -2,22 +2,148 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Title of your work",
+    "title": "Bayesian Unobserved Component Models",
     "section": "",
-    "text": "Abstract. This is a suggested formatting for your abstract. This quarto document is a template for your report. It includes some basic ways of working with such documents. You are invited to learn more about developing online reports with this technology.\nKeywords. bsvars, impulse responses, quarto, R, tax shocks"
+    "text": "Abstract. We present the basics of Bayesian estimation and inference for unobserved component models on the example of a local-level model. The range of topics includes the conjugate prior analysis using normal-inverted-gamma 2 distribution and its extensions focusing on hierarchical modelling, conditional heteroskedasticity, and Student-t error terms. We scrutinise Bayesian forecasting and sampling from the predictive density.\nKeywords. Unobserved Component Models, Local-Level Model, State-Space Bayesian Inference, Forecasting, Heteroskedasticity, Hierarchical Modelling, Gibbs Sampler, Simulation Smoother, Precision Sampling"
   },
   {
-    "objectID": "index.html#a-simple-example",
-    "href": "index.html#a-simple-example",
-    "title": "Title of your work",
-    "section": "A Simple Example",
-    "text": "A Simple Example\nThis is a Quarto document in which we can cite the bsvars package by Woźniak (2022). Look for more info at package CRAN website.\nSimply load the package by running\n\n\n\nThe code below performs simple computations for sampling posterior draws of the impulse responses. The first line uploads the data from the package,another sets the seed for reproducible computations, and then the pipe |> is used to streamline the model specification, estimation including the first burn-in run to obtain convergence and finally, the computed impulse responses are saved in object irf.\n\ndata(us_fiscal_lsuw)\nset.seed(123)\nus_fiscal_lsuw |>\n  specify_bsvar$new(p = 1) |>\n  estimate(S = 1000, show_progress = FALSE) |> \n  estimate(S = 2000, show_progress = FALSE) |> \n  compute_impulse_responses(horizon = 20) -> irf\n\nThe code above is visible as the R chunk contains the setting #| echo: true.\nTable 1 reports the posterior means of the gross domestic product response to an unanticipated tax increase by 1 pp.\n\n\n\n\nTable 1: Impulse response of gdp to unanticipated tax increase by 1 pp. within two years\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n0\n1\n2\n3\n4\n5\n6\n7\n8\n\n\n\n\nchange in gdp [%]\n0.199\n0.184\n0.17\n0.159\n0.148\n0.139\n0.13\n0.123\n0.116\n\n\n\n\n\n\nFigure 1 presents the same reaction over the horizon of five years.\n\n\n\n\n\nFigure 1: Impulse response of gdp to unanticipated tax increase by 1 pp. within five years"
+    "objectID": "index.html#matrix-notation-for-the-model",
+    "href": "index.html#matrix-notation-for-the-model",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Matrix notation for the model",
+    "text": "Matrix notation for the model\nTo simplify the notation and the derivations introduce matrix notation for the model. Let \\(T\\) be the available sample size for the variable \\(y\\). Define a \\(T\\)-vector of zeros, \\(\\mathbf{0}_T\\), and of ones, \\(\\boldsymbol\\imath_T\\), the identity matrix of order \\(T\\), \\(\\mathbf{I}_T\\), as well as \\(T\\times1\\) vectors: \\[\\begin{align}\n\\mathbf{y} = \\begin{bmatrix} y_1\\\\ \\vdots\\\\ y_T \\end{bmatrix},\\quad\n\\boldsymbol\\tau = \\begin{bmatrix} \\tau_1\\\\ \\vdots\\\\ \\tau_T \\end{bmatrix},\\quad\n\\boldsymbol\\epsilon = \\begin{bmatrix} \\epsilon_1\\\\ \\vdots\\\\ \\epsilon_T \\end{bmatrix},\\quad\n\\boldsymbol\\eta = \\begin{bmatrix} \\eta_1\\\\ \\vdots\\\\ \\eta_T \\end{bmatrix},\\qquad\n\\mathbf{i} = \\begin{bmatrix} 1\\\\0\\\\ \\vdots\\\\ 0 \\end{bmatrix},\n\\end{align}\\] and a \\(T\\times T\\) matrix \\(\\mathbf{H}\\) with the elements: \\[\\begin{align}\n\\mathbf{H} = \\begin{bmatrix}\n1 & 0 & \\cdots & 0 & 0\\\\\n-1 & 1 & \\cdots & 0 & 0\\\\\n0 & -1 & \\cdots & 0 & 0\\\\\n\\vdots & \\vdots & \\ddots & \\vdots & \\vdots\\\\\n0 & 0 & \\cdots & 1 & 0\\\\\n0 & 0 & \\cdots & -1 & 1\n\\end{bmatrix}.\n\\end{align}\\]\nThen the model can be written in a concise notation as: \\[\\begin{align}\n\\mathbf{y} &= \\mathbf{\\tau} + \\boldsymbol\\epsilon,\\\\\n\\mathbf{H}\\boldsymbol\\tau &= \\mathbf{i} \\tau_0 + \\boldsymbol\\eta,\\\\\n\\boldsymbol\\epsilon &\\sim\\mathcal{N}\\left(\\mathbf{0}_T, \\sigma^2\\mathbf{I}_T\\right),\\\\\n\\boldsymbol\\eta &\\sim\\mathcal{N}\\left(\\mathbf{0}_T, \\sigma_\\eta^2\\mathbf{I}_T\\right).\n\\end{align}\\]"
   },
   {
-    "objectID": "index.html#some-hints",
-    "href": "index.html#some-hints",
-    "title": "Title of your work",
-    "section": "Some Hints",
-    "text": "Some Hints\nHave a look at how to work with RStudio and GitHub at: How to use git and GitHub with R.\nThese are many different ways of how to work with references in RStudio: Preview Citations.\nTo make all the R code visible on the website change the settings in the preabmble of this document to:\nexecute:\n  echo: true"
+    "objectID": "index.html#likelihood-function",
+    "href": "index.html#likelihood-function",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Likelihood function",
+    "text": "Likelihood function\nThe model equations imply the predictive density of the data vector \\(\\mathbf{y}\\). To see this, consider the model equation as a linear transformation of a normal vector \\(\\boldsymbol\\epsilon\\). Therefore, the data vector follows a multivariate normal distribution given by: \\[\\begin{align}\n\\mathbf{y}\\mid \\boldsymbol\\tau, \\sigma^2 &\\sim\\mathcal{N}_T\\left(\\boldsymbol\\tau, \\sigma^2\\mathbf{I}_T\\right).\n\\end{align}\\]\nThis distribution determines the shape of the likelihood function that is defined as the sampling data density: \\[\\begin{align}\nL(\\boldsymbol\\tau,\\sigma^2|\\mathbf{y})\\equiv p\\left(\\mathbf{y}\\mid\\boldsymbol\\tau, \\sigma^2 \\right).\n\\end{align}\\]\nThe likelihood function that for the sake of the estimation of the parameters, and after plugging in data in place of \\(\\mathbf{y}\\), is considered a function of parameters \\(\\boldsymbol\\tau\\) and \\(\\sigma^2\\) is given by: \\[\\begin{align}\nL(\\boldsymbol\\tau,\\sigma^2|\\mathbf{y}) =\n(2\\pi)^{-\\frac{T}{2}}\\left(\\sigma^2\\right)^{-\\frac{T}{2}}\\exp\\left\\{-\\frac{1}{2}\\frac{1}{\\sigma^2}(\\mathbf{y} - \\boldsymbol\\tau)'(\\mathbf{y} - \\boldsymbol\\tau)\\right\\}.\n\\end{align}\\]"
+  },
+  {
+    "objectID": "index.html#prior-distributions",
+    "href": "index.html#prior-distributions",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Prior distributions",
+    "text": "Prior distributions"
+  },
+  {
+    "objectID": "index.html#gibbs-sampler",
+    "href": "index.html#gibbs-sampler",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Gibbs sampler",
+    "text": "Gibbs sampler"
+  },
+  {
+    "objectID": "index.html#simulation-smoother-and-precision-sampler",
+    "href": "index.html#simulation-smoother-and-precision-sampler",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Simulation smoother and precision sampler",
+    "text": "Simulation smoother and precision sampler"
+  },
+  {
+    "objectID": "index.html#analytical-solution-for-a-joint-posterior",
+    "href": "index.html#analytical-solution-for-a-joint-posterior",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Analytical solution for a joint posterior",
+    "text": "Analytical solution for a joint posterior"
+  },
+  {
+    "objectID": "index.html#estimating-gamma-error-term-variance-prior-scale",
+    "href": "index.html#estimating-gamma-error-term-variance-prior-scale",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Estimating gamma error term variance prior scale",
+    "text": "Estimating gamma error term variance prior scale"
+  },
+  {
+    "objectID": "index.html#estimating-inverted-gamma-2-error-term-variance-prior-scale",
+    "href": "index.html#estimating-inverted-gamma-2-error-term-variance-prior-scale",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Estimating inverted-gamma 2 error term variance prior scale",
+    "text": "Estimating inverted-gamma 2 error term variance prior scale"
+  },
+  {
+    "objectID": "index.html#estimating-the-initial-condition-prior-scale",
+    "href": "index.html#estimating-the-initial-condition-prior-scale",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Estimating the initial condition prior scale",
+    "text": "Estimating the initial condition prior scale"
+  },
+  {
+    "objectID": "index.html#student-t-prior-for-the-trend-component",
+    "href": "index.html#student-t-prior-for-the-trend-component",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Student-t prior for the trend component",
+    "text": "Student-t prior for the trend component"
+  },
+  {
+    "objectID": "index.html#estimating-student-t-degrees-of-freedom-parameter",
+    "href": "index.html#estimating-student-t-degrees-of-freedom-parameter",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Estimating Student-t degrees of freedom parameter",
+    "text": "Estimating Student-t degrees of freedom parameter"
+  },
+  {
+    "objectID": "index.html#laplace-prior-for-the-trend-component",
+    "href": "index.html#laplace-prior-for-the-trend-component",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Laplace prior for the trend component",
+    "text": "Laplace prior for the trend component"
+  },
+  {
+    "objectID": "index.html#autoregressive-cycle-component",
+    "href": "index.html#autoregressive-cycle-component",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Autoregressive cycle component",
+    "text": "Autoregressive cycle component"
+  },
+  {
+    "objectID": "index.html#random-walk-with-time-varying-drift-parameter",
+    "href": "index.html#random-walk-with-time-varying-drift-parameter",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Random walk with time-varying drift parameter",
+    "text": "Random walk with time-varying drift parameter"
+  },
+  {
+    "objectID": "index.html#student-t-error-terms",
+    "href": "index.html#student-t-error-terms",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Student-t error terms",
+    "text": "Student-t error terms"
+  },
+  {
+    "objectID": "index.html#conditional-heteroskedasticity",
+    "href": "index.html#conditional-heteroskedasticity",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Conditional heteroskedasticity",
+    "text": "Conditional heteroskedasticity"
+  },
+  {
+    "objectID": "index.html#predictive-density",
+    "href": "index.html#predictive-density",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Predictive density",
+    "text": "Predictive density"
+  },
+  {
+    "objectID": "index.html#sampling-from-the-predictive-density",
+    "href": "index.html#sampling-from-the-predictive-density",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Sampling from the predictive density",
+    "text": "Sampling from the predictive density"
+  },
+  {
+    "objectID": "index.html#missing-observations",
+    "href": "index.html#missing-observations",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "Missing observations",
+    "text": "Missing observations"
+  },
+  {
+    "objectID": "index.html#references",
+    "href": "index.html#references",
+    "title": "Bayesian Unobserved Component Models",
+    "section": "References",
+    "text": "References"
   }
 ]
