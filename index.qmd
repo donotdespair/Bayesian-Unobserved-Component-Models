@@ -1,80 +1,137 @@
 ---
-title: "Title of your work"
-author: "Your Name"
+title: "Bayesian Unobserved Component Models"
+author:
+  - name: Tomasz Woźniak
+    url: https://github.com/donotdespair
+    orcid: 0000-0003-2212-2378
 
 execute:
   echo: false
-  
+citation: 
+  issued: 2024-05-01
+  url: https://donotdespair.github.io/Bayesian-Unobserved-Component-Models/
 bibliography: references.bib
 ---
 
-> **Abstract.** This is a suggested formatting for your abstract. This **quarto** document is a template for your report. It includes some basic ways of working with such documents. You are invited to learn more about developing online reports with this technology. 
+> **Abstract.** We present the basics of Bayesian estimation and inference for unobserved component models on the example of a local-level model. 
+> The range of topics includes the conjugate prior analysis using normal-inverted-gamma 2 distribution and its extensions focusing on hierarchical modelling, conditional heteroskedasticity, and Student-t error terms. 
+> We scrutinise Bayesian forecasting and sampling from the predictive density.
 >
-> **Keywords.** bsvars, impulse responses, quarto, R, tax shocks
+> **Keywords.** Unobserved Component Models, Local-Level Model, State-Space Bayesian Inference, Forecasting, Heteroskedasticity, Hierarchical Modelling, Gibbs Sampler, Simulation Smoother, Precision Sampling
 
-# Introduction
+# Unobserved component models
 
-This is a template repository for the Research Report for **Macroeconometrics**. Learn more about about developing online reports with **quarto** at [quarto.org](https://quarto.org/).
+Unobserved Component (UC) models are a popular class of models in macroeconometrics that use the state-space representation in modelling unit-root nonstationary time series. 
+The simple formulation of the model equations decomposing the series into a non-stationary and stationary component facilitates economic interpretations and good forecasting performance.
 
-## A Simple Example
+# A simple local-level model
 
-This is a Quarto document in which we can cite the **bsvars** package by @wozniakBsvarsBayesianEstimation2022. Look for more info at [package CRAN website](https://cran.r-project.org/package=bsvars).
+The model is set for a univariate time series whose observation at time
+$t$ is denoted by $y_t$. 
+It decomposes the variable into a stochastic trend component, $\tau_t$, and a stationary error component, $\epsilon_t$. 
+The former follows a Gaussian random walk process with the conditional variance $\sigma_\eta^2$, and the latter is zero-mean normally distributed with the variance $\sigma^2$.
+These are expressed as the model equations:
+\begin{align}
+y_t &= \tau_t + \epsilon_t,\\
+\tau_t &= \tau_{t-1} + \eta_t,\\
+\epsilon_t &\sim\mathcal{N}\left(0, \sigma^2\right),\\
+\eta_t &\sim\mathcal{N}\left(0, \sigma_\eta^2\right),
+\end{align}
+where the initial condition $\tau_0$ is a parameter of the model.
 
-Simply load the package by running
-```{r package load}
-library(bsvars)
-```
+## Matrix notation for the model
 
-The code below performs simple computations for sampling posterior draws of the impulse responses. The first line uploads the data from the package,another sets the seed for reproducible computations, and then the pipe `|>` is used to streamline the model specification, estimation including the first burn-in run to obtain convergence and finally, the computed impulse responses are saved in object `irf`.
-```{r estimate irf}
-#| message: false
-#| echo: true
+To simplify the notation and the derivations introduce matrix notation for the model. Let $T$ be the available sample size for the variable $y$. 
+Define a $T$-vector of zeros, $\mathbf{0}_T$, and of ones, $\boldsymbol\imath_T$, the identity matrix of order $T$, $\mathbf{I}_T$, as well as $T\times1$ vectors:
+\begin{align}
+\mathbf{y} = \begin{bmatrix} y_1\\ \vdots\\ y_T \end{bmatrix},\quad
+\boldsymbol\tau = \begin{bmatrix} \tau_1\\ \vdots\\ \tau_T \end{bmatrix},\quad
+\boldsymbol\epsilon = \begin{bmatrix} \epsilon_1\\ \vdots\\ \epsilon_T \end{bmatrix},\quad
+\boldsymbol\eta = \begin{bmatrix} \eta_1\\ \vdots\\ \eta_T \end{bmatrix},\qquad
+\mathbf{i} = \begin{bmatrix} 1\\0\\ \vdots\\ 0 \end{bmatrix},
+\end{align}
+and a $T\times T$ matrix $\mathbf{H}$ with the elements:
+\begin{align}
+\mathbf{H} = \begin{bmatrix}
+1 & 0 & \cdots & 0 & 0\\
+-1 & 1 & \cdots & 0 & 0\\
+0 & -1 & \cdots & 0 & 0\\
+\vdots & \vdots & \ddots & \vdots & \vdots\\
+0 & 0 & \cdots & 1 & 0\\
+0 & 0 & \cdots & -1 & 1
+\end{bmatrix}.
+\end{align}
 
-data(us_fiscal_lsuw)
-set.seed(123)
-us_fiscal_lsuw |>
-  specify_bsvar$new(p = 1) |>
-  estimate(S = 1000, show_progress = FALSE) |> 
-  estimate(S = 2000, show_progress = FALSE) |> 
-  compute_impulse_responses(horizon = 20) -> irf
-```
+Then the model can be written in a concise notation as:
+\begin{align}
+\mathbf{y} &= \mathbf{\tau} + \boldsymbol\epsilon,\\
+\mathbf{H}\boldsymbol\tau &= \mathbf{i} \tau_0 + \boldsymbol\eta,\\
+\boldsymbol\epsilon &\sim\mathcal{N}\left(\mathbf{0}_T, \sigma^2\mathbf{I}_T\right),\\
+\boldsymbol\eta &\sim\mathcal{N}\left(\mathbf{0}_T, \sigma_\eta^2\mathbf{I}_T\right).
+\end{align}
 
-The code above is visible as the **R** chunk contains the setting `#| echo: true`.
+## Likelihood function
 
-@tbl-irf reports the posterior means of the gross domestic product response to an unanticipated tax increase by 1 pp.
-```{r}
-#| label: tbl-irf
-#| tbl-cap: Impulse response of gdp to unanticipated tax increase by 1 pp. within two years
+The model equations imply the predictive density of the data vector
+$\mathbf{y}$. To see this, consider the model equation as a linear
+transformation of a normal vector $\boldsymbol\epsilon$. Therefore, the data vector follows a multivariate normal distribution given by:
+\begin{align}
+\mathbf{y}\mid \boldsymbol\tau, \sigma^2 &\sim\mathcal{N}_T\left(\boldsymbol\tau, \sigma^2\mathbf{I}_T\right).
+\end{align}
 
-irf_gdp_tax = matrix(apply(irf[3,1,1:9,],1, mean), nrow = 1)
-rownames(irf_gdp_tax) = "change in gdp [%]"
-colnames(irf_gdp_tax) = 0:8
-knitr::kable(irf_gdp_tax, digits = 3)
-```
+This distribution determines the shape of the likelihood function that
+is defined as the sampling data density: 
+\begin{align}
+L(\boldsymbol\tau,\sigma^2|\mathbf{y})\equiv p\left(\mathbf{y}\mid\boldsymbol\tau, \sigma^2 \right).
+\end{align}
 
-@fig-irf presents the same reaction over the horizon of five years.
-```{r}
-#| label: fig-irf
-#| fig-cap: Impulse response of gdp to unanticipated tax increase by 1 pp. within five years
+The likelihood function that for the sake of the estimation of the parameters, and after plugging in data in place of $\mathbf{y}$, is considered a function of parameters $\boldsymbol\tau$ and $\sigma^2$ is given by: 
+\begin{align}
+L(\boldsymbol\tau,\sigma^2|\mathbf{y}) = 
+(2\pi)^{-\frac{T}{2}}\left(\sigma^2\right)^{-\frac{T}{2}}\exp\left\{-\frac{1}{2}\frac{1}{\sigma^2}(\mathbf{y} - \boldsymbol\tau)'(\mathbf{y} - \boldsymbol\tau)\right\}.
+\end{align}
 
-irf_median    = apply(irf[3,1,,],1, median)
-irf_hdi       = apply(irf[3,1,,],1, HDInterval::hdi, credMass = .68)
-plot(x = 0:20, y = irf_median, type = "l", bty = "n", 
-     xlab = "horizon", ylab = "change in gdp [%]",
-     ylim = range(irf_hdi))
-polygon(x = c(0:20, 20:0), y = c(irf_hdi[1,], irf_hdi[2,21:1]), col = "deepskyblue1", border = "deepskyblue1")
-lines(x = 0:20, y = irf_median, lwd = 2, col = "deepskyblue3")
-```
+## Prior distributions
 
-## Some Hints
+# Bayesian estimation
 
-Have a look at how to work with **RStudio** and **GitHub** at: [How to use git and GitHub with R](https://rfortherestofus.com/2021/02/how-to-use-git-github-with-r/). 
+## Gibbs sampler
 
-These are many different ways of how to work with references in **RStudio**: [Preview Citations](https://posit.co/blog/rstudio-1-4-preview-citations/).
+## Simulation smoother and precision sampler
 
-To make all the **R** code visible on the website change the settings in the preabmble of this document to:
-```
-execute:
-  echo: true
-```
+## Analytical solution for a joint posterior
+
+# Hierarchical modeling
+
+## Estimating gamma error term variance prior scale
+
+## Estimating inverted-gamma 2 error term variance prior scale
+
+## Estimating the initial condition prior scale
+
+## Student-t prior for the trend component
+
+## Estimating Student-t degrees of freedom parameter
+
+## Laplace prior for the trend component
+
+# Model extensions
+
+## Autoregressive cycle component
+
+## Random walk with  time-varying drift parameter
+
+## Student-t error terms
+
+## Conditional heteroskedasticity
+
+# Bayesian forecasting
+
+## Predictive density
+
+## Sampling from the predictive density
+
+## Missing observations
+
+
 ## References {.unnumbered}
