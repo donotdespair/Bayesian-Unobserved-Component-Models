@@ -21,7 +21,7 @@ bibliography: references.bib
 
 # Unobserved component models
 
-Unobserved Component (UC) models are a popular class of models in macroeconometrics that use the state-space representation in modelling unit-root nonstationary time series. 
+Unobserved Component (UC) models are a popular class of models in macroeconometrics that use the state-space representation for unit-root nonstationary time series. 
 The simple formulation of the model equations decomposing the series into a non-stationary and stationary component facilitates economic interpretations and good forecasting performance.
 
 # A simple local-level model
