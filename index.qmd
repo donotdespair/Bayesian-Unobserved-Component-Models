@@ -1,0 +1,80 @@
+---
+title: "Title of your work"
+author: "Your Name"
+
+execute:
+  echo: false
+  
+bibliography: references.bib
+---
+
+> **Abstract.** This is a suggested formatting for your abstract. This **quarto** document is a template for your report. It includes some basic ways of working with such documents. You are invited to learn more about developing online reports with this technology. 
+>
+> **Keywords.** bsvars, impulse responses, quarto, R, tax shocks
+
+# Introduction
+
+This is a template repository for the Research Report for **Macroeconometrics**. Learn more about about developing online reports with **quarto** at [quarto.org](https://quarto.org/).
+
+## A Simple Example
+
+This is a Quarto document in which we can cite the **bsvars** package by @wozniakBsvarsBayesianEstimation2022. Look for more info at [package CRAN website](https://cran.r-project.org/package=bsvars).
+
+Simply load the package by running
+```{r package load}
+library(bsvars)
+```
+
+The code below performs simple computations for sampling posterior draws of the impulse responses. The first line uploads the data from the package,another sets the seed for reproducible computations, and then the pipe `|>` is used to streamline the model specification, estimation including the first burn-in run to obtain convergence and finally, the computed impulse responses are saved in object `irf`.
+```{r estimate irf}
+#| message: false
+#| echo: true
+
+data(us_fiscal_lsuw)
+set.seed(123)
+us_fiscal_lsuw |>
+  specify_bsvar$new(p = 1) |>
+  estimate(S = 1000, show_progress = FALSE) |> 
+  estimate(S = 2000, show_progress = FALSE) |> 
+  compute_impulse_responses(horizon = 20) -> irf
+```
+
+The code above is visible as the **R** chunk contains the setting `#| echo: true`.
+
+@tbl-irf reports the posterior means of the gross domestic product response to an unanticipated tax increase by 1 pp.
+```{r}
+#| label: tbl-irf
+#| tbl-cap: Impulse response of gdp to unanticipated tax increase by 1 pp. within two years
+
+irf_gdp_tax = matrix(apply(irf[3,1,1:9,],1, mean), nrow = 1)
+rownames(irf_gdp_tax) = "change in gdp [%]"
+colnames(irf_gdp_tax) = 0:8
+knitr::kable(irf_gdp_tax, digits = 3)
+```
+
+@fig-irf presents the same reaction over the horizon of five years.
+```{r}
+#| label: fig-irf
+#| fig-cap: Impulse response of gdp to unanticipated tax increase by 1 pp. within five years
+
+irf_median    = apply(irf[3,1,,],1, median)
+irf_hdi       = apply(irf[3,1,,],1, HDInterval::hdi, credMass = .68)
+plot(x = 0:20, y = irf_median, type = "l", bty = "n", 
+     xlab = "horizon", ylab = "change in gdp [%]",
+     ylim = range(irf_hdi))
+polygon(x = c(0:20, 20:0), y = c(irf_hdi[1,], irf_hdi[2,21:1]), col = "deepskyblue1", border = "deepskyblue1")
+lines(x = 0:20, y = irf_median, lwd = 2, col = "deepskyblue3")
+```
+
+## Some Hints
+
+Have a look at how to work with **RStudio** and **GitHub** at: [How to use git and GitHub with R](https://rfortherestofus.com/2021/02/how-to-use-git-github-with-r/). 
+
+These are many different ways of how to work with references in **RStudio**: [Preview Citations](https://posit.co/blog/rstudio-1-4-preview-citations/).
+
+To make all the **R** code visible on the website change the settings in the preabmble of this document to:
+```
+execute:
+  echo: true
+```
+## References {.unnumbered}
