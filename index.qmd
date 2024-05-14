@@ -10,6 +10,7 @@ execute:
 citation: 
   issued: 2024-05-01
   url: https://donotdespair.github.io/Bayesian-Unobserved-Component-Models/
+  doi: 10.26188/25814617
 bibliography: references.bib
 ---
 
