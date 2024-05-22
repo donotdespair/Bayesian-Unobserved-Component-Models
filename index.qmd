@@ -4,9 +4,13 @@ author:
   - name: Tomasz Woźniak
     url: https://github.com/donotdespair
     orcid: 0000-0003-2212-2378
+  - name: Ben Gussen
+    url: https://github.com/bgussen
+    orcid: 0000-0003-4406-4076
 
-execute:
-  echo: false
+  
+    execute:
+  #echo: false
 citation: 
   issued: 2024-05-01
   url: https://donotdespair.github.io/Bayesian-Unobserved-Component-Models/
@@ -113,6 +117,225 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 ## Student-t prior for the trend component
 
 ## Estimating Student-t degrees of freedom parameter
+
+The Student-t distribution is commonly used in statistical modeling to handle data with heavier tails than the normal distribution. An essential parameter of the Student-t distribution is the degrees of freedom $\nu$, which controls the tail heaviness. In this note, we present the Bayesian estimation of the degrees of freedom parameter for an N-variate Student-t distribution using the Inverted-Gamma 2 (IG2) scale mixture of normals.
+
+The N-variate Student-t distribution can be represented as a scale mixture of normals:
+
+$$
+\mathbf{y} \mid \mathbf{\mu}, \lambda \sim \mathcal{N}(\mathbf{\mu}, \lambda \mathbf{I}_N)
+$$
+
+$$
+\lambda \mid \nu \sim \mathcal{IG2}(\nu, \nu)
+$$
+
+where:
+
+- $\mathbf{y}$ is the $N$-dimensional observation vector.
+- $\mathbf{\mu}$ is the mean vector.
+- $\lambda$ is the latent scale variable.
+- $\nu$ is the degrees of freedom parameter.
+
+### Derivation of Full Conditional Posteriors
+
+#### Full Conditional Posterior of $\lambda$
+
+Given the prior distribution:
+
+$$
+\lambda \mid \nu \sim \mathcal{IG2}(\nu, \nu)
+$$
+
+The likelihood of the data given $\lambda$ is:
+
+$$
+\mathbf{y} \mid \mathbf{\mu}, \lambda \sim \mathcal{N}(\mathbf{\mu}, \lambda \mathbf{I}_N)
+$$
+
+The full conditional posterior of $\lambda$ can be derived as follows:
+
+1. **Likelihood of $\mathbf{y}$ given $\mathbf{\mu}$ and $\lambda$**:
+
+   $$
+   p(\mathbf{y} \mid \mathbf{\mu}, \lambda) \propto \lambda^{-\frac{N}{2}} \exp\left(-\frac{(\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})}{2\lambda}\right)
+   $$
+
+2. **Prior for $\lambda$ given $\nu$**:
+
+   $$
+   p(\lambda \mid \nu) \propto \lambda^{-\nu - 1} \exp\left(-\frac{\nu}{\lambda}\right)
+   $$
+
+3. **Joint distribution**:
+
+   $$
+   p(\mathbf{y}, \lambda \mid \mathbf{\mu}, \nu) = p(\mathbf{y} \mid \mathbf{\mu}, \lambda) p(\lambda \mid \nu)
+   $$
+
+4. **Full conditional posterior**:
+
+   $$
+   p(\lambda \mid \mathbf{y}, \mathbf{\mu}, \nu) \propto \lambda^{-\frac{N}{2}} \exp\left(-\frac{(\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})}{2\lambda}\right) \lambda^{-\nu - 1} \exp\left(-\frac{\nu}{\lambda}\right)
+   $$
+
+   Combining terms:
+
+   $$
+   p(\lambda \mid \mathbf{y}, \mathbf{\mu}, \nu) \propto \lambda^{-\left(\nu + \frac{N}{2} + 1\right)} \exp\left(-\frac{\nu + \frac{(\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})}{2}}{\lambda}\right)
+   $$
+
+   This is recognized as the kernel of an Inverted-Gamma 2 distribution:
+
+   $$
+   \lambda \mid \mathbf{y}, \mathbf{\mu}, \nu \sim \mathcal{IG2}\left(\nu + N, \nu + (\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})\right)
+   $$
+
+#### Full Conditional Posterior of $\nu$
+
+To estimate $\nu$, we use the Metropolis-Hastings algorithm due to its non-standard form. The steps for deriving the full conditional posterior of $\nu$ are as follows:
+
+1. **Likelihood of $\lambda$ given $\nu$**:
+
+   $$
+   p(\lambda \mid \nu) = \frac{\left(\frac{\nu}{2}\right)^{\nu/2}}{\Gamma(\nu/2)} \lambda^{-\left(\nu/2 + 1\right)} \exp\left(-\frac{\nu}{2\lambda}\right)
+   $$
+
+2. **Log-likelihood for $\nu$ given $\lambda$**:
+
+   $$
+   \log p(\lambda \mid \nu) = \frac{\nu}{2} \log\left(\frac{\nu}{2}\right) - \log\Gamma\left(\frac{\nu}{2}\right) - \left(\frac{\nu}{2} + 1\right) \log \lambda - \frac{\nu}{2\lambda}
+   $$
+
+3. **Log-prior for $\nu$ (assuming a non-informative prior)**:
+
+   $$
+   \log p(\nu) = \text{constant}
+   $$
+
+4. **Full conditional posterior**:
+
+   The full conditional posterior for $\nu$ is proportional to the product of the likelihood and the prior:
+
+   $$
+   p(\nu \mid \lambda) \propto p(\lambda \mid \nu) p(\nu)
+   $$
+
+   Since $p(\nu)$ is constant, we focus on $p(\lambda \mid \nu)$:
+
+   $$
+   \log p(\nu \mid \lambda) = \frac{\nu}{2} \log\left(\frac{\nu}{2}\right) - \log\Gamma\left(\frac{\nu}{2}\right) - \left(\frac{\nu}{2} + 1\right) \log \lambda - \frac{\nu}{2\lambda}
+   $$
+
+   This expression does not have a closed form, so we use the Metropolis-Hastings algorithm to sample from this posterior.
+
+### R Function for Gibbs Sampler
+
+Below is the R function implementing the Gibbs sampler for estimating $\nu$ using the IG2-scale mixture of normals representation.
+
+```{r echo=TRUE}
+metropolis_hastings_nu <- function(y, mu, n_iter, init_nu, proposal_sd) {
+  # Initialize parameter
+  nu <- init_nu
+  N <- length(y)
+  
+  # Storage for samples
+  nu_samples <- numeric(n_iter)
+  
+  # Log-likelihood function
+  log_likelihood <- function(nu, y, mu) {
+    sum(dt((y - mu) / sqrt(nu), df = nu, log = TRUE))
+  }
+  
+  for (i in 1:n_iter) {
+    # Propose new value for nu
+    nu_proposal <- nu + rnorm(1, 0, proposal_sd)
+    
+    if (nu_proposal > 0) {
+      # Calculate log acceptance ratio
+      log_acceptance_ratio <- log_likelihood(nu_proposal, y, mu) - log_likelihood(nu, y, mu)
+      
+      # Accept or reject the proposal
+      if (log(runif(1)) < log_acceptance_ratio) {
+        nu <- nu_proposal
+      }
+    }
+    
+    # Store the sample
+    nu_samples[i] <- nu
+  }
+  
+  return(nu_samples)
+}
+
+gibbs_sampler_t <- function(y, n_iter, init_values) {
+  # Initialize parameters
+  nu <- init_values$nu
+  mu <- init_values$mu
+  N <- length(y)
+  
+  # Storage for samples
+  nu_samples <- numeric(n_iter)
+  mu_samples <- numeric(n_iter)
+  lambda_samples <- numeric(n_iter)
+  
+  for (i in 1:n_iter) {
+    # Sample lambda
+    shape_lambda <- nu + N
+    rate_lambda <- nu + sum((y - mu)^2)
+    lambda <- 1 / rgamma(1, shape = shape_lambda, rate = rate_lambda)
+    
+    # Sample mu
+    mu <- rnorm(1, mean = mean(y), sd = sqrt(lambda / N))
+    
+    # Sample nu using Metropolis-Hastings
+    log_likelihood <- function(nu, y, mu) {
+      sum(dt((y - mu) / sqrt(nu), df = nu, log = TRUE))
+    }
+    
+    proposal_nu <- nu + rnorm(1, 0, 0.1) # proposal distribution: normal random walk
+    if (proposal_nu > 0) {
+      log_acceptance_ratio <- log_likelihood(proposal_nu, y, mu) - log_likelihood(nu, y, mu)
+      if (log(runif(1)) < log_acceptance_ratio
+
+) {
+        nu <- proposal_nu
+      }
+    }
+    
+    # Store samples
+    nu_samples[i] <- nu
+    mu_samples[i] <- mu
+    lambda_samples[i] <- lambda
+  }
+  
+  return(list(nu = nu_samples, mu = mu_samples, lambda = lambda_samples))
+}
+
+# Example usage
+set.seed(123)
+y <- rnorm(100)
+init_values <- list(nu = 5, mu = mean(y))
+n_iter <- 1000
+result <- gibbs_sampler_t(y, n_iter, init_values)
+
+# Display the results
+print(summary(result$nu))
+print(summary(result$mu))
+print(summary(result$lambda))
+```
+
+### Conclusion
+
+This note provided a comprehensive step-by-step algebraic derivation and a sampler for estimating the degrees of freedom parameter $\nu$ for an N-variate Student-t distribution using an IG2-scale mixture of normals approach within a Bayesian framework. By using the Metropolis-Hastings algorithm, we avoid the need to assume a prior distribution for $\nu$, simplifying the estimation process. This approach allows for flexible modeling of heavy-tailed data, which is often encountered in practice.
+
+### References
+
+- Geweke, J. (1993). Bayesian treatment of the independent Student-t linear model. *Journal of Applied Econometrics*, 8(S1), S19-S40.
+- Chib, S., & Greenberg, E. (1995). Understanding the Metropolis-Hastings Algorithm. *The American Statistician*, 49(4), 327-335.
+
+
+
 
 ## Laplace prior for the trend component
 
