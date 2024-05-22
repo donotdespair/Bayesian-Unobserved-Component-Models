@@ -327,7 +327,7 @@ print(summary(result$lambda))
 
 ### Conclusion
 
-This note provided a step-by-step algebraic derivation and a sampler for estimating the degrees of freedom parameter $\nu$ for an N-variate Student-t distribution using an IG2-scale mixture of normals approach within a Bayesian framework. By using the Metropolis-Hastings algorithm, we avoid the need to assume a prior distribution for $\nu$, simplifying the estimation process. This approach allows for flexible modeling of heavy-tailed data, which is often encountered in practice.
+This note provided a comprehensive step-by-step algebraic derivation and a sampler for estimating the degrees of freedom parameter $\nu$ for an N-variate Student-t distribution using an IG2-scale mixture of normals approach within a Bayesian framework. By using the Metropolis-Hastings algorithm, we avoid the need to assume a prior distribution for $\nu$, simplifying the estimation process. This approach allows for flexible modeling of heavy-tailed data, which is often encountered in practice.
 
 ### References
 
