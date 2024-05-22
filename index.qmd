@@ -4,9 +4,13 @@ author:
   - name: Tomasz Woźniak
     url: https://github.com/donotdespair
     orcid: 0000-0003-2212-2378
+  - name: Ben Gussen
+    url: https://github.com/bgussen
+    orcid: 0000-0003-4406-4076
 
-execute:
-  echo: false
+  
+    execute:
+  #echo: false
 citation: 
   issued: 2024-05-01
   url: https://donotdespair.github.io/Bayesian-Unobserved-Component-Models/
