@@ -18,45 +18,32 @@ citation:
 bibliography: references.bib
 ---
 
-> **Abstract.** We present the basics of Bayesian estimation and inference for unobserved component models on the example of a local-level model. 
-> The range of topics includes the conjugate prior analysis using normal-inverted-gamma 2 distribution and its extensions focusing on hierarchical modelling, conditional heteroskedasticity, and Student-t error terms. 
-> We scrutinise Bayesian forecasting and sampling from the predictive density.
+> **Abstract.** We present the basics of Bayesian estimation and inference for unobserved component models on the example of a local-level model. The range of topics includes the conjugate prior analysis using normal-inverted-gamma 2 distribution and its extensions focusing on hierarchical modelling, conditional heteroskedasticity, and Student-t error terms. We scrutinise Bayesian forecasting and sampling from the predictive density.
 >
 > **Keywords.** Unobserved Component Models, Local-Level Model, State-Space Bayesian Inference, Forecasting, Heteroskedasticity, Hierarchical Modelling, Gibbs Sampler, Simulation Smoother, Precision Sampling
 
 # Unobserved component models
 
-Unobserved Component (UC) models are a popular class of models in macroeconometrics that use the state-space representation for unit-root nonstationary time series. 
-The simple formulation of the model equations decomposing the series into a non-stationary and stationary component facilitates economic interpretations and good forecasting performance.
+Unobserved Component (UC) models are a popular class of models in macroeconometrics that use the state-space representation for unit-root nonstationary time series. The simple formulation of the model equations decomposing the series into a non-stationary and stationary component facilitates economic interpretations and good forecasting performance.
 
 # A simple local-level model
 
-The model is set for a univariate time series whose observation at time
-$t$ is denoted by $y_t$. 
-It decomposes the variable into a stochastic trend component, $\tau_t$, and a stationary error component, $\epsilon_t$. 
-The former follows a Gaussian random walk process with the conditional variance $\sigma_\eta^2$, and the latter is zero-mean normally distributed with the variance $\sigma^2$.
-These are expressed as the model equations:
-\begin{align}
+The model is set for a univariate time series whose observation at time $t$ is denoted by $y_t$. It decomposes the variable into a stochastic trend component, $\tau_t$, and a stationary error component, $\epsilon_t$. The former follows a Gaussian random walk process with the conditional variance $\sigma_\eta^2$, and the latter is zero-mean normally distributed with the variance $\sigma^2$. These are expressed as the model equations: \begin{align}
 y_t &= \tau_t + \epsilon_t,\\
 \tau_t &= \tau_{t-1} + \eta_t,\\
 \epsilon_t &\sim\mathcal{N}\left(0, \sigma^2\right),\\
 \eta_t &\sim\mathcal{N}\left(0, \sigma_\eta^2\right),
-\end{align}
-where the initial condition $\tau_0$ is a parameter of the model.
+\end{align} where the initial condition $\tau_0$ is a parameter of the model.
 
 ## Matrix notation for the model
 
-To simplify the notation and the derivations introduce matrix notation for the model. Let $T$ be the available sample size for the variable $y$. 
-Define a $T$-vector of zeros, $\mathbf{0}_T$, and of ones, $\boldsymbol\imath_T$, the identity matrix of order $T$, $\mathbf{I}_T$, as well as $T\times1$ vectors:
-\begin{align}
+To simplify the notation and the derivations introduce matrix notation for the model. Let $T$ be the available sample size for the variable $y$. Define a $T$-vector of zeros, $\mathbf{0}_T$, and of ones, $\boldsymbol\imath_T$, the identity matrix of order $T$, $\mathbf{I}_T$, as well as $T\times1$ vectors: \begin{align}
 \mathbf{y} = \begin{bmatrix} y_1\\ \vdots\\ y_T \end{bmatrix},\quad
 \boldsymbol\tau = \begin{bmatrix} \tau_1\\ \vdots\\ \tau_T \end{bmatrix},\quad
 \boldsymbol\epsilon = \begin{bmatrix} \epsilon_1\\ \vdots\\ \epsilon_T \end{bmatrix},\quad
 \boldsymbol\eta = \begin{bmatrix} \eta_1\\ \vdots\\ \eta_T \end{bmatrix},\qquad
 \mathbf{i} = \begin{bmatrix} 1\\0\\ \vdots\\ 0 \end{bmatrix},
-\end{align}
-and a $T\times T$ matrix $\mathbf{H}$ with the elements:
-\begin{align}
+\end{align} and a $T\times T$ matrix $\mathbf{H}$ with the elements: \begin{align}
 \mathbf{H} = \begin{bmatrix}
 1 & 0 & \cdots & 0 & 0\\
 -1 & 1 & \cdots & 0 & 0\\
@@ -67,8 +54,7 @@ and a $T\times T$ matrix $\mathbf{H}$ with the elements:
 \end{bmatrix}.
 \end{align}
 
-Then the model can be written in a concise notation as:
-\begin{align}
+Then the model can be written in a concise notation as: \begin{align}
 \mathbf{y} &= \mathbf{\tau} + \boldsymbol\epsilon,\\
 \mathbf{H}\boldsymbol\tau &= \mathbf{i} \tau_0 + \boldsymbol\eta,\\
 \boldsymbol\epsilon &\sim\mathcal{N}\left(\mathbf{0}_T, \sigma^2\mathbf{I}_T\right),\\
@@ -77,21 +63,15 @@ Then the model can be written in a concise notation as:
 
 ## Likelihood function
 
-The model equations imply the predictive density of the data vector
-$\mathbf{y}$. To see this, consider the model equation as a linear
-transformation of a normal vector $\boldsymbol\epsilon$. Therefore, the data vector follows a multivariate normal distribution given by:
-\begin{align}
+The model equations imply the predictive density of the data vector $\mathbf{y}$. To see this, consider the model equation as a linear transformation of a normal vector $\boldsymbol\epsilon$. Therefore, the data vector follows a multivariate normal distribution given by: \begin{align}
 \mathbf{y}\mid \boldsymbol\tau, \sigma^2 &\sim\mathcal{N}_T\left(\boldsymbol\tau, \sigma^2\mathbf{I}_T\right).
 \end{align}
 
-This distribution determines the shape of the likelihood function that
-is defined as the sampling data density: 
-\begin{align}
+This distribution determines the shape of the likelihood function that is defined as the sampling data density: \begin{align}
 L(\boldsymbol\tau,\sigma^2|\mathbf{y})\equiv p\left(\mathbf{y}\mid\boldsymbol\tau, \sigma^2 \right).
 \end{align}
 
-The likelihood function that for the sake of the estimation of the parameters, and after plugging in data in place of $\mathbf{y}$, is considered a function of parameters $\boldsymbol\tau$ and $\sigma^2$ is given by: 
-\begin{align}
+The likelihood function that for the sake of the estimation of the parameters, and after plugging in data in place of $\mathbf{y}$, is considered a function of parameters $\boldsymbol\tau$ and $\sigma^2$ is given by: \begin{align}
 L(\boldsymbol\tau,\sigma^2|\mathbf{y}) = 
 (2\pi)^{-\frac{T}{2}}\left(\sigma^2\right)^{-\frac{T}{2}}\exp\left\{-\frac{1}{2}\frac{1}{\sigma^2}(\mathbf{y} - \boldsymbol\tau)'(\mathbf{y} - \boldsymbol\tau)\right\}.
 \end{align}
@@ -132,10 +112,10 @@ $$
 
 where:
 
-- $\mathbf{y}$ is the $N$-dimensional observation vector.
-- $\mathbf{\mu}$ is the mean vector.
-- $\lambda$ is the latent scale variable.
-- $\nu$ is the degrees of freedom parameter.
+-   $\mathbf{y}$ is the $N$-dimensional observation vector.
+-   $\mathbf{\mu}$ is the mean vector.
+-   $\lambda$ is the latent scale variable.
+-   $\nu$ is the degrees of freedom parameter.
 
 ### Derivation of Full Conditional Posteriors
 
@@ -155,79 +135,79 @@ $$
 
 The full conditional posterior of $\lambda$ can be derived as follows:
 
-1. **Likelihood of $\mathbf{y}$ given $\mathbf{\mu}$ and $\lambda$**:
+1.  **Likelihood of** $\mathbf{y}$ given $\mathbf{\mu}$ and $\lambda$:
 
-   $$
-   p(\mathbf{y} \mid \mathbf{\mu}, \lambda) \propto \lambda^{-\frac{N}{2}} \exp\left(-\frac{(\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})}{2\lambda}\right)
-   $$
+    $$
+    p(\mathbf{y} \mid \mathbf{\mu}, \lambda) \propto \lambda^{-\frac{N}{2}} \exp\left(-\frac{(\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})}{2\lambda}\right)
+    $$
 
-2. **Prior for $\lambda$ given $\nu$**:
+2.  **Prior for** $\lambda$ given $\nu$:
 
-   $$
-   p(\lambda \mid \nu) \propto \lambda^{-\nu - 1} \exp\left(-\frac{\nu}{\lambda}\right)
-   $$
+    $$
+    p(\lambda \mid \nu) \propto \lambda^{-\nu - 1} \exp\left(-\frac{\nu}{\lambda}\right)
+    $$
 
-3. **Joint distribution**:
+3.  **Joint distribution**:
 
-   $$
-   p(\mathbf{y}, \lambda \mid \mathbf{\mu}, \nu) = p(\mathbf{y} \mid \mathbf{\mu}, \lambda) p(\lambda \mid \nu)
-   $$
+    $$
+    p(\mathbf{y}, \lambda \mid \mathbf{\mu}, \nu) = p(\mathbf{y} \mid \mathbf{\mu}, \lambda) p(\lambda \mid \nu)
+    $$
 
-4. **Full conditional posterior**:
+4.  **Full conditional posterior**:
 
-   $$
-   p(\lambda \mid \mathbf{y}, \mathbf{\mu}, \nu) \propto \lambda^{-\frac{N}{2}} \exp\left(-\frac{(\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})}{2\lambda}\right) \lambda^{-\nu - 1} \exp\left(-\frac{\nu}{\lambda}\right)
-   $$
+    $$
+    p(\lambda \mid \mathbf{y}, \mathbf{\mu}, \nu) \propto \lambda^{-\frac{N}{2}} \exp\left(-\frac{(\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})}{2\lambda}\right) \lambda^{-\nu - 1} \exp\left(-\frac{\nu}{\lambda}\right)
+    $$
 
-   Combining terms:
+    Combining terms:
 
-   $$
-   p(\lambda \mid \mathbf{y}, \mathbf{\mu}, \nu) \propto \lambda^{-\left(\nu + \frac{N}{2} + 1\right)} \exp\left(-\frac{\nu + \frac{(\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})}{2}}{\lambda}\right)
-   $$
+    $$
+    p(\lambda \mid \mathbf{y}, \mathbf{\mu}, \nu) \propto \lambda^{-\left(\nu + \frac{N}{2} + 1\right)} \exp\left(-\frac{\nu + \frac{(\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})}{2}}{\lambda}\right)
+    $$
 
-   This is recognized as the kernel of an Inverted-Gamma 2 distribution:
+    This is recognized as the kernel of an Inverted-Gamma 2 distribution:
 
-   $$
-   \lambda \mid \mathbf{y}, \mathbf{\mu}, \nu \sim \mathcal{IG2}\left(\nu + N, \nu + (\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})\right)
-   $$
+    $$
+    \lambda \mid \mathbf{y}, \mathbf{\mu}, \nu \sim \mathcal{IG2}\left(\nu + N, \nu + (\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})\right)
+    $$
 
 #### Full Conditional Posterior of $\nu$
 
 To estimate $\nu$, we use the Metropolis-Hastings algorithm due to its non-standard form. The steps for deriving the full conditional posterior of $\nu$ are as follows:
 
-1. **Likelihood of $\lambda$ given $\nu$**:
+1.  **Likelihood of** $\lambda$ given $\nu$:
 
-   $$
-   p(\lambda \mid \nu) = \frac{\left(\frac{\nu}{2}\right)^{\nu/2}}{\Gamma(\nu/2)} \lambda^{-\left(\nu/2 + 1\right)} \exp\left(-\frac{\nu}{2\lambda}\right)
-   $$
+    $$
+    p(\lambda \mid \nu) = \frac{\left(\frac{\nu}{2}\right)^{\nu/2}}{\Gamma(\nu/2)} \lambda^{-\left(\nu/2 + 1\right)} \exp\left(-\frac{\nu}{2\lambda}\right)
+    $$
 
-2. **Log-likelihood for $\nu$ given $\lambda$**:
+2.  **Log-likelihood for** $\nu$ given $\lambda$:
 
-   $$
-   \log p(\lambda \mid \nu) = \frac{\nu}{2} \log\left(\frac{\nu}{2}\right) - \log\Gamma\left(\frac{\nu}{2}\right) - \left(\frac{\nu}{2} + 1\right) \log \lambda - \frac{\nu}{2\lambda}
-   $$
+    $$
+    \log p(\lambda \mid \nu) = \frac{\nu}{2} \log\left(\frac{\nu}{2}\right) - \log\Gamma\left(\frac{\nu}{2}\right) - \left(\frac{\nu}{2} + 1\right) \log \lambda - \frac{\nu}{2\lambda}
+    $$
 
-3. **Log-prior for $\nu$ (assuming a non-informative prior)**:
+3.  **Log-prior for** $\nu$ (assuming a non-informative prior):
 
-   $$
-   \log p(\nu) = \text{constant}
-   $$
+    $$
+    \log p(\nu) = \text{constant}
+    $$
 
-4. **Full conditional posterior**:
+4.  **Full conditional posterior**:
 
-   The full conditional posterior for $\nu$ is proportional to the product of the likelihood and the prior:
+    The full conditional posterior for $\nu$ is proportional to the product of the likelihood and the prior:
 
-   $$
-   p(\nu \mid \lambda) \propto p(\lambda \mid \nu) p(\nu)
-   $$
+    $$
+    p(\nu \mid \lambda) \propto p(\lambda \mid \nu) p(\nu)
+    $$
 
-   Since $p(\nu)$ is constant, we focus on $p(\lambda \mid \nu)$:
+    Since $p(\nu)$ is constant, we focus on $p(\lambda \mid \nu)$:
 
-   $$
-   \log p(\nu \mid \lambda) = \frac{\nu}{2} \log\left(\frac{\nu}{2}\right) - \log\Gamma\left(\frac{\nu}{2}\right) - \left(\frac{\nu}{2} + 1\right) \log \lambda - \frac{\nu}{2\lambda}
-   $$
+    $$
+    \log p(\nu \mid \lambda) = \frac{\nu}{2} \log\left(\frac{\nu}{2}\right) - \log\Gamma\left(\frac{\nu}{2}\right) - \left(\frac{\nu}{2} + 1\right) \log \lambda - \frac{\nu}{2\lambda}
+    $$
 
-   This expression does not have a closed form, so we use the Metropolis-Hastings algorithm to sample from this posterior.
+    This expression does not have a closed form, so we use the Metropolis-Hastings algorithm to sample from this posterior.
 
 ### R Function for Gibbs Sampler
 
@@ -331,11 +311,8 @@ This note provided a comprehensive step-by-step algebraic derivation and a sampl
 
 ### References
 
-- Geweke, J. (1993). Bayesian treatment of the independent Student-t linear model. *Journal of Applied Econometrics*, 8(S1), S19-S40.
-- Chib, S., & Greenberg, E. (1995). Understanding the Metropolis-Hastings Algorithm. *The American Statistician*, 49(4), 327-335.
-
-
-
+-   Geweke, J. (1993). Bayesian treatment of the independent Student-t linear model. *Journal of Applied Econometrics*, 8(S1), S19-S40.
+-   Chib, S., & Greenberg, E. (1995). Understanding the Metropolis-Hastings Algorithm. *The American Statistician*, 49(4), 327-335.
 
 ## Laplace prior for the trend component
 
@@ -343,7 +320,7 @@ This note provided a comprehensive step-by-step algebraic derivation and a sampl
 
 ## Autoregressive cycle component
 
-## Random walk with  time-varying drift parameter
+## Random walk with time-varying drift parameter
 
 ## Student-t error terms
 
@@ -356,6 +333,5 @@ This note provided a comprehensive step-by-step algebraic derivation and a sampl
 ## Sampling from the predictive density
 
 ## Missing observations
-
 
 ## References {.unnumbered}
