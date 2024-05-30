@@ -103,6 +103,173 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 
 ## Gibbs sampler
 
+Base on the Bayesian approach:
+
+```{=tex}
+\begin{aligned}
+
+P(A|B) & =\frac{P(B|A)P(A)}{P(B)} \\
+P(A|B) & \propto P(B|A)P(A)
+
+\end{aligned}
+```
+
+And the Joint prior distribution:
+
+```{=tex}
+\begin{aligned}
+
+P(\tau,\tau_{0},\sigma^{2},\sigma_{\eta}^{2})=P(\tau|\tau_{0},\sigma_{\eta}^{2})P(\tau_{0}|\sigma_{\eta}^{2})P(\sigma_{\eta}^{2})P(\sigma^{2})
+
+\end{aligned}
+```
+
+We could have **Full Conditional posterior distribution** for $\tau,\tau_{0},\sigma^{2},\sigma_{\eta}^{2}$ based on two likelihood functions:
+
+Full Conditional posterior distribution for $\tau$:
+
+```{=tex}
+\begin{aligned}
+
+P(\tau|y,\tau_{0},\sigma^{2},\sigma_{\eta}^{2})&=L(\tau|y,\tau_{0},\sigma^{2},\sigma_{\eta}^{2})P(\tau|\tau_{0},\sigma_{\eta}^{2})\\
+&\propto exp\left\{ -\frac{1}{2}\sigma^{-2}\left( y-\tau \right)'I_{T}\left( y-\tau \right) \right\}\\
+&\times exp\left\{ -\frac{1}{2}\sigma_{\eta}^{-2}\left(\tau-H^{-1} i\tau_{0}\right)'H'H\left( \tau-H^{-1} i\tau_{0} \right) \right\}
+
+\\where: P(\tau|y,\tau_{0},\sigma^{2},\sigma_{\eta}^{2})\sim N(\bar{\tau},\bar{V_{\tau}})\\
+\bar{V_{\tau}}&=\left[ \sigma^{-2}I_{T} +\sigma_{\eta}^{-2}H'H\right]^{-1}\\
+\bar{\tau}&=\bar{V_{\tau}}\left[ \sigma_{\eta}^{-2}H'i\tau_{0} +\sigma^{-2}I_{T}y\right]
+
+\end{aligned}
+```
+
+Full Conditional posterior distribution for $\tau_{0}$:
+
+```{=tex}
+\begin{aligned}
+
+P(\tau_{0}|y,\tau,\sigma^{2},\sigma_{\eta}^{2})&=L(\tau_{0}|y,\tau,\sigma^{2},\sigma_{\eta}^{2})P(\tau_{0}|\sigma_{\eta}^{2})\\
+&\propto exp\left\{ -\frac{1}{2}\sigma_{\eta}^{-2}\left(H\tau -i\tau_{0}\right)'I_{T}\left(H\tau-i\tau_{0}\right)\right\}\\
+&\times exp\left\{ -\frac{1}{2}\left(\tau_{0}-  \underline{\tau}_{0}\right)'\underline{V}_{\tau_{0}}^{-1}\left(\tau_{0}-  \underline{\tau}_{0}\right) \right\}
+
+\\where: P(\tau_{0}|y,\tau,\sigma^{2},\sigma_{\eta}^{2})\sim N(\bar{\tau_{0}},\bar{V_{\tau_{0}}})\\
+\bar{V_{\tau_{0}}}&=\left[ \sigma_{\eta}^{-2}I_{T} +\underline{V}_{\tau_{0}}^{-1}\right]^{-1}\\
+\bar{\tau_{0}}&=\bar{V_{\tau_{0}}}\left[ \sigma_{\eta}^{-2}I_{T}H\tau i +\underline{V}_{\tau_{0}}^{-1}\underline{\tau}_{0}\right]
+
+\end{aligned}
+```
+
+Full Conditional posterior distribution for $\sigma_{\eta}^{2}$:
+
+```{=tex}
+\begin{aligned}
+
+P(\sigma_{\eta}^{2}|y,\tau,\tau_{0},\sigma^{2})&=L(\sigma_{\eta}^{2}|y,\tau,\tau_{0},\sigma^{2})P(\sigma_{\eta}^{2})
+\\
+&\propto \left( \sigma_{\eta}^{2} \right)^{-\frac{T}{2}}exp\left\{ -\frac{1}{2}\sigma_{\eta}^{-2}\left(H\tau -i\tau_{0}\right)'I_{T}\left(H\tau-i\tau_{0}\right)\right\}
+\\
+&\times \left( \sigma_{\eta}^{2} \right)^{-\frac{\underline{\upsilon}+2}{2}}exp\left\{ -\frac{1}{2}\frac{\underline{s}}{\sigma_{\eta}^{2}}\right\}
+\\
+where: P(\sigma_{\eta}^{2}|y,\tau,\tau_{0},\sigma^{2})\sim IG2(\bar{s_{\eta}},\bar{\upsilon_{\eta}})
+\\
+\bar{s_{\eta}}&=\underline{s} + \left(H\tau -i\tau_{0}\right)'I_{T}\left(H\tau-i\tau_{0}\right)
+\\
+
+\end{aligned}
+```
+
+Full Conditional posterior distribution for $\sigma^{2}$:
+
+```{=tex}
+\begin{aligned}
+
+P(\sigma^{2}|y,\tau,\tau_{0},\sigma_{\eta}^{2})&=L(\sigma^{2}|y,\tau,\tau_{0},\sigma_{\eta}^{2})P(\sigma^{2})
+\\
+&\propto \left( \sigma^{2} \right)^{-\frac{T}{2}} exp\left\{ -\frac{1}{2}\sigma^{-2}\left(y-\tau\right)'I_{T}\left(y-\tau\right)\right\}
+\\
+&\times \left( \sigma^{2} \right)^{-\frac{\underline{\upsilon}+2}{2}}exp\left\{ -\frac{1}{2}\frac{\underline{s}}{\sigma^{2}}\right\}
+\\
+where: P(\sigma^{2}|y,\tau,\tau_{0},\sigma_{\eta}^{2})\sim IG2(\bar{s_{\sigma}},\bar{\upsilon_{\sigma}})
+\\
+\bar{s_{\sigma}}&=\underline{s} + \left(y-\tau\right)'I_{T}\left(y-\tau\right)
+\\
+\bar{\upsilon_{\sigma}}&= \underline{\upsilon}+T
+
+\end{aligned}
+```
+
+Therefore, we could have basic Gibbs Sampler method:
+
+
+
+The following function is for Gibbs sampler for posterior:
+```{r Gibbs Sampler}
+#| echo: true
+# Gibbs sampler for a simple UC model using simulation smoother
+############################################################
+
+UC.Gibbs.sampler    = function(S, starting.values, priors){
+  #Initialize the data 
+  aux     = starting.values
+  T       = nrow(aux$Y)
+  i_matrix <- diag(T)
+  i <- matrix(0, T, 1)  
+  i[1, 1] <- 1 
+  #Posteriors list
+  posteriors    = list(
+    tau     = matrix(NA,T,S),
+    tau_0   = matrix(NA,1,S),
+    sigma   = matrix(NA,2,S),
+    non.stationary.iterations = rep(NA,S)
+  )
+  
+  for (s in 1:S){
+    
+    # Sampling tau 0
+    ###########################
+    tau_0.v.inv    = diag(1/diag(priors$tau_0.v))
+    V.tau_0.bar    = solve((1/aux$sigma[1])*i_matrix + tau_0.v.inv )
+    tau_0.bar      = V.tau_0.bar %*% ( (1/aux$sigma[1])*i_matrix%*%priors$H%*%aux$tau%*%i + tau_0.v.inv%*%priors$tau_0 )
+    tau_0.draw     = rmvnorm(1,as.vector(tau_0.bar),V.tau_0.bar)
+    aux$tau_0      = as.vector(tau_0.draw)
+    
+    # Sampling sigma
+    ###########################
+    # sigma of tau
+    sigma.eta.s   = as.numeric(priors$sigma.s + crossprod(priors$H%*%aux$tau - i%*%priors$tau_0))
+    sigma.eta.nu  = priors$sigma.nu + T
+    sigma.eta.draw= sigma.eta.s/rchisq(1,sigma.eta.nu)
+    # sigma of errors
+    sigma.e.s     = as.numeric(priors$sigma.s + crossprod(aux$Y - aux$tau))
+    sigma.e.nu    = priors$sigma.nu + T
+    sigma.e.draw  = sigma.e.s/rchisq(1,sigma.e.nu)
+    aux$sigma     = c(sigma.eta.draw,sigma.e.draw)
+    
+    # Sampling tau
+    ###########################
+    V.tau.inv     = (1/aux$sigma[2])*i_matrix + (1/aux$sigma[1])*crossprod(priors$H)
+    V.tau.inv     = 0.5*(V.tau.inv + t(V.tau.inv))
+    b.tau         = (1/aux$sigma[2])*i_matrix%*%aux$Y + (1/aux$sigma[1])%*%i_matrix%*%t(priors$H)%*%i%*%priors$tau_0
+    precision.L   = t(bandchol(V.tau.inv))
+    epsilon       = rnorm(T)
+    b.tau.tmp     = forwardsolve(precision.L, b.tau)
+    tau.draw      = backsolve(t(precision.L), b.tau.tmp + epsilon)
+    aux$tau       = tau.draw
+    
+    posteriors$tau[,s]     = aux$tau
+    posteriors$tau_0[,s]   = aux$tau_0
+    posteriors$sigma[,s]   = aux$sigma
+    # posteriors$non.stationary.iterations[s] = ns.i
+    if (s%%1000==0){cat(" ",s)}
+  }
+  
+  output      = list(
+    posterior = posteriors,
+    last.draw = aux
+  )
+  return(output)
+}
+```
+
 ## Simulation smoother and precision sampler
 
 ```{r}
