@@ -9,7 +9,7 @@ author:
     orcid: 0000-0003-4406-4076
   - name: Gezhi Chen
     url: https://github.com/cora1ine
-    orcid: 0009-0006-4709-785X
+    
 
   
     execute:
@@ -115,16 +115,17 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 
 ## Estimating inverted-gamma 2 error term variance prior scale
 
+
 In this section, we estimate the error term variance prior scale $s$ that follows a Inverted-gamma 2 distribution with scale $\underline{s}$ and shape $\underline{\mu}$: $s\sim\mathcal{IG2}(\underline{s},\underline{\mu})$. The probability density function equal to: 
 
 $$
-s=\Gamma(\frac{\underline{\mu}}{2})^{-1} (\frac{\underline{s}}{2})^{\frac{\underline{\mu}}{2}} s^{-\frac{\underline{\mu}+2}{2}}exp\{ -\frac{1}{2}\frac{\underline{s}}{s}\}
+s = \Gamma(\frac{\underline{\mu}}{2})^{-1} (\frac{\underline{s}}{2})^{\frac{\underline{\mu}}{2}} s^{-\frac{\underline{\mu}+2}{2}}exp\{ -\frac{1}{2}\frac{\underline{s}}{s}\}
 $$
 
-As we assume $\sigma^2|s \sim \mathcal{IG2} (s, \underline{\nu})$
+As we assume $\sigma^2|s \sim \mathcal{IG2} (s,\underline{\nu})$
 
 $$
-\sigma^2|s = \Gamma(\frac{\underline{\nu}}{2})^{-1} (\frac{s}{2})^{\frac{\underline{\nu}}{2}} \sigma^2{^{-\frac{\underline{\nu}+2}{2}}}exp\{ -\frac{1}{2}\frac{s}{\sigma^2}\}
+\sigma^2|s = \Gamma(\frac{\underline{\nu}}{2})^{-1} (\frac{s}{2})^{\frac{\underline{\nu}}{2}} \sigma^2{^{-\frac{\underline{\nu}+2}{2}}}exp\{-\frac{1}{2}\frac{s}{\sigma^2}\}
 $$
 
 In order to find full conditional posterior of $s$ write out its kernel as:
@@ -136,43 +137,42 @@ p(s|\tau, \sigma^2) &\propto L(\tau, \sigma^2|y) \cdot p(\epsilon|\sigma^2) \cdo
 &\propto (\frac{s}{2})^{\frac{\underline{\nu}}{2}} exp\{ -\frac{1}{2}\frac{s}{\sigma^2}\} \cdot s^{-\frac{\underline{\mu}+2}{2}}exp\{-\frac{1}{2}\frac{\underline{s}}{s}\} \\
 &\propto (\frac{s}{2})^{\frac{\underline{\nu}}{2}} \cdot s^{-\frac{\underline{\mu}+2}{2}} \cdot exp \{-\frac{1}{2}(\frac{\underline{s}}{s} + \frac{s}{\sigma^2} )\}  \\
 &\propto (\frac{1}{2}^{\frac{\underline{\nu}}{2}}) \cdot s^{\frac{\underline{\nu}}{2}} \cdot s^{-\frac{\underline{\mu}+2}{2}} \cdot exp \{-\frac{1}{2}(\frac{\underline{s}}{s} + \frac{s}{\sigma^2} )\}  \\
-&\propto s^{\frac{\underline{\nu}-\underline{\mu}-2}{2}} exp\{ -\frac{\frac{1}{\sigma^2} s +\frac{s}{\underline{s}}}{2}\}
+&\propto s^{\frac{\underline{\nu}-\underline{\mu}-2}{2}} exp\{ -\frac{\frac{1}{\sigma^2}s +\frac{s}{\underline{s}}}{2}\}
 \end{aligned}
 $$
 
-from which we recognize a GIG distribution $\mathcal{GIG}(\overline{p}, \overline{a}, \overline{b})$ with parameters:
+from which we recognize a Generalized inverse Gaussian distribution $\mathcal{GIG}(\overline{p}, \overline{a}, \overline{b})$ with parameters:
 
 $$
-\overline{p} = \frac{\underline{\nu}-\underline{\mu}}{2}
-$$
-
-$$
-\overline{a} = \frac{1}{\sigma^2}
+\overline{p} = \frac{\underline{\nu} - \underline{\mu}}{2}
 $$
 
 $$
-\overline{b} = \underline{s}
+\overline{a} = \frac{1}{\sigma^2 }
 $$
 
-In order to obtain a sample from the posterior distribution we use a Gibbs sampler. We generate random draws from the joint posterior distribution and we update them at each iteration. In this case we exploit the following procedure:
+$$
+\overline{b} = \underline{s }
+$$
 
-Initialize $s$ at $s^{(0)}$
+In order to obtain a sample from the posterior distribution we use a Gibbs sampler. We generate random draws from the joint posterior distribution and we update them at each iteration. Therefore we exploit the following procedure:
 
-At each iteration s:
+Initialize $s$ at $s^{(0)}$.
 
-- 1.  Draw $(\tau, \sigma^2)^{(s)} \sim p(y,X, \tau^{(s-1)}, \sigma^{2(s-1)}, s^{(s)})$
+At each iteration s
 
-- 2.  Draw $s^{(s)} \sim p(s|\tau^{(s)}, \sigma^{2(s)})$
+- 1. Draw $(\tau, \sigma^2)^{(s)} \sim p(y,X, \tau^{(s-1)}, \sigma^{2(s-1)}, s^{(s)})$
 
-Repeat steps 1 and 2 for $(S_1+S_2)$ times. Discard the first $S_1$ repetitions. Return the output as $\{\tau^{(s)}, \sigma^{2(s)}, s^{(s)}\}^{S_1+S_2}_{s=S_1+1}$
+- 2. Draw $s^{(s)} \sim p(s|\tau^{(s)}, \sigma^{2(s)})$
 
-The following script illustrates sampling from the full conditional posterior distribution of $s$ and use function `s.sampler`:
+Repeat steps 1 and 2 for $(S_1+S_2)$ times. Discard the first $S_1$ repetitions. Return the output as $\{\tau^{(s)}, \sigma^{2(s)}, s^{(s)}\}^{S_1+S_2}_{s = S_1+1}$
+
+The following script illustrates sampling from the full conditional posterior distribution of $s$ and the function `s.sampler`:
 
 ```{r}
 #| echo: true
 #| message: false
 #| warning: false
-
 sigma2       = 1 # this part need to draw from before steps, and here just an example of it
 
 # define the prior hyper-parameters
