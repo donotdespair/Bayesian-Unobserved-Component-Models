@@ -7,6 +7,9 @@ author:
   - name: Ben Gussen
     url: https://github.com/bgussen
     orcid: 0000-0003-4406-4076
+  - name: Rui Liu
+    url: https://github.com/rruiliu1005
+    orcid: 0009-0008-9348-8581
   - name: Zheyuan Li
     url: https://github.com/lzyzero3
   
@@ -106,7 +109,151 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 ## Simulation smoother and precision sampler
 
 ## Analytical solution for a joint posterior
+$$\underset{T \times 1}{y} = \begin{pmatrix} y_1 \\ y_2 \\ \vdots \\ y_T \end{pmatrix} \qquad 
+\underset{T \times 1}{\tau} = \begin{pmatrix} \tau_1 \\ \tau_2 \\ \vdots \\\tau_T \end{pmatrix} \qquad 
+\underset{T \times 1}{\epsilon} = \begin{pmatrix} \epsilon_1 \\ \epsilon_2 \\ \vdots \\ \epsilon_T \end{pmatrix} \qquad 
+\underset{T \times 1}{\eta} = \begin{pmatrix} \eta_1 \\ \eta_2 \\ \vdots \\ \eta_T \end{pmatrix}$$
 
+$$\underset{T \times T}{H} = 
+\begin{pmatrix} 1 & 0 & 0 & \cdots & 0 & 0 \\ 
+-1 & 1 & 0 & \cdots & 0 & 0 \\ 
+0 & -1 & 1 & \cdots & 0 & 0 \\ 
+\vdots & \vdots & \ddots & \ddots & \vdots & \vdots \\ 
+0&0&0 & \cdots & 1 & 0  \\ 
+0 & 0 & 0 &0& -1 & 1 \end{pmatrix}$$
+
+
+In this setting, we have out state equations as: 
+
+$$y = \tau + \epsilon \quad\quad\qquad \qquad \qquad \qquad \text{measurement equation}$$
+
+$$\color{purple}{\mathbf{H\tau = \eta \implies \tau = H^{-1} \eta}} \quad \qquad \color{black}{  \qquad \qquad\text{state equation 1}}$$
+
+The state equations in matrix notation are derived as follows: 
+
+(1) In an unobserved component model, the measurement equation is defined as $y_t = \tau_t + \epsilon_t$, in matrix notation, we have: 
+
+$$y = \begin{pmatrix} y_1 \\ y_2 \\ \vdots \\ y_T \end{pmatrix} = \begin{pmatrix} \tau_1 \\ \tau_2 \\ \vdots \\ \tau_T \end{pmatrix} + \begin{pmatrix} \epsilon_1 \\ \epsilon_2 \\ \vdots \\ \epsilon_T \end{pmatrix} = \tau + \epsilon$$
+(2) We have for each t = 1,...,T, $\tau_t = \tau_{t-1} + \eta_t$, and $\tau_0 = 0$, so in matrix notation: 
+
+$$\tau = \begin{pmatrix} \tau_1 \\ \tau_2 \\ \vdots \\ \tau_T \end{pmatrix} = \begin{pmatrix} \eta_1 \\ 
+\tau_1+ \eta_2 \\
+\tau_2+ \eta_3 \\ 
+\vdots \\ 
+\tau_{T-1} + \eta_T  \end{pmatrix} = \begin{pmatrix} 0 \\ \tau_1 \\ \vdots \\ \tau_{T-1} \end{pmatrix} + \eta$$
+
+Moving the lagged $\tau$ terms on the right hand side to the left:
+
+$$\begin{pmatrix} 
+1 & 0 & \cdots & 0 \\
+-1 & 1 & \cdots & 0 \\ 
+\vdots & \ddots & \ddots & \vdots \\ 
+0 & 0 & -1 & 1
+\end{pmatrix} \begin{pmatrix} \tau_1 \\ \tau_2 \\ \vdots \\ \tau_T \end{pmatrix}  = \begin{pmatrix} \tau_1 \\ \tau_2-\tau_1 \\ \vdots \\ \tau_T - \tau_{T-1} \end{pmatrix} = \eta$$
+
+Hence, we have: 
+$$H \tau = \eta \implies \tau = H^{-1}\eta$$
+
+We assume $\mathbf{\color{purple}{\eta \sim \mathcal{N}(0_T, c\sigma^2I_T)}}$ and $\sigma^2 \sim \mathcal{IG2}(s_{prior}, \nu_{prior})$
+
+The parameters to be estimated are: $\mathbf{\color{purple}{\tau, \sigma^2}}$
+
+### 2.Prior distributions 
+
+(1) **Prior distribution for** $\tau$ 
+
+From the state equation, we have: 
+$$\tau =  H^{-1}\eta$$
+we know that $$\mathbf{\color{purple}{\eta \sim \mathcal{N}(0_T, c \sigma^2 I_T) \implies H^{-1}\eta \sim \mathcal{N}(0_T, c\sigma^2(H^T H)^{-1})}}$$
+since $Var(H^{-1}\eta) = H^{-1}Var(\eta)(H^{-1})^T =c\sigma^2(H^TH)^{-1}$
+Then, the prior distribution of $\tau|c\sigma^2$ is 
+$$\tau|c\sigma^2 \sim \mathcal{N}(0_T, c\sigma^2(H^TH)^{-1}) \\ \propto (c\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{\tau^TH^T H\tau}{2c\sigma^2}\right)
+$$
+(2) **Prior assumptions for $\sigma^2$**
+
+$$\sigma^2 \sim \mathcal{IG2}(s_{prior}, \nu_{prior}) \propto (\sigma^2)^\frac{-\nu_{prior}+2}{2}exp\left(-\frac{s_{prior}}{2\sigma^2}\right)$$
+
+### 3. Posterior distributions
+
+1. $\mathbf{p(\tau|y, \alpha, \beta, \sigma^2_e)}$
+We have, from the measurement equation: 
+$$y = \tau + \epsilon$$
+since $\epsilon \sim \mathcal{N}(0_T, \sigma^2I_T)$
+$$y|\tau, \sigma^2 \sim \mathcal{N}(\tau, \sigma^2I_T)\propto (\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{1}{2\sigma^2}(y-\tau)^T(y-\tau)\right)$$
+and the prior of $\tau$ is: 
+
+$$\tau|c\sigma^2 \sim \mathcal{N}(0_T, c\sigma^2I_T) \\ \propto (\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{\tau^TH^T H\tau}{2c\sigma^2}\right)$$
+
+the prior of $\sigma^2$ is: 
+$$p(\sigma^2) \propto (\sigma^2)^-{\frac{\nu_{prior}+2}{2}}exp(-\frac{s_{prior}}{2\sigma^2})$$
+
+The joint posterior of $\tau$ and $\sigma^2$ can be derived as follows: 
+
+$$
+p(\tau, \sigma^2 |y) = \frac{p(\tau, \sigma^2, y)}{p(y)} \propto p(\tau, \sigma^2, y) = p(y | \tau, \sigma^2)p(\tau, \sigma^2) =p(y | \tau, \sigma^2)p(\tau|\sigma^2)p(\sigma^2)
+$$
+
+$$
+\propto (\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{(y-\tau)^T(y-\tau)}{2\sigma^2}\right) \times 
+(\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{\tau^TH^T H\tau}{2c\sigma^2}\right) \times
+(\sigma^2)^{-\frac{\nu_{prior}+2}{2}} exp(-\frac{s_{prior}}{2\sigma^2})
+$$
+$$
+\propto exp(-\frac{y^Ty - 2\tau^T y + \tau^T\tau + c^{-1}\tau^TH^T H\tau}{2\sigma^2}) \times \\ 
+exp(-\frac{s_{prior}}{2\sigma^2})\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}}
+$$
+$$ = exp(-\frac{\tau^T(c^{-1}H^T H + I_T)\tau - 2\tau^Ty}{2\sigma^2}) \times \\ 
+exp(-\frac{y^Ty + s_{prior}}{2\sigma^2})\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}} $$
+
+Hence, $\tau, \Sigma |y \sim \mathcal{NIG2}(\bar{\tau}, \bar{\Sigma}, \bar{\nu}, \bar{s})$ where 
+$$\bar{\Sigma} = (c^{-1}H^T H + I_T)^{-1}$$
+$$\bar{\tau} = \bar{\Sigma}y$$
+$$\bar{\nu} = 2T+\nu_{prior}$$
+$$\bar{s} = s_{prior}+y^Ty$$
+```{r}
+UC.local.simple.Gibbs.sampler    = function(S, starting.values, priors){
+  # Estimation of a local level UC model with \tau_0 = 0 and no AR trend. 
+  aux     = starting.values
+  T       = nrow(aux$Y)
+  posteriors    = list(
+    tau     = matrix(NA,T,S),
+    sigma   = matrix(NA,2,S),
+    non.stationary.iterations = rep(NA,S)
+  )
+
+  for (s in 1:S){
+    # Sampling sigma
+    ###########################
+    sigma.s   = priors$sigma.s +t(aux$Y)%*%aux$Y
+    sigma.nu  = priors$sigma.nu + 2*T
+    sigma.draw= sigma.s/rchisq(1,sigma.nu)
+
+
+    # Sampling tau
+    ###########################
+    V.tau.inv     = priors$c^(-1)*t(aux$H)%*%(aux$H) + diag(T)
+    V.tau.inv     = 0.5*(V.tau.inv + t(V.tau.inv))
+    b.tau         = aux$Y
+    precision.L   = t(bandchol(V.tau.inv))
+    epsilon       = rnorm(T)
+    b.tau.tmp     = forwardsolve(precision.L, b.tau)
+    tau.draw      = backsolve(t(precision.L), b.tau.tmp + epsilon)
+    aux$tau       = tau.draw
+
+    posteriors$tau[,s]     = aux$tau
+    posteriors$sigma[,s]   = aux$sigma
+    # posteriors$non.stationary.iterations[s] = ns.i
+    if (s%%1000==0){cat(" ",s)}
+  }
+
+  output      = list(
+    posterior = posteriors,
+    last.draw = aux
+  )
+  return(output)
+}
+
+```
 # Hierarchical modeling
 
 ## Estimating gamma error term variance prior scale
