@@ -112,53 +112,36 @@ In this section, we present an analytical solution for a joint posterior for \ta
 
 $$\underset{T \times 1}{y} = \begin{pmatrix} y_1 \\ y_2 \\ \vdots \\ y_T \end{pmatrix} \qquad 
 \underset{T \times 1}{\tau} = \begin{pmatrix} \tau_1 \\ \tau_2 \\ \vdots \\\tau_T \end{pmatrix} \qquad 
-\underset{T \times 1}{\epsilon_{1:T}} = \begin{pmatrix} \epsilon_1 \\ \epsilon_2 \\ \vdots \\ \epsilon_T \end{pmatrix} \qquad 
-\underset{T \times 1}{\eta} = \begin{pmatrix} \eta_1 \\ \eta_2 \\ \vdots \\ \eta_T \end{pmatrix}\qquad 
-\underset{T \times 1}{e} = \begin{pmatrix} e_1 \\ e_2 \\ \vdots \\ e_T \end{pmatrix} $$
-$$\underset{T \times 1}{I_T} = \begin{pmatrix}1 \\ 1 \\ \vdots \\ 1\end{pmatrix} \qquad \underset{T \times 1}{e_{1.T}} = \begin{pmatrix} 1 \\ 0 \\ \vdots \\ 0 \end{pmatrix} \qquad 
-\underset{2 \times 1}{\beta} = \begin{pmatrix}\mu \\ 0 \end{pmatrix} \qquad 
-\underset{p \times 1}{\alpha} = \begin{pmatrix} \alpha_1 \\ \alpha_2 \\ \vdots \\ \alpha_p \end{pmatrix} \qquad \color{purple}{\mathbf{\underset{T \times 1}{x_{\tau}} = I_T}}$$
-
-$$\underset{T \times p}{X_{\epsilon}} = \begin{bmatrix}\epsilon_{0:T-1} & \epsilon_{-1:T-2} & \cdots & \epsilon_{-p+1:T-p} \end{bmatrix} = \begin{pmatrix} \epsilon_0 & \epsilon_1 & \cdots & \epsilon_{-p+1} \\ \epsilon_1 & \epsilon_2 & \cdots & \epsilon_{-p+2} \\ \vdots & \vdots & \cdots & \vdots \\ \epsilon_{T-1} & \epsilon_{T-2} & \cdots & \epsilon_{T-p} \end{pmatrix}$$ 
+\underset{T \times 1}{\epsilon} = \begin{pmatrix} \epsilon_1 \\ \epsilon_2 \\ \vdots \\ \epsilon_T \end{pmatrix} \qquad 
+\underset{T \times 1}{\eta} = \begin{pmatrix} \eta_1 \\ \eta_2 \\ \vdots \\ \eta_T \end{pmatrix}$$
 
 $$\underset{T \times T}{H} = 
 \begin{pmatrix} 1 & 0 & 0 & \cdots & 0 & 0 \\ 
 -1 & 1 & 0 & \cdots & 0 & 0 \\ 
 0 & -1 & 1 & \cdots & 0 & 0 \\ 
 \vdots & \vdots & \ddots & \ddots & \vdots & \vdots \\ 
-0&0&\vdots & \vdots & 1 & 0  \\ 
-0 & 0 & 0 &0& -1 & 1 \end{pmatrix} \qquad 
-\underset{T \times T}{H_{\alpha}} = 
-\begin{pmatrix} 1 & 0 & 0 & 0 & \cdots&\cdots& \cdots&0 & 0 \\ 
--\alpha_1 & 1 &0 & 0 & \cdots & \cdots&\cdots&0 & 0 \\ 
--\alpha_2 & -\alpha_1 & 1 & 0 & \cdots & \cdots&\cdots& 0 & 0 \\ 
-- \alpha_3 & -\alpha_2 & -\alpha_1 & 1 & \ddots &  \cdots& \cdots&0 & 0 \\ 
-\ddots & \ddots & \ddots & \ddots&\ddots& \ddots & \ddots & \ddots & \ddots \\ 
--\alpha_p & -\alpha_{p-1} & \ddots & \cdots &\cdots& \cdots& \cdots & \cdots & 0 \\ 
-0 & -\alpha_p &  \ddots & \ddots &\cdots&\cdots& \ddots & \ddots & 0 \\ 
-\vdots & \vdots & \ddots & \ddots & \ddots&\ddots&\ddots & \ddots & \vdots \\ 
-0 & 0 & \cdots  & -\alpha_p & \cdots & -\alpha_3& - \alpha_2& -\alpha_1 & 1\end{pmatrix}$$ 
+0&0&0 & \cdots & 1 & 0  \\ 
+0 & 0 & 0 &0& -1 & 1 \end{pmatrix}$$
+
 
 In this setting, we have out state equations as: 
 
-$$y = \tau + \epsilon \qquad \qquad\qquad\qquad \quad\qquad \qquad \qquad \qquad \text{measurement equation}$$
+$$y = \tau + \epsilon \quad\quad\qquad \qquad \qquad \qquad \text{measurement equation}$$
 
-$$\tau = H^{-1}X_{\tau}\beta + H^{-1} \eta  = \color{purple}{\mathbf{H^{-1}\mu I_T + H^{-1}\eta}}  \quad \color{black}{  \qquad \qquad\text{state equation 1}}$$
-
-$$\epsilon = X_{\epsilon} \alpha + e = H^{-1}_{\alpha}e  \qquad\quad \qquad \quad \qquad \qquad \qquad \qquad\text{state equation 2} $$
+$$\color{purple}{\mathbf{H\tau = \eta \implies \tau = H^{-1} \eta}} \quad \qquad \color{black}{  \qquad \qquad\text{state equation 1}}$$
 
 The state equations in matrix notation are derived as follows: 
 
 (1) In an unobserved component model, the measurement equation is defined as $y_t = \tau_t + \epsilon_t$, in matrix notation, we have: 
 
 $$y = \begin{pmatrix} y_1 \\ y_2 \\ \vdots \\ y_T \end{pmatrix} = \begin{pmatrix} \tau_1 \\ \tau_2 \\ \vdots \\ \tau_T \end{pmatrix} + \begin{pmatrix} \epsilon_1 \\ \epsilon_2 \\ \vdots \\ \epsilon_T \end{pmatrix} = \tau + \epsilon$$
-(2) We have for each t = 1,...,T, $\tau_t = \mu + \tau_{t-1} + \eta_t$, and $\tau_0 = 0$, so in matrix notation: 
+(2) We have for each t = 1,...,T, $\tau_t = \tau_{t-1} + \eta_t$, and $\tau_0 = 0$, so in matrix notation: 
 
-$$\tau = \begin{pmatrix} \tau_1 \\ \tau_2 \\ \vdots \\ \tau_T \end{pmatrix} = \begin{pmatrix} \mu + \eta_1 \\ 
-\mu + \tau_1+ \eta_2 \\
-\mu + \tau_2+ \eta_3 \\ 
+$$\tau = \begin{pmatrix} \tau_1 \\ \tau_2 \\ \vdots \\ \tau_T \end{pmatrix} = \begin{pmatrix} \eta_1 \\ 
+\tau_1+ \eta_2 \\
+\tau_2+ \eta_3 \\ 
 \vdots \\ 
-\mu + \tau_{T-1} + \eta_T  \end{pmatrix} = \mu I_T + \begin{pmatrix} 0 \\ \tau_1 \\ \vdots \\ \tau_{T-1} \end{pmatrix} + \eta$$
+\tau_{T-1} + \eta_T  \end{pmatrix} = \begin{pmatrix} 0 \\ \tau_1 \\ \vdots \\ \tau_{T-1} \end{pmatrix} + \eta$$
 
 Moving the lagged $\tau$ terms on the right hand side to the left:
 
@@ -167,273 +150,98 @@ $$\begin{pmatrix}
 -1 & 1 & \cdots & 0 \\ 
 \vdots & \ddots & \ddots & \vdots \\ 
 0 & 0 & -1 & 1
-\end{pmatrix} \begin{pmatrix} \tau_1 \\ \tau_2 \\ \vdots \\ \tau_T \end{pmatrix}  = \begin{pmatrix} \tau_1 \\ \tau_2-\tau_1 \\ \vdots \\ \tau_T - \tau_{T-1} \end{pmatrix} = \mu I_T + \eta$$
+\end{pmatrix} \begin{pmatrix} \tau_1 \\ \tau_2 \\ \vdots \\ \tau_T \end{pmatrix}  = \begin{pmatrix} \tau_1 \\ \tau_2-\tau_1 \\ \vdots \\ \tau_T - \tau_{T-1} \end{pmatrix} = \eta$$
 
 Hence, we have: 
-$$H \tau = \mu I_T + \eta = x_{\tau}\beta + \eta \implies \tau = H^{-1}X_\tau\beta + H^{-1}\eta$$
+$$H \tau = \eta \implies \tau = H^{-1}\eta$$
 
-(3) the unit room stationary component is defined as: $\epsilon_t = \alpha_1 \epsilon_{t-1} + \alpha_2 \epsilon_{t-2} + \cdots + \alpha_p \epsilon_{t-p} + e+t$ In matrix, notation: 
+We assume $\mathbf{\color{purple}{\eta \sim \mathcal{N}(0_T, c\sigma^2I_T)}}$ and $\sigma^2 \sim \mathcal{IG2}(s_{prior}, \nu_{prior})$
 
-$$\begin{pmatrix} 
-\epsilon_1 \\ \epsilon_2 \\ \vdots \\ \epsilon_T \end{pmatrix} = \begin{pmatrix} \alpha_1 \epsilon_0 + \alpha_2 \epsilon_{-1} + \cdots+\alpha_p \epsilon_{-p+1} +e_1 \\ 
-\alpha_1 \epsilon_1+ \alpha_2 \epsilon_{0} + \cdots+\alpha_p \epsilon_{-p+2} +e_2 \\ 
-\vdots  \\
-\alpha_1 \epsilon_T + \alpha_2 \epsilon_{T-1} + \cdots+\alpha_p \epsilon_{T-p} +e_T 
-\end{pmatrix} \implies H_{\alpha} \epsilon = e \implies \epsilon = H_{\alpha}^{-1}e$$
-since we assume $\begin{pmatrix}\epsilon_0, \epsilon_1, \cdots, \epsilon_T\end{pmatrix}^T = 0$
-Similarly, we have 
-
-$$\begin{pmatrix} 
-\epsilon_1 \\ \epsilon_2 \\ \vdots \\ \epsilon_T \end{pmatrix} = 
-\begin{pmatrix} \epsilon_0 & \epsilon_{-1} & \cdots & \epsilon_{-p+1} \\
-\epsilon_1 & \epsilon_{0} & \cdots & \epsilon_{-p+2} \\
-\vdots & \vdots & \vdots & \vdots \\ 
-\epsilon_{T-1} & \epsilon_{T-2} & \cdots & \epsilon_{-p+T} \\
-\end{pmatrix} \begin{pmatrix} \alpha_1 \\ \alpha_2 \\ \vdots \\ \alpha_p \end{pmatrix} + \begin{pmatrix}  e_1 \\ e_2 \\ \vdots \\ e_T \end{pmatrix} = X_{\epsilon} \alpha + e$$ 
-
-We have $\mathbf{\color{purple}{\eta \sim \mathcal{N}(0_T, c\sigma^2I_T)}}$ and $e \sim \mathcal{N}(0_T, \sigma^2_eI_T)$. 
-
-The parameters to be estimated are: $\mathbf{\color{purple}{\sigma^2_e, \tau, \epsilon, \beta = \mu}}$
+The parameters to be estimated are: $\mathbf{\color{purple}{\tau, \sigma^2}}$
 
 ### 2.Prior distributions 
 
 (1) **Prior distribution for** $\tau$ 
 
 From the state equation, we have: 
-$$\tau = H^{-1}\mu I_T + H^{-1}\eta$$
-we know that $$\mathbf{\color{purple}{\eta \sim \mathcal{N}(0_T, c \sigma^2 I_T) \implies H^{-1}\eta \sim \mathcal{N}(0_T, c\sigma^2(H^TH)^{-1})}}$$
+$$\tau =  H^{-1}\eta$$
+we know that $$\mathbf{\color{purple}{\eta \sim \mathcal{N}(0_T, c \sigma^2 I_T) \implies H^{-1}\eta \sim \mathcal{N}(0_T, c\sigma^2(H^T H)^{-1})}}$$
 since $Var(H^{-1}\eta) = H^{-1}Var(\eta)(H^{-1})^T =c\sigma^2(H^TH)^{-1}$
-Then, the prior distribution of $\tau|\beta, c\sigma^2$ is 
-$$\tau|\beta, c\sigma^2 \sim \mathcal{N}(H^{-1}\mu I_T, c\sigma^2(H^TH)^{-1}) \\ \propto exp\left(-\frac{1}{2}\frac{(\tau - H^{-1}\mu I_T)^TH^TH(\tau - H^{-1}\mu I_T)}{c\sigma^2}\right)$$
-(2) **Prior distribution for** $\epsilon$
-From the state equation, we have: 
+Then, the prior distribution of $\tau|c\sigma^2$ is 
+$$\tau|c\sigma^2 \sim \mathcal{N}(0_T, c\sigma^2(H^TH)^{-1}) \\ \propto (c\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{\tau^TH^T H\tau}{2c\sigma^2}\right)
+$$
+(2) **Prior assumptions for $\sigma^2$**
 
-$$\epsilon = H^{-1}_{\alpha}e$$ 
-since $e \sim \mathcal{N}(0_T, \sigma^2_eI_T)$, we have: 
-
-$$\epsilon | \sigma_e, \alpha \sim \mathcal{N}(0_T,\sigma_e^2(H_\alpha^TH_\alpha)^{-1}) \\ \propto exp\left(\frac{1}{2\sigma^2_e}\epsilon^T(H_\alpha^TH_\alpha)\epsilon\right)$$
-(3) **Prior assumptions for other parameters**
-
-$$\alpha \sim \mathcal{N}({\alpha_{prior}, V_{prior}})\mathbb{1}_{\alpha \in A} \propto exp\left({-\frac{1}{2}(\alpha - \alpha_{prior})^T}V_{\alpha,prior}^{-1}(\alpha - \alpha_{prior})\right)\mathbb{1}_{\alpha \in A}$$
-$$\beta = \mu\sim \mathcal{N}(\beta_{prior}, V_{\beta, prior} \propto exp\left({-\frac{1}{2}(\beta - \beta_{prior})^T}V_{\beta,prior}^{-1}(\beta - \beta_{prior})\right)$$
-$$\sigma^2_e \sim \mathcal{IG2}(s_{prior}, \nu_{prior}) \propto (\sigma^2_e)^\frac{-\nu+2}{2}exp\left(-\frac{s_{prior}}{2\sigma^2_e}\right)$$
-and 
-
-$$p(\tau, \epsilon, \alpha, \beta, \sigma^2_e) = p(\tau|\beta)p(\beta)p(\epsilon|\alpha,\sigma^2_e)p(\alpha)p(\sigma^2_e)$$
+$$\sigma^2 \sim \mathcal{IG2}(s_{prior}, \nu_{prior}) \propto (\sigma^2)^\frac{-\nu_{prior}+2}{2}exp\left(-\frac{s_{prior}}{2\sigma^2}\right)$$
 
 ### 3. Posterior distributions
 
 1. $\mathbf{p(\tau|y, \alpha, \beta, \sigma^2_e)}$
 We have, from the measurement equation: 
 $$y = \tau + \epsilon$$
-since $\epsilon \sim \mathcal{N}(0_T, \sigma^2_e(H^T_\alpha H_\alpha)^{-1})$
-$$y|\tau, \alpha, \sigma^2_e \sim \mathcal{N}(\tau, \sigma^2_e(H^T_\alpha H_\alpha)^{-1})\propto exp\left(-\frac{1}{2\sigma^2_e}(y-\tau)^TH_\alpha^TH_\alpha(y-\tau)\right)$$
+since $\epsilon \sim \mathcal{N}(0_T, \sigma^2I_T)$
+$$y|\tau, \sigma^2 \sim \mathcal{N}(\tau, \sigma^2I_T)\propto (\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{1}{2\sigma^2}(y-\tau)^T(y-\tau)\right)$$
 and the prior of $\tau$ is: 
 
-$$\tau|\beta, c\sigma^2 \sim \mathcal{N}(H^{-1}\mu I_T, c\sigma^2(H^TH)^{-1}) \\ \propto exp\left(-\frac{1}{2}\frac{(\tau - H^{-1}\mu I_T)^TH^TH(\tau - H^{-1}\mu I_T)}{c\sigma^2}\right)$$
+$$\tau|c\sigma^2 \sim \mathcal{N}(0_T, c\sigma^2I_T) \\ \propto (\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{\tau^TH^T H\tau}{2c\sigma^2}\right)$$
 
-The posterior of $\tau$ is: 
+the prior of $\sigma^2$ is: 
+$$p(\sigma^2) \propto (\sigma^2)^-{\frac{\nu_{prior}+2}{2}}exp(-\frac{s_{prior}}{2\sigma^2})$$
 
-$$p(\tau |\alpha,  \beta, \sigma^2_e, y) = \frac{p(\tau,\alpha, \beta, \sigma^2_e, y)}{p(\alpha, \beta, \sigma^2_e, y)} \propto p(\tau,\alpha, \beta, \sigma^2_e, y)=p(y|\tau, \alpha, , \beta, \sigma^2_e)p(\tau, \alpha, \beta, \sigma^2_e)$$
+The joint posterior of $\tau$ and $\sigma^2$ can be derived as follows: 
 
-$$= p(y|\tau, \alpha, \beta, \sigma^2_e)p(\tau|\alpha, \beta, \sigma^2_e)p(\alpha, \beta, \sigma^2_e) \propto  p(y|\tau, \alpha, \beta, \sigma^2_e)p(\tau|\alpha, \beta, \sigma^2_e)$$
+$$
+p(\tau, \sigma^2 |y) = \frac{p(\tau, \sigma^2, y)}{p(y)} \propto p(\tau, \sigma^2, y) = p(y | \tau, \sigma^2)p(\tau, \sigma^2) =p(y | \tau, \sigma^2)p(\tau|\sigma^2)p(\sigma^2)
+$$
 
-$$\propto exp\left(-\frac{1}{2\sigma^2_e}(y-\tau)^TH_\alpha^TH_\alpha(y-\tau)\right)exp\left(-\frac{1}{2}\frac{(\tau - H^{-1}\mu I_T)^TH^TH(\tau - H^{-1}\mu I_T)}{c\sigma^2}\right)$$
+$$
+\propto (\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{(y-\tau)^T(y-\tau)}{2\sigma^2}\right) \times 
+(\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{\tau^TH^T H\tau}{2c\sigma^2}\right) \times
+(\sigma^2)^{-\frac{\nu_{prior}+2}{2}} exp(-\frac{s_{prior}}{2\sigma^2})
+$$
+$$
+\propto exp(-\frac{y^Ty - 2\tau^T y + \tau^T\tau + c^{-1}\tau^TH^T H\tau}{2\sigma^2}) \times \\ 
+exp(-\frac{s_{prior}}{2\sigma^2})\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}}
+$$
+$$ = exp(-\frac{\tau^T(c^{-1}H^T H + I_T)\tau - 2\tau^Ty}{2\sigma^2}) \times \\ 
+exp(-\frac{y^Ty + s_{prior}}{2\sigma^2})\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}} $$
 
-$$= exp\left(-\frac{1}{2}\left[\sigma^{-2}_ey^T H_\alpha^TH_\alpha y - 2\sigma_e^{-2}\tau^TH_\alpha^TH_\alpha y +  \sigma_e^{-2}\tau^T H_\alpha^TH_\alpha \tau 
-+ c^{-1}\sigma^{-2}\tau^T H^TH \tau -2 c^{-1}\sigma^{-2} \tau^T H^T H H^{-1} \mu I_T + \mu I_T^T (H^{-1})^TH^THH^{-1}\mu I_T
-\right]\right)$$
-
-$$\propto exp\left(-\frac{1}{2}\left[ 
-\tau^T(\sigma_e^{-2}H_\alpha^TH_\alpha + c^{-1}\sigma^{-2}H^TH)\tau - 2\tau^T(\sigma_e^{-2}H_\alpha^TH_\alpha y + c^{-1}\sigma^{-2} H^T \mu I_T)
-\right]\right)$$
-
-Hence, $\tau|\alpha, \beta, \sigma^2_e, y \sim \mathcal{N}(\bar{\tau}, \bar{V_\tau})$ where, 
-
-$$\bar{V_\tau} = [(\sigma_e^{-2}H_\alpha^TH_\alpha+\color{purple}{\mathbf{c^{-1}\sigma^{-2}H^T H)}}]^{-1}$$
-$$\bar{\tau} =  \bar{V_\tau}(\sigma_e^{-2}H_\alpha^TH_\alpha y + \color{purple}{\mathbf{c^{-1}\sigma^{-2}H^T \mu I_T}})$$
-2. $\mathbf{p(\epsilon|y, \alpha, \beta, \sigma^2_e)}$
-We have, from the measurement equation: 
-$$y = \tau + \epsilon$$
-and the prior for $\tau$ is 
-$$\tau|\beta, c\sigma^2 \sim \mathcal{N}(H^{-1}\mu I_T, c\sigma^2(H^TH)^{-1})$$
-Hence, we have 
-
-$$y|\epsilon \sim \mathcal{N}(\epsilon + H^{-1}\mu I_T, c\sigma^2(H^TH)^{-1}) \propto exp\left(-\frac{1}{2}\frac{(y - \epsilon- H^{-1}\mu I_T)^TH^TH(y - \epsilon - H^{-1}\mu I_T)}{c\sigma^2}\right)$$
-We have the prior for $\epsilon$: 
-$$\epsilon | \sigma_e, \alpha \sim \mathcal{N}(0_T,\sigma_e^2(H_\alpha^TH_\alpha)^{-1}) \\ \propto exp\left(-\frac{1}{2\sigma^2_e}\epsilon^T(H_\alpha^TH_\alpha)\epsilon\right)$$
-To derive the posterior distribution for $epsilon$, we use Baye's rule: 
-$$\mathbf{p(\epsilon|y, \alpha, \beta, \sigma^2_e)} = \frac{\mathbf{p(\epsilon, y, \alpha, \beta, \sigma^2_e)}}{\mathbf{p(y, \alpha, \beta, \sigma^2_e)}} \propto \mathbf{p(\epsilon, y, \alpha, \beta, \sigma^2_e)} = \mathbf{p(y|\epsilon,  \alpha, \beta, \sigma^2_e)}p(\epsilon,  \alpha, \beta, \sigma^2_e)$$
-$$= \mathbf{p(y|\epsilon, \beta)}p(\epsilon|\alpha, \beta, \sigma^2_e)p(\alpha, \beta, \sigma^2_e) \propto \mathbf{p(y|\epsilon, \beta)}p(\epsilon|\alpha, \sigma^2_e)$$
-$$\propto exp\left(-\frac{1}{2}\frac{(y - \epsilon- H^{-1}\mu I_T)^TH^TH(y - \epsilon - H^{-1}\mu I_T)}{c\sigma^2}\right)exp\left(-\frac{1}{2\sigma^2_e}\epsilon^T(H_\alpha^TH_\alpha)\epsilon\right)$$
-
-$$\propto exp\left( \frac{y^TH^THy - 2\epsilon^T H^T Hy - 2y^TH^THH^{-1}\mu I_T+\epsilon^T H^TH \epsilon + 2\epsilon^T H^THH^{-1}\mu I_T + I_T^T\mu (H^{-1})^TH^THH^{-1}\mu I_T
-}{2c\sigma^2}\right)exp\left(\frac{1}{2\sigma^2_e}\epsilon^T(H_\alpha^TH_\alpha)\epsilon\right)$$
-
-$$\propto exp\left(- \frac{c^{-1}\sigma^{-2}\epsilon^TH^THy + c^{-1}\sigma^{-2}\epsilon^TH^TH\epsilon+2c^{-1}\sigma^{-2}\mu\epsilon^TH^T + \sigma_e^{-2}\epsilon^T H_\alpha^TH_\alpha \epsilon }{2}\right)$$
-$$= exp\left( \frac{\epsilon^T[c^{-1}\sigma^{-2}H^TH + \sigma_e^{-2}H_\alpha^T H_\alpha]\epsilon - 2\epsilon^T[c^{-1}\sigma^{-2}H^THy-c^{-1}\sigma^{-2}\mu H^T]}{2}\right)$$
-Hence, $\epsilon|y, \alpha, \beta, \sigma^2_e \sim \mathcal{N}(\bar{\epsilon}, \bar{V}_\epsilon)$, where 
-
-$$\bar{V}_\epsilon = [\color{purple}{\mathbf{c^{-1}\sigma^{-2}}}\color{black}{H^T H + \sigma_e^{-2}H_\alpha^T H_\alpha}]^{-1} \qquad \bar{\epsilon} = \bar{V}_\epsilon H^T H\color{purple}{\mathbf{c^{-1}\sigma^{-2}}}\color{black}{[y-\mu H^{-1}]}$$
-3. $\mathbf{p(\alpha|y, \alpha, \epsilon, \sigma^2_e)}$
-From state equation 2, we have: 
-$$\epsilon = X_{\epsilon} \alpha + e \qquad \text{where} \qquad e \sim \mathcal{N}(0, \sigma^2_eI_T)$$
-We note that $\alpha$ is not in the measurement equation, so the updates for $\alpha$ does not directly come from the data. Hence we have: 
-$$p(\epsilon|\alpha , \sigma^2_e) \sim \mathcal{N}(X_\epsilon \alpha, \sigma^2_eI_T) \propto exp\left(\frac{(\epsilon - X_\epsilon\alpha)^T(\epsilon-X_\epsilon \alpha)}{2 \sigma^2_e}\right)$$
-$$p(\alpha) \sim \mathcal{N}({\alpha_{prior}, V_{prior}})\mathbb{1}_{\alpha \in A} \propto exp\left({-\frac{1}{2}(\alpha - \alpha_{prior})^T}V_{\alpha,prior}^{-1}(\alpha - \alpha_{prior})\right)\mathbb{1}_{\alpha \in A} $$
-
-Therefore, 
-
-$$p(\alpha | y, \epsilon, \sigma_e^2) \propto p(\alpha, y, \epsilon, \sigma^2_e) \propto p(\epsilon|y, \sigma^2_e, \alpha)p(\alpha|y, \sigma^2_e)p(y, \sigma^2_e)\propto p(\epsilon|y, \sigma^2_e, \alpha)p(\alpha|y, \sigma^2_e)$$
-
-$$\propto exp\left(\frac{(\epsilon - X_\epsilon\alpha)^T(\epsilon-X_\epsilon \alpha)}{2 \sigma^2_e}\right)exp\left({-\frac{1}{2}(\alpha - \alpha_{prior})^T}V_{\alpha,prior}^{-1}(\alpha - \alpha_{prior})\right)\mathbb{1}_{\alpha \in A}$$
-
-$$\propto exp\left(\frac{-2\sigma^{-2}_e \alpha^TX_\epsilon^T\epsilon + \sigma^{-2}_e\alpha^TX_\epsilon X_\epsilon \alpha + \alpha^TV_{\alpha,prior}^{-1}\alpha - 2 \alpha^TV_{\alpha,prior}^{-1}\alpha_{prior}}{2} \right)\mathbb{1}_{\alpha \in A} $$
-$$= exp\left(\frac{
-\alpha^T(\sigma^{-2}_eX_\epsilon X_\epsilon + V_{\alpha,prior}^{-1}) \alpha - 2 \alpha^T(\sigma^{-2}_e X_\epsilon^T\epsilon + V_{\alpha,prior}^{-1}\alpha_{prior})}{2} \right)\mathbb{1}_{\alpha \in A}$$
-Hence, we have the posterior distribution of $\alpha$ as: 
-
-$$\alpha|y, \epsilon, \sigma^2_e \sim \mathcal{N}(\bar{\alpha}, \bar{V}_\alpha)\mathbb{1}_{\alpha \in A} \qquad where \qquad \bar{V}_\alpha = [\sigma^{-2}_eX_\epsilon^T X_\epsilon + V_{\alpha,prior}^{-1}]^{-1} \quad \bar{\alpha} = \bar{V}_\alpha[\sigma^{-2}_e X_\epsilon^T\epsilon + V_{\alpha,prior}^{-1}\alpha_{prior}]$$
-
-4. $\mathbf{p(\beta|y, \tau)}$
-
-From state equation 2, we have: $$H \tau = \ X_{\tau}\beta + \eta = \color{purple}{\mathbf{\mu I_T + \eta}}$$, 
-
-where $\eta \sim \color{purple}{\mathbf{\mathcal{N}(0_T, c\sigma^2I_T)}}$ and $$H \tau \sim \color{purple}{\mathbf{\mathcal{N}(\mu I_T, c\sigma^2I_T)}} \propto exp\left(-\frac{(H\tau - \mu I_T)^T(H\tau - \mu I_T)}{2c\sigma^2}\right)$$
-
-We have the prior of $\beta$ as: 
-$$\beta = \mu\sim \mathcal{N}(\beta_{prior}, V_{\beta, prior}) \propto exp\left({-\frac{1}{2}(\beta - \beta_{prior})^T}V_{\beta,prior}^{-1}(\beta - \beta_{prior})\right) = exp\left({-\frac{1}{2}(\mu I_T - \beta_{prior})^T}V_{\beta,prior}^{-1}(\mu I_t - \beta_{prior})\right)$$
-
-Then, the posterior distributuion of $\beta$ is:
-
-$$p(\beta | y, \tau) \propto p(\beta, y, \tau) \propto p(H\tau | \beta,y)p(\beta) $$
-$$\propto exp\left({-\frac{1}{2}(\mu I_T - \beta_{prior})^T}V_{\beta,prior}^{-1}(\mu I_t - \beta_{prior})\right)exp\left(-\frac{(H\tau - \mu I_T)^T(H\tau - \mu I_T)}{2c\sigma^2}\right)$$
-
-$$\propto exp\left( \frac{\mu^2 V_{\beta,prior}^{-1} - 2\mu V_{\beta,prior}^{-1}\beta_{prior}-2\mu c^{-1}\sigma^{-2}H\tau+c^{-1}\sigma^{-2}\mu^2}{2}\right) \propto exp\left( \frac{\mu^2 V_{\beta,prior}^{-1} - 2\mu V_{\beta,prior}^{-1}\beta_{prior}-2\mu c^{-1}\sigma^{-2} H\tau+c^{-1}\sigma^{-2}\mu^2}{2}\right)$$
-$$\propto  exp\left( \frac{\mu^2 (V_{\beta,prior}^{-1}+c^{-1}\sigma^{-2}) - 2\mu( V_{\beta,prior}^{-1}\beta_{prior} +c^{-1}\sigma^{-2} H\tau)}{2}\right) \sim \mathcal{N}(\bar{\beta}, \bar{V}_\beta)$$ and 
-
-$$\bar{V}_\beta = (V_{\beta,prior}^{-1}+\color{purple}{\mathbf{c^{-1}\sigma^{-2}}}\color{black}{)^{-1}  \qquad \bar{\beta} = \bar{V}_\beta[V_{\beta,prior}^{-1}\beta_{prior}} +\color{purple}{\mathbf{c^{-1}\sigma^{-2}}\color{black}{ H\tau]}}$$
-
-
-5. $\mathbf{p(\sigma^2_e|y, \epsilon, \alpha)}$ Again from state equation 2, we have: 
-
-$$\epsilon = X_{\epsilon} \alpha + e \qquad \text{where} \qquad e \sim \mathcal{N}(0, \sigma^2_eI_T)$$
-Hence, we have $$\epsilon | \alpha, \sigma^2_e \sim \mathcal{N}(X_\epsilon \alpha, \sigma_e^2) \propto (\sigma_e^2)^{\frac{T}{2}}exp(-\frac{(\epsilon - X_\epsilon \alpha)^T(\epsilon - X_\epsilon \alpha)}{2\sigma^2_e})$$
-
-The prior distribution of $\sigma^2_e$ is assumed to follow an inverse-gamma 2 distribution, with 
-
-$$\sigma^2_e \sim \mathcal{N}(s_{prior}, \nu_{prior}) \propto (\sigma^2_e)^{-\frac{\nu_{prior}+2}{2}}exp(-\frac{s_{prior}}{2\sigma^2_e})$$
-Then, the posterior distribution of $\sigma^2_e$ can be derived as follows: 
-
-$$p(\sigma^2_e|\epsilon, \alpha, \sigma^2_e, y) \propto \frac{p(\sigma^2_e, \epsilon, \alpha, \sigma^2_e, y)}{p(\epsilon, \alpha, \sigma^2_e, y)} \propto p(\sigma^2_e, \epsilon, \alpha, \sigma^2_e, y)$$ 
-$$ \propto p(\epsilon|\sigma^2_e,\alpha, y)p(\sigma^2_e,\alpha, y)\propto p(\epsilon|\sigma^2_e,\alpha, y)p(\sigma^2_e)$$
-
-$$\propto (\sigma^2_e)^{-\frac{\nu_{prior}+2}{2}}exp(-\frac{s_{prior}}{\sigma^2_e})(\sigma_e^2)^{\frac{T}{2}}exp(-\frac{(\epsilon - X_\epsilon \alpha)^T(\epsilon - X_\epsilon \alpha)}{2\sigma^2_e})$$
-$$\propto (\sigma^2_e)^{-\frac{\nu_{prior}+T+2}{2}}exp(-\frac{(\epsilon - X_\epsilon \alpha)^T(\epsilon - X_\epsilon \alpha)+s_{prior}}{2\sigma^2_e}) \sim \mathcal{IG2}(\bar{s_{e}}, \bar{\nu_e})$$
-where 
-$$\bar{s}_e = s_{prior} + (\epsilon - X_\epsilon \alpha)^T(\epsilon - X_\epsilon \alpha) \qquad \bar{\nu}_e = T+ \nu_{prior}$$
-
-Note that in this case, $\sigma^2_\eta$ is assumed to be a constant, with no posterior distribution. 
-
+Hence, $\tau, \Sigma |y \sim \mathcal{NIG2}(\bar{\tau}, \bar{\Sigma}, \bar{\nu}, \bar{s})$ where 
+$$\bar{\Sigma} = (c^{-1}H^T H + I_T)^{-1}$$
+$$\bar{\tau} = \bar{\Sigma}y$$
+$$\bar{\nu} = 2T+\nu_{prior}$$
+$$\bar{s} = s_{prior}+y^Ty$$
 ```{r}
-UC.AR.Gibbs.sampler.Sigma.eta    = function(S, starting.values, priors, sigma_eta_fixed){
-  # Estimation of a simple UC-AR(p) model with sigma_{\eta e}=0, sigma_eta fixed and tau_0 = 0
-  
+UC.local.simple.Gibbs.sampler    = function(S, starting.values, priors){
+  # Estimation of a local level UC model with \tau_0 = 0 and no AR trend. 
   aux     = starting.values
-  p       = length(aux$alpha)
   T       = nrow(aux$Y)
-  #####  #####  #####  #####  #####  #####  #####  #####  #####
-  HH = t(aux$H)%*%aux$H
-  #####  #####  #####  #####  #####  #####  #####  #####  #####
   posteriors    = list(
     tau     = matrix(NA,T,S),
-    epsilon = matrix(NA,T,S),
-    beta    = matrix(NA,2,S),
-    alpha   = matrix(NA,p,S),
     sigma   = matrix(NA,2,S),
     non.stationary.iterations = rep(NA,S)
   )
 
   for (s in 1:S){
-
-    # Sampling beta
-    ###########################
-    ######Modified from simple model####################################
-    #beta.v.inv    = diag(1/diag(priors$beta.v))
-    beta.v.inv = 1/priors$beta.v
-    #V.beta.bar    = solve( (1/aux$sigma[1])*crossprod(priors$X.tau) + beta.v.inv )
-    V.beta.bar    = (1/sigma_eta_fixed + beta.v.inv)^(-1)
-    #beta.bar      = V.beta.bar %*% ( (1/aux$sigma[1])*crossprod(priors$X.tau, c(aux$tau[1],diff(aux$tau))) + beta.v.inv%*%priors$beta.m )
-    beta.bar = V.beta.bar*(beta.v.inv*priors$beta.m + sigma_eta_fixed*aux$H*aux$tau)
-
-    #beta.draw     = rmvnorm(1,as.vector(beta.bar),V.beta.bar)
-    beta.draw     = rnorm(1,beta.bar,V.beta.bar)
-    #aux$beta      = as.vector(beta.draw)
-    aux$beta = beta.draw
-    ####################################################
-    X.epsilon     = matrix(NA,T,0)
-    for (i in 1:p){
-      X.epsilon   = cbind(X.epsilon, c(rep(0,i),aux$epsilon[1:(T-i),]))
-    }
-
-    # Sampling alpha
-    ###########################
-    alpha.v.inv   = diag(1/diag(priors$alpha.v))
-    V.alpha.bar   = solve((1/aux$sigma[2])*crossprod(X.epsilon) + alpha.v.inv )
-    V.alpha.bar   = 0.5*(V.alpha.bar + t(V.alpha.bar))
-    alpha.bar     = V.alpha.bar %*% ( (1/aux$sigma[2])*crossprod(X.epsilon, aux$epsilon) + alpha.v.inv%*%priors$alpha.m )
-    # non.stationary= TRUE
-    # ns.i          = 1
-    # while(non.stationary){
-      alpha.draw    = rmvnorm(1,as.vector(alpha.bar),V.alpha.bar)
-    #   non.stationary= max(Mod(eigen(rbind(alpha.draw,cbind(diag(p-1),rep(0,p-1))))$values))>=1
-    #   ns.i          = ns.i + 1
-    # }
-    aux$alpha     = as.vector(alpha.draw)
-
-    H.alpha       = diag(T)
-    for (i in 1:p){
-      sdiag(H.alpha,-i) =  -aux$alpha[i]
-    }
-    aux$H.alpha   = H.alpha
-
     # Sampling sigma
     ###########################
-    #sigma.eta.s   = as.numeric(priors$sigma.s + crossprod( (c(aux$tau[1],diff(aux$tau)) - X.tau%*%aux$beta), (priors$H%*%aux$tau - X.tau%*%aux$beta)))
-    #sigma.eta.nu  = priors$sigma.nu + T
-    #sigma.eta.draw= sigma.eta.s/rchisq(1,sigma.eta.nu)
+    sigma.s   = priors$sigma.s +t(aux$Y)%*%aux$Y
+    sigma.nu  = priors$sigma.nu + 2*T
+    sigma.draw= sigma.s/rchisq(1,sigma.nu)
 
-    sigma.e.s     = as.numeric(priors$sigma.s + crossprod(aux$H.alpha%*%aux$epsilon))
-    sigma.e.nu    = priors$sigma.nu + T
-    sigma.e.draw  = sigma.e.s/rchisq(1,sigma.e.nu)
-    #aux$sigma     = c(sigma.eta.draw,sigma.e.draw)
-    aux$sigma     = c(sigma_eta_fixed,sigma.e.draw)
+
     # Sampling tau
     ###########################
-    #V.tau.inv     = (1/aux$sigma[2])*crossprod(aux$H.alpha) + (1/aux$sigma[1])*HH
-    V.tau.inv     = (1/aux$sigma[2])*crossprod(aux$H.alpha) + (1/sigma_eta_fixed)*HH
+    V.tau.inv     = priors$c^(-1)*t(aux$H)%*%(aux$H) + diag(T)
     V.tau.inv     = 0.5*(V.tau.inv + t(V.tau.inv))
-    #b.tau         = (1/aux$sigma[2])*crossprod(aux$H.alpha, aux$H.alpha%*%aux$Y) + (1/aux$sigma[1])*crossprod(H, X.tau%*%aux$beta)
-    b.tau         = (1/aux$sigma[2])*crossprod(aux$H.alpha, aux$H.alpha%*%aux$Y) + (1/sigma_eta_fixed)*t(aux$H) * aux$beta
+    b.tau         = aux$Y
     precision.L   = t(bandchol(V.tau.inv))
     epsilon       = rnorm(T)
     b.tau.tmp     = forwardsolve(precision.L, b.tau)
     tau.draw      = backsolve(t(precision.L), b.tau.tmp + epsilon)
     aux$tau       = tau.draw
 
-    # Sampling epsilon
-    ###########################
-    #b.epsilon     = (1/aux$sigma[1])*HH%*%(aux$Y- cumsum(X.tau%*%aux$beta))
-    b.epsilon     = (1/sigma_eta_fixed)*HH%*%(aux$Y- aux$beta*solve(aux$H))
-    epsilon.n     = rnorm(T)
-    b.epsilon.tmp = forwardsolve(precision.L, b.epsilon)
-    epsilon.draw  = backsolve(t(precision.L), b.epsilon.tmp + epsilon.n)
-    aux$epsilon   = epsilon.draw
-
     posteriors$tau[,s]     = aux$tau
-    posteriors$epsilon[,s] = aux$epsilon
-    posteriors$beta[,s]    = aux$beta
-    posteriors$alpha[,s]   = aux$alpha
     posteriors$sigma[,s]   = aux$sigma
     # posteriors$non.stationary.iterations[s] = ns.i
     if (s%%1000==0){cat(" ",s)}
@@ -445,7 +253,9 @@ UC.AR.Gibbs.sampler.Sigma.eta    = function(S, starting.values, priors, sigma_et
   )
   return(output)
 }
+
 ```
+
 # Hierarchical modeling
 
 ## Estimating gamma error term variance prior scale
