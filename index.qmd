@@ -7,8 +7,7 @@ author:
   - name: Ben Gussen
     url: https://github.com/bgussen
     orcid: 0000-0003-4406-4076
-  - name: Zheyuan Li
-    url: https://github.com/lzyzero3
+
   
     execute:
   #echo: false
@@ -110,100 +109,6 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 # Hierarchical modeling
 
 ## Estimating gamma error term variance prior scale
-To estimate the gamma error term variance, we need to firstly put a prior on the prior scale of and present its full conditional posterior distribution.
-
-The prior is below:
-
-```{=tex}
-\begin{align*}
-\sigma^2 \mid s &\sim \text{IG2}(s, \nu) \\
-s &\sim \mathcal{G}(s, a)
-\end{align*}
-```
-
-
-Then we use Gibbs sampling to draw samples from the full conditional distributions: 
-```{r}
-#| echo: true
-#| message: false
-#| warning: false
-library(MCMCpack)
-# Define prior parameters
-s_prior <- 2
-nu_prior <- 2
-a_prior <- 2
-
-# Define the function for the conditional posterior distribution
-posterior_sampler <- function(y, n_iter = 1000) {
-  # Store samples
-  s <- rgamma(1, shape = a_prior, rate = s_prior)
-  sigma2 <- rinvgamma(1, shape = s, scale = nu_prior)  
-
-  s_samples <- numeric(n_iter)
-  sigma2_samples <- numeric(n_iter)
-
-  for (i in 1:n_iter) {
-    shape_sigma2 <- (length(y) / 2) + s
-    rate_sigma2 <- (sum((y - mean(y))^2) / 2) + nu_prior
-    sigma2 <- rinvgamma(1, shape = shape_sigma2, scale = rate_sigma2)  
-
-    shape_s <- a_prior + 1
-    rate_s <- s_prior + sigma2
-    s <- rgamma(1, shape = shape_s, rate = rate_s)
-
-    sigma2_samples[i] <- sigma2
-    s_samples[i] <- s
-  }
-
-  return(list(sigma2_samples = sigma2_samples, s_samples = s_samples))
-}
-
-set.seed(123)
-y <- rnorm(100, mean = 0, sd = 1)
-
-# Run the sampler
-posterior_samples <- posterior_sampler(y, n_iter = 1000)
-
-# Plot posterior distributions
-par(mfrow = c(2, 1))
-hist(posterior_samples$sigma2_samples, main = expression(paste("Posterior of ", sigma^2)), xlab = expression(sigma^2))
-hist(posterior_samples$s_samples, main = "Posterior of s", xlab = "s")
-```
-
-Based on the sampling results, we summarize the posterior distribution of these parameters.
-
-As can be seen from the histogram, the values of $\sigma^2$ are mostly concentrated between 0.6 and 1.0. The distribution has a certain skewness, with a small number of higher values on the right, but it is generally concentrated.
-
-Most of the values of $s$ are concentrated between 0 and 2, indicating that the probability of s is higher in this range and the distribution has a longer right tail.
-
-To derive the full conditional posteriors for $\sigma^2$ and $s$, we start with the joint posterior distribution of these parameters given the data $y$.
-
-The joint posterior distribution is below:
-
-```{=tex}
-\begin{equation}
-p(\sigma^2, s \mid y) \propto p(y \mid \sigma^2) p(\sigma^2 \mid s) p(s)
-\end{equation}
-```
-
-
-Full Conditional Posterior for $\sigma^2$ is: 
-
-```{=tex}
-\begin{equation}
-p(\sigma^2 \mid y, s) \propto (\sigma^2)^{-\left( \frac{T}{2} + s + 1 \right)} \exp \left( -\frac{1}{\sigma^2} \left( \frac{(y - \tau)'(y - \tau)}{2} + \nu \right) \right)
-\end{equation}
-```
-
-
-Full Conditional Posterior for $s$ is:
-
-```{=tex}
-\begin{equation}
-p(s \mid \sigma^2) \propto s^{a-1} \nu^s (\sigma^2)^{-(s+1)} \exp \left( -s - \frac{\nu}{\sigma^2} \right)
-\end{equation}
-```
-
 
 ## Estimating inverted-gamma 2 error term variance prior scale
 
