@@ -4,7 +4,8 @@ author:
   - name: Tomasz Woźniak
     url: https://github.com/donotdespair
     orcid: 0000-0003-2212-2378
-  
+  - name: Zheyuan Li
+    url: https://github.com/lzyzero3
     execute:
   #echo: false
 citation: 
@@ -105,6 +106,119 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 # Hierarchical modeling
 
 ## Estimating gamma error term variance prior scale
+To estimate the gamma error term variance, we need to firstly put a prior on the prior scale of and present its full conditional posterior distribution.
+
+The prior structure is below:
+
+```{=tex}
+\begin{align*}
+\sigma^2 \mid s &\sim \text{IG2}(s, \nu) \\
+s &\sim \mathcal{G}(s, a)
+\end{align*}
+```
+
+
+Then we use Gibbs sampling to draw samples from the full conditional distributions.
+
+
+The code define the prior parameters for $s$ and $\sigma^2$ as 's_prior', 'nu_prior', 'a_prior' and 'b_prior'. Then we initialize samples for $s$ and $\sigma^2$. In each iteration, first update $\sigma^2$ then update $s$. Also, we run 1000 iterations of sampling and plot the posterior distributions. 
+
+
+```{r}
+#| echo: true
+#| message: false
+#| warning: false
+library(MCMCpack)
+
+# Define prior parameters
+s_prior <- 2
+nu_prior <- 2
+a_prior <- 2
+b_prior <- 1  
+
+# Define the function for the conditional posterior distribution
+posterior_sampler <- function(y, n_iter = 1000, s_prior, nu_prior, a_prior, b_prior) {
+  # Initialize and store samples
+  s <- rgamma(1, shape = a_prior, rate = b_prior)
+  sigma2 <- rinvgamma(1, shape = s_prior, scale = nu_prior)  
+
+  s_samples <- numeric(n_iter)
+  sigma2_samples <- numeric(n_iter)
+
+  for (i in 1:n_iter) {
+    # Update sigma2
+    shape_sigma2 <- (length(y) / 2) + s
+    rate_sigma2 <- (sum((y - mean(y))^2) / 2) + nu_prior
+    sigma2 <- rinvgamma(1, shape = shape_sigma2, scale = rate_sigma2)  
+
+    # Update s
+    shape_s <- a_prior + 1
+    rate_s <- b_prior + sigma2
+    s <- rgamma(1, shape = shape_s, rate = rate_s)
+
+    # Store the samples
+    sigma2_samples[i] <- sigma2
+    s_samples[i] <- s
+  }
+
+  return(list(sigma2_samples = sigma2_samples, s_samples = s_samples))
+}
+
+set.seed(123)
+y <- rnorm(100, mean = 0, sd = 1)
+
+# Run the sampler
+posterior_samples <- posterior_sampler(y, n_iter = 1000, s_prior, nu_prior, a_prior, b_prior)
+
+# Plot posterior distributions
+par(mfrow = c(2, 1))
+hist(posterior_samples$sigma2_samples, main = expression(paste("Posterior of ", sigma^2)), xlab = expression(sigma^2))
+hist(posterior_samples$s_samples, main = "Posterior of s", xlab = "s")
+
+```
+
+The results show that the posterior distribution of $\sigma^2$ lies between 0.6 and 1.2, indicating a high probability density within this interval.From the peak we can see the $\sigma^2$ are concentrated around 0.8.
+
+The posterior distribution of $s$ lies between 0 and 4, indicating a high probability density within this interval.And the histogram shows that the values of $s$ are concentrated between 1 and 2.
+
+
+For the full conditional posterior distribution of $\sigma^2$, we can drive it based on the prior information.
+
+The observed data is normal distribution:
+
+```{=tex}
+\begin{align}
+\mathbf{y} \mid \boldsymbol{\tau}, \sigma^2 \sim \mathcal{N}_T(\boldsymbol{\tau}, \sigma^2 I_T)
+\end{align}
+```
+
+Then combine the observed data and $s$, we can get the likelihood function:
+
+```{=tex}
+\begin{align}
+p(\mathbf{y} \mid \boldsymbol{\tau}, \sigma^2) = (2\pi\sigma^2)^{-T/2} \exp \left( -\frac{1}{2\sigma^2} (\mathbf{y} - \boldsymbol{\tau})' (\mathbf{y} - \boldsymbol{\tau}) \right)
+\end{align}
+```
+
+The prior distribution is:
+
+
+```{=tex}
+\begin{align}
+p(\sigma^2 \mid s) \propto (\sigma^2)^{-s-1} \exp \left( -\frac{\nu}{\sigma^2} \right)
+\end{align}
+```
+
+Combine the likelihood function and prior distribution, we can know the posterior distribution:
+
+```{=tex}
+\begin{align}
+p(\sigma^2 \mid \mathbf{y}, \boldsymbol{\tau}, s) \propto (\sigma^2)^{-s-1-T/2} \exp \left( -\frac{(\mathbf{y} - \boldsymbol{\tau})' (\mathbf{y} - \boldsymbol{\tau})/2 + \nu}{\sigma^2} \right)
+\end{align}
+```
+
+
+
 
 
 ## Estimating inverted-gamma 2 error term variance prior scale
