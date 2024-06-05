@@ -176,17 +176,35 @@ The following script illustrates sampling from the full conditional posterior di
 sigma2       = 1 # this part need to draw from before steps, and here just an example of it
 
 # define the prior hyper-parameters
-s.prior      = 10
-mu.prior     = 1
-nu.prior     = 1
+prior        = list(
+  s.prior      = 10,
+  mu.prior     = 1,
+  nu.prior     = 1
+  )
 
-s.sampler = function (total_S){ 
+s.sampler = function (total_S, prior){ 
+  # total_S iteration of sampler for s
+  #
+  # total_S is the iteration times
+  #
+  # prior is a list containing:
+  #   s.prior - a positive scalar
+  #   mu.prior - a scalar
+  #   nu.prior - a scalar
+  
   for (s in 1:total_S){
     
+  # define posterior
+  s.posterior  = matrix(NA, total_S, 1)
+  # initial value of lambda
+  s.posterior[1] = 10                            # set s0
+  
+  
+  # --------------------- s.sampler --------------------- 
   # Update parameters for s posterior
   a.bar.s      = 1/sigma2
-  b.bar.s      = (nu.prior - mu.prior)/2
-  p.bar.s      = s.prior
+  b.bar.s      = (prior$nu.prior - prior$mu.prior)/2
+  p.bar.s      = prior$s.prior
 
   # Draw next period value for s from GIG distribution
   if (s!=total_S){
