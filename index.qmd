@@ -232,6 +232,8 @@ microbenchmark(
 
 ```
 
+Therefore, we could clearly see that the taking time drop a lot due to simulation smoothing method.
+
 ## Analytical solution for a joint posterior
 
 # Hierarchical modeling
