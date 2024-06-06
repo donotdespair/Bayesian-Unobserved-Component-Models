@@ -130,14 +130,15 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 
 ## Student-t error terms
 
-This section proposes an approach to implement t-Distributed error terms in unobserved component models by following the methodology of Chan(2020). 
+T-distributed error terms enhance robustness against outliers in data. This section outlines a method to incorporate t-distributed error terms into unobserved component models, adopting the approach described by Chan (2020), where the error term structure looks as follows: 
 
 $$
 \epsilon\sim N_{T}(0_{T},{\sigma^{2}}diag({\lambda_{t})})
 $$
 
 The model sepeartes the cross sectional and serial covariance, $\sigma^{2}$ and $\lambda_{t}$.
-If each $\lambda_{t}$ follows independently an $IG2\sim(\nu,\nu)$, then marginally $\epsilon_{t}$ has a t-distribution. 
+If each $\lambda_{t}$ follows independently an $IG2\sim(\nu,\nu)$, then marginally $\epsilon_{t}$ follows a t-distribution. 
+
 The kernel of the likelihood is given by: 
 
 $$
@@ -194,10 +195,10 @@ $$
 With the posterior parameters represented as: 
 
 $$
-\bar{\sigma}_{\tau}^{2}=(\frac{1}{\lambda_{t}}X'X+{\underline{\sigma}_{\tau}^{2}})^{-1}
+\bar{\sigma}_{\tau}^{2}=(\frac{1}{\lambda_{t}}+{\underline{\sigma}_{\tau}^{2}})^{-1}
 $$
 $$
-\bar{\tau}=\bar{\sigma}^{2}(\frac{1}{\lambda_{t}}X'Y+\underline{\sigma}_{\tau}^{2} \underline{\tau})
+\bar{\tau}=\bar{\sigma}^{2}(\frac{1}{\lambda_{t}}Y+\underline{\sigma}_{\tau}^{2} \underline{\tau})
 $$
 $$
 \bar{\nu}=T+{\underline{\tau}}
@@ -240,32 +241,19 @@ $$IG2\sim(N+\nu_{\lambda},\nu_{\lambda}+\epsilon_{t}'\frac{1}{\sigma^{2}}\epsilo
 #install.packages("MCMCpack")
 library(MCMCpack)
 
-lambda_t <- function(Y,X,tau.posterior,sigma.posterior){
+lambda_t <- function(y,tau,sigma.posterior){
   N = ncol(Y)
   t = nrow(Y)
   lambda.nu.prior = 5
   lambda.posterior <- array(t)
   for (x in 1:t) {
-    u_t <- Y[x,] - t(X[x,]) %*% tau.posterior
-    lambda.posterior[x] <- rinvgamma(1, (N + lambda.nu.prior)/2, (lambda.nu.prior + u_t %*% sigma.posterior %*% t(u_t))/2)
+    e_t <- Y[x,] - tau[x,]
+    lambda[x] <- rinvgamma(1, (N + lambda.nu.prior)/2, (lambda.nu.prior + e_t %*% sigma.posterior %*% t(e_t))/2)
     
   }
-  list(lambda.posterior = lambda.posterior)
+  list(lambda = lambda * diag(t))
   
 }
-
-#Suppose arbitrary data
-Y.test <- t(matrix(c(1, 2), ncol = 2))
-X.test <- matrix(c(1, 1, 1, 1), nrow = 2, ncol = 2)
-tau.posterior.test  <- matrix(c(1, 1, 1, 1), nrow = 2, ncol = 2)
-sigma.posterior.test <- matrix(c(1, 0, 0, 1), nrow = 2, ncol = 2)
-
-
-lambda_results <- lambda_t(Y.test, X.test, tau.posterior.test, sigma.posterior.test)
-
-print(lambda_results)
-
-
 ```
 
 ### Reference
