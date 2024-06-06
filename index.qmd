@@ -245,7 +245,7 @@ lambda_t <- function(y,tau,sigma.posterior){
   N = ncol(Y)
   t = nrow(Y)
   lambda.nu.prior = 5
-  lambda.posterior <- array(t)
+  lambda<- array(t)
   for (x in 1:t) {
     e_t <- Y[x,] - tau[x,]
     lambda[x] <- rinvgamma(1, (N + lambda.nu.prior)/2, (lambda.nu.prior + e_t %*% sigma.posterior %*% t(e_t))/2)
