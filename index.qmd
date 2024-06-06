@@ -4,6 +4,9 @@ author:
   - name: Tomasz Woźniak
     url: https://github.com/donotdespair
     orcid: 0000-0003-2212-2378
+    name: Stephan Berke
+    url: https://github.com/sb955/
+    orcid: 0009-0004-8443-1453
   
     execute:
   #echo: false
