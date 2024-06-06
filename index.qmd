@@ -362,15 +362,15 @@ posterior_t <- function(Y, X, p, S){
   }
 }
 
-median.lambda.nu <- median(lambda.nu)
-# Plot the nu draws
-plot(lambda.nu, type = 'l', col = 'black', lwd = 2, 
-     main = expression(paste(lambda_nu, " draws")), 
-     xlab = "Iteration", ylab = expression(lambda_nu))
-abline(h = median.lambda.nu, col = 'blue', lwd = 1)
-
-library(coda)
-print(1-rejectionRate(as.mcmc(lambda.nu)))
+# median.lambda.nu <- median(lambda.nu)
+# # Plot the nu draws
+# plot(lambda.nu, type = 'l', col = 'black', lwd = 2, 
+#      main = expression(paste(lambda_nu, " draws")), 
+#      xlab = "Iteration", ylab = expression(lambda_nu))
+# abline(h = median.lambda.nu, col = 'blue', lwd = 1)
+# 
+# library(coda)
+# print(1-rejectionRate(as.mcmc(lambda.nu)))
 
 ```
 
