@@ -4,11 +4,13 @@ author:
   - name: Tomasz Woźniak
     url: https://github.com/donotdespair
     orcid: 0000-0003-2212-2378
+
   - name: Ben Gussen
     url: https://github.com/bgussen
     orcid: 0000-0003-4406-4076
   - name: Pun Suparattanapinan
     url: https://github.com/Punzbd
+
 
   
     execute:
@@ -112,6 +114,7 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 
 ## Estimating gamma error term variance prior scale
 
+
 ## Estimating inverted-gamma 2 error term variance prior scale
 
 ## Estimating the initial condition prior scale
@@ -120,16 +123,11 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 
 ## Estimating Student-t degrees of freedom parameter
 
-
-
-
-
-
-
-
 ## Laplace prior for the trend component
 
 # Model extensions
+
+## Estimation of autoregressive parameters for cycle component
 
 ## Autoregressive cycle component
 
@@ -478,9 +476,6 @@ Sampling.epsilon.epsilonzero    = function(starting.values, priors){
 }
 ```
 
-
-
-
 ## Random walk with  time-varying drift parameter
 
 ## Student-t error terms
@@ -493,7 +488,7 @@ Sampling.epsilon.epsilonzero    = function(starting.values, priors){
 
 ## Sampling from the predictive density
 
-## Missing observations
+
 
 
 ## References {.unnumbered}
