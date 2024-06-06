@@ -142,7 +142,7 @@ The kernel of the likelihood is given by:
 
 $$
 L(y|\tau,\sigma^{2},\lambda_{t}) = (\sigma^2)^{\frac{T}{2}}(\lambda_{t})^{-\frac{_{N}}{2}}
-exp\{-\frac{1}{2}\frac{1}{\sigma^{2}}\frac{1}{\lambda_{t}}(y-\tau)'(y-(\tau)\}.
+exp\{-\frac{1}{2}\frac{1}{\sigma^{2}}\frac{1}{\lambda_{t}}(y-\tau)'(y-\tau)\}.
 $$
 
 In this framework, the parameters $\tau$ and $\sigma^{2}$ follow a normal inverse gamma 2 distribution 
@@ -236,144 +236,17 @@ It can be observed. that the kernel of the posterior follows an inverse gamma 2 
 
 $$IG2\sim(N+\nu_{\lambda},\nu_{\lambda}+\epsilon_{t}'\frac{1}{\sigma^{2}}\epsilon_{t})$$
 
-Sampling of $\nu_{\lambda}$
-
-Using the Metropolis-Hastings algorithm, one can sample at each iteration for 
-
-$$\nu_{\lambda}\sim N(\nu^{s-1},\sigma_{\nu}^{2})$$
-
-Sampling algorithm
-
-1. Draw ($\sigma^{2})^{(s)}$ from $IW(\bar{\nu},\bar{s})$
-
-2. Draw $\tau^{(s)}$ from $N(\bar{\tau},(\sigma^{2})^{(s)},\bar{{\sigma_{\tau}^{2}}})$
-
-3. Draw $\lambda_{t}$ from $IG2\sim(N+\nu_{\lambda},\nu_{\lambda}+\epsilon_{t}'\frac{1}{\sigma^{2}}\epsilon_{t})$
-
-4. Draw $\nu^{*(s)}$ from $N(\nu^{s-1},\sigma_{\nu}^{2})$
-
-```{r}
-library(MCMCpack)
-library(mvtnorm)
-library(RcppTN)
-
-posterior_t <- function(Y, X, p, S){
-  
-  #p=1
-  #S=1000
-  
-  A.hat       = solve(t(X)%*%X)%*%t(X)%*%Y
-  Sigma.hat   = t(Y-X%*%A.hat)%*%(Y-X%*%A.hat)/nrow(Y)
-  
-  N = ncol(Y)
-  t <- NROW(Y)
-  kappa.1   = 1
-  kappa.2   = 100
-  K = 1 + (p*N)
-  
-  A.prior     = matrix(0, K , N)
-  A.prior[2:(N+1),] = diag(N)
-  V.prior     = diag(c(kappa.2,kappa.1*((1:p)^(-2))%x%rep(1,N)))
-  S.prior     = diag(diag(Sigma.hat))
-  nu.prior    = N+1
+```{r Lambda function, echo=TRUE}
+lambda_t <- function(Y,X,A.posterior,Sigma.posterior){
   lambda.nu.prior = 5
-  
-  
-  
-  lambda.0 = rinvgamma(t, lambda.nu.prior/2, lambda.nu.prior/2)
-  
-  
-  Sigma.posterior.draws <- array(dim = c(N, N, S))
-  A.posterior.draws <- array(dim = c(K, N, S))
-  lambda.posterior.draws <- array(NA,c(t,S))
-  
-  
-  for (s in 1:S){
-    if (s == 1) {
-      lambda.s = lambda.0
-    } else {
-      lambda.s    = lambda.posterior.draws[,s-1]
-    }
-    Omega = (diag(lambda.s))
-    Omega.inv = diag(1/lambda.s)
-    
-    V.bar.ext       = solve(t(X)%*% Omega.inv%*%X + solve(V.prior))
-    A.bar.ext       = V.bar.ext%*%(t(X)%*% Omega.inv%*%Y + solve(V.prior)%*%A.prior)
-    nu.bar.ext      = t + nu.prior
-    S.bar.ext       = S.prior + t(Y)%*% Omega.inv%*%Y + t(A.prior)%*%solve(V.prior)%*%A.prior - t(A.bar.ext)%*%solve(V.bar.ext)%*%A.bar.ext
-    S.bar.ext.inv   = solve(S.bar.ext)
-    
-    Sigma.inv.draw = rWishart(1, nu.bar.ext, S.bar.ext.inv)[,,1]
-    Sigma.posterior.draws[,,s] = solve(Sigma.inv.draw)
-    A.posterior.draws[,,s] = matrix(mvtnorm::rmvnorm(1, mean=as.vector(A.bar.ext), sigma = Sigma.posterior.draws[,,s] %x% V.bar.ext), ncol=N)
-    
-    for (x in 1:t) {
-    u_t <- Y.bv[x,] - t(X.bv[x,]) %*% A.posterior.draws[,,s]
-    lambda.posterior.draws[x, s] <- rinvgamma(1, (N + lambda.nu[s])/2, (lambda.nu[s] + u_t %*% Sigma.posterior.draws[,,s] %*% t(u_t))/2)
-    }
-  
-    if (s>=2){
-    
-    #sample nu from a truncated normal distribution
-    lambda.nu.star <- RcppTN::rtn(1, .mean = lambda.nu[s-1], .sd = var.lambda.nu, .low = 0, .high = Inf)
-    
-    #densities of proposed value
-    log_likelihood_star<- 1/sum((lambda.nu.star/2) * log(lambda.nu.star/2) - lgamma(lambda.nu.star/2) - (lambda.nu.star/2 + 1) * log(lambda.posterior.draws[,s]) - (lambda.nu.star/2) / lambda.posterior.draws[,s] )
-    #or simply write with function
-    #log_likelihood_star <- 1/(sum(dgamma(lambda.posterior.draws[,s], shape = lambda.nu.star/2, rate = lambda.nu.star/2, log = TRUE)))
-
-    #prior distribution of nu of proposed value
-    log_prior_nu_star <- dnorm(lambda.nu.star, mean = lambda.nu[s-1], sd = var.lambda.nu, log = TRUE)
-    
-    #truncated prior of nu of proposed value
-    log_prior_nu_trunc_star <- log(RcppTN::dtn(lambda.nu.star, .mean = lambda.nu[s-1], .sd = var.lambda.nu))
-    
-    
-    
-    #densities of current value
-    log_likelihood_curr<- 1/sum((lambda.nu[s-1]/2) * log(lambda.nu[s-1]/2) - lgamma(lambda.nu[s-1]/2) - (lambda.nu[s-1]/2 + 1) * log(lambda.posterior.draws[,s]) - (lambda.nu[s-1]/2) / lambda.posterior.draws[,s] )
-    #log_likelihood_curr <- 1/(sum(dgamma(lambda.posterior.draws[,s], shape = lambda.nu[s-1]/2, rate = lambda.nu[s-1]/2, log = TRUE)))
-    
-    #prior distribution of nu of current value
-    log_prior_nu_curr <- dnorm(lambda.nu[s-1], mean = lambda.nu[s-1], sd = var.lambda.nu, log = TRUE)
-    #truncated prior of nu of current value
-    log_prior_nu_trunc_curr <- log(RcppTN::dtn(lambda.nu[s-1], .mean = lambda.nu[s-1], .sd = var.lambda.nu))
-    
-    
-    #calculate ratio 
-    log_ratio <- (log_likelihood_star + log_prior_nu_star + log_prior_nu_trunc_star) - (log_likelihood_curr + log_prior_nu_curr+ log_prior_nu_trunc_curr)
-    
-    ratio[s] <- exp(log_ratio)
-    
-    alpha[s] <- min(1, ratio[s])
-    
-    if (runif(1) < alpha[s]) {
-      lambda.nu[s] <- lambda.nu.star
-    } else{
-      lambda.nu[s] <- lambda.nu[s-1]
-    }
-    
-  }  
-  pris = (list(A.posterior.draws = A.posterior.draws, 
-               Sigma.posterior.draws = Sigma.posterior.draws,
-               lambda.posterior.draws=lambda.posterior.draws,
-               lambda.nu=lambda.nu))
-
+  N = ncol(Y)
+  t = nrows(Y)
+  for (x in 1:t) {
+    u_t <- Y[x,] - t(X[x,]) %*% A.posterior
+    lambda.posterior <- rinvgamma(1, (N + lambda.nu.prior)/2, (lambda.nu.prior + u_t %*% Sigma.posterior %*% t(u_t))/2)
   }
 }
-
-# median.lambda.nu <- median(lambda.nu)
-# # Plot the nu draws
-# plot(lambda.nu, type = 'l', col = 'black', lwd = 2, 
-#      main = expression(paste(lambda_nu, " draws")), 
-#      xlab = "Iteration", ylab = expression(lambda_nu))
-# abline(h = median.lambda.nu, col = 'blue', lwd = 1)
-# 
-# library(coda)
-# print(1-rejectionRate(as.mcmc(lambda.nu)))
-
 ```
-
 
 ### Reference
 
