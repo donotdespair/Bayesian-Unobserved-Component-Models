@@ -237,15 +237,35 @@ It can be observed. that the kernel of the posterior follows an inverse gamma 2 
 $$IG2\sim(N+\nu_{\lambda},\nu_{\lambda}+\epsilon_{t}'\frac{1}{\sigma^{2}}\epsilon_{t})$$
 
 ```{r Lambda function, echo=TRUE}
-lambda_t <- function(Y,X,A.posterior,Sigma.posterior){
-  lambda.nu.prior = 5
+#install.packages("MCMCpack")
+library(MCMCpack)
+
+lambda_t <- function(Y,X,tau.posterior,sigma.posterior){
   N = ncol(Y)
-  t = nrows(Y)
+  t = nrow(Y)
+  lambda.nu.prior = 5
+  lambda.posterior <- array(t)
   for (x in 1:t) {
-    u_t <- Y[x,] - t(X[x,]) %*% A.posterior
-    lambda.posterior <- rinvgamma(1, (N + lambda.nu.prior)/2, (lambda.nu.prior + u_t %*% Sigma.posterior %*% t(u_t))/2)
+    u_t <- Y[x,] - t(X[x,]) %*% tau.posterior
+    lambda.posterior[x] <- rinvgamma(1, (N + lambda.nu.prior)/2, (lambda.nu.prior + u_t %*% sigma.posterior %*% t(u_t))/2)
+    
   }
+  list(lambda.posterior = lambda.posterior)
+  
 }
+
+#Suppose arbitrary data
+Y.test <- t(matrix(c(1, 2), ncol = 2))
+X.test <- matrix(c(1, 1, 1, 1), nrow = 2, ncol = 2)
+tau.posterior.test  <- matrix(c(1, 1, 1, 1), nrow = 2, ncol = 2)
+sigma.posterior.test <- matrix(c(1, 0, 0, 1), nrow = 2, ncol = 2)
+
+
+lambda_results <- lambda_t(Y.test, X.test, tau.posterior.test, sigma.posterior.test)
+
+print(lambda_results)
+
+
 ```
 
 ### Reference
