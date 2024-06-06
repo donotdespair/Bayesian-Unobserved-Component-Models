@@ -4,6 +4,8 @@ author:
   - name: Tomasz Woźniak
     url: https://github.com/donotdespair
     orcid: 0000-0003-2212-2378
+  - name: Yansong Yang
+    url: https://github.com/russellyang728
   
     execute:
   #echo: false
@@ -110,6 +112,77 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 ## Estimating inverted-gamma 2 error term variance prior scale
 
 ## Estimating the initial condition prior scale
+
+In the univariate local-level model, the initial state $\tau_0$ and the
+variance $s^2$ are key parameters determining the behavior of the
+stochastic process. For the initial state $\tau_0$, a prior is specified
+as an inverse gamma distribution, denoted by
+$\tau_0 \sim \text{N}(\underline\tau_0, s^2)$, reflecting our belief
+about the distribution of $\tau_0$ before observing the data. While, for
+the variance $s^2$, which controls the fluctuation of the process, we
+use inverse gamma 2 distribution,
+$s^2 \sim \text{IG2}(\underline{s}, \underline{\nu})$.
+
+The full posterior of $s^2$ is derived below: 
+
+$$
+\begin{gather*}
+&p(s^2|y,\sigma,\tau,\tau_0,\sigma_{\eta}, \underline{s}, \underline{\nu}) \propto
+p(y|\tau,\sigma)p(\tau|\tau_0,\sigma_{\eta}^2)p(\tau_0|s^2)p(s^2) \\ \\
+&\propto p(\tau_0|s^2)p(s^2|\underline{s}, \underline{\nu}) \\ \\
+&= (s^2)^{-\frac{1}{2}}\exp\left\{-\frac{1}{2}(\tau_0-\underline{\tau_0})'(s^2)^{-1}(\tau_0-\underline{\tau_0})\right\}(s^2)^{-\frac{\underline{\nu}+2}{2}}\exp\left\{-\frac{1}{2}\frac{\underline{s}}{s^2}\right\} \\ \\
+&= (s^2)^{-\frac{1+\underline{\nu}+2}{2}}
+\exp \left\{-\frac{1}{2}\frac{(\tau_0-\underline{\tau_0})^2+\underline{s}}{s^2}\right\}
+\end{gather*}
+$$
+
+Hence, full conditional posterior of $s^2$ in a form of inverse
+gamma 2 distribution, where
+
+$$
+\begin{gather*}
+\overline{\nu} = 1+\underline{\nu} \\
+\overline{s} = (\tau_0-\underline{\tau_0})^2+\underline{s}
+\end{gather*}
+$$
+This R code below implements a Bayesian posterior sampling process. The code gives hyper parameters initial value for the prior distribution and then updates the posterior distribution parameters by combining them with data observations.
+
+```{r echo=TRUE}
+# Define the prior hyper-parameters
+s_prior = 10
+nu_prior = 1
+tau_0 = 1    #Initial state parameter
+tau_0_prior = 1
+
+s2_sampler <- function(total_s, s_prior,tau_0_prior,nu_prior) {
+    # Initialize vector to store samples of s2
+    s2_posterior <- numeric(total_s)
+    
+    for (s in 1:total_s) {
+      # Update parameters for s2 posterior based on your derivation
+      nu_posterior <- nu_prior + 1
+      s_posterior <- (tau_0 - tau_0_prior)^2 + s_prior
+      
+      # Draw next period value for s2 from inverse gamma distribution
+      s2_posterior[s] <- s_posterior / rchisq(1, nu_posterior)
+      if (s < total_s) {
+        s_posterior = s2_posterior[s]
+      }
+    }
+    
+    # Prepare the output
+    s2_draw <- list(s2_posterior = s2_posterior)
+    return(s2_draw)
+}
+```
+
+The plot visualizes the posterior samples of the $s^2$ parameter over time, derived from the Bayesian updating process.
+
+```{r echo=FALSE}
+qq = s2_sampler(100, s_prior,tau_0_prior,nu_prior)
+plot.ts(qq$s2_posterior, ylab = "s2_posterior")
+```
+
 
 ## Student-t prior for the trend component
 
