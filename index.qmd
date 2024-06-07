@@ -205,11 +205,13 @@ $$
 $$ = exp(-\frac{\tau^T(c^{-1}H^T H + I_T)\tau - 2\tau^Ty}{2\sigma^2}) \times \\ 
 exp(-\frac{y^Ty + s_{prior}}{2\sigma^2})\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}} $$
 
+Let $\bar{\Sigma} = (c^{-1}H^T H + I_T)^{-1}$, we have 
+$$p(\tau, \sigma^2 |y) \propto exp(-\frac{\tau^T\bar{\Sigma}^{-1}\tau - 2\tau^Ty + y^T\bar{\Sigma}y}{2\sigma^2})exp(-\frac{y^Ty + s_{prior}-y^T\bar{\Sigma}y}{2\sigma^2})\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}}$$
 Hence, $\tau, \Sigma |y \sim \mathcal{NIG2}(\bar{\tau}, \bar{\Sigma}, \bar{\nu}, \bar{s})$ where 
 $$\bar{\Sigma} = (c^{-1}H^T H + I_T)^{-1}$$
 $$\bar{\tau} = \bar{\Sigma}y$$
 $$\bar{\nu} = 2T+\nu_{prior}$$
-$$\bar{s} = s_{prior}+y^Ty$$
+$$\bar{s} = s_{prior}+y^Ty-y^T\bar{\Sigma}y$$
 ```{r}
 UC.local.simple.Gibbs.sampler    = function(S, starting.values, priors){
   # Estimation of a local level UC model with \tau_0 = 0 and no AR trend. 
@@ -222,11 +224,7 @@ UC.local.simple.Gibbs.sampler    = function(S, starting.values, priors){
   )
 
   for (s in 1:S){
-    # Sampling sigma
-    ###########################
-    sigma.s   = priors$sigma.s +t(aux$Y)%*%aux$Y
-    sigma.nu  = priors$sigma.nu + 2*T
-    sigma.draw= sigma.s/rchisq(1,sigma.nu)
+
 
 
     # Sampling tau
@@ -239,6 +237,12 @@ UC.local.simple.Gibbs.sampler    = function(S, starting.values, priors){
     b.tau.tmp     = forwardsolve(precision.L, b.tau)
     tau.draw      = backsolve(t(precision.L), b.tau.tmp + epsilon)
     aux$tau       = tau.draw
+    
+    # Sampling sigma
+    ###########################
+    sigma.s   = priors$sigma.s +t(aux$Y)%*%aux$Y - t(aux$Y)%*%aux$tau%*%aux$Y
+    sigma.nu  = priors$sigma.nu + 2*T
+    sigma.draw= sigma.s/rchisq(1,sigma.nu)
 
     posteriors$tau[,s]     = aux$tau
     posteriors$sigma[,s]   = aux$sigma
