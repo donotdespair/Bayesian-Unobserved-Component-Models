@@ -213,40 +213,48 @@ $$\bar{\tau} = \bar{\Sigma}y$$
 $$\bar{\nu} = 2T+\nu_{prior}$$
 $$\bar{s} = s_{prior}+y^Ty-y^T\bar{\Sigma}y$$
 ```{r}
-UC.local.simple.Gibbs.sampler    = function(S, starting.values, priors){
-  # Estimation of a local level UC model with \tau_0 = 0 and no AR trend. 
+#| code-fold: true
+#| code-summary: "Show code"
+UC.local.tau.sigma.Gibbs.sampler    = function(S, starting.values, priors){
+  # Estimation of a simple UC-AR(p) model with sigma_{\eta e}=0
+  # as specified in Lecture 17 slides 
+  
   aux     = starting.values
+  p       = length(aux$alpha)
   T       = nrow(aux$Y)
+
   posteriors    = list(
     tau     = matrix(NA,T,S),
+    epsilon = matrix(NA,T,S),
+    beta    = matrix(NA,2,S),
+    alpha   = matrix(NA,p,S),
     sigma   = matrix(NA,2,S),
     non.stationary.iterations = rep(NA,S)
   )
 
   for (s in 1:S){
-
-
+    # Sampling sigma
+    ###########################
+    V.tau.bar.inv = priors$c^(-1)*t(aux$H)%*%aux$H + diag(T)
+    V.tau.bar.inv = 0.5*(V.tau.bar.inv + t(V.tau.bar.inv))
+    V.tau.bar = solve(V.tau.bar.inv)
+    V.tau.bar = 0.5*(V.tau.bar + t(V.tau.bar))
+    sigma.s   = as.numeric(priors$sigma.s + t(aux$Y)%*%aux$Y - t(aux$Y)%*%V.tau.bar%*%aux$Y)
+    sigma.nu  = priors$sigma.nu + 2*T
+    sigma.draw= sigma.s/rchisq(1,sigma.nu)
+    aux$sigma     = sigma.draw
 
     # Sampling tau
     ###########################
-    V.tau.inv     = priors$c^(-1)*t(aux$H)%*%(aux$H) + diag(T)
-    V.tau.inv     = 0.5*(V.tau.inv + t(V.tau.inv))
-    b.tau         = aux$Y
-    precision.L   = t(bandchol(V.tau.inv))
+    b.tau         = aux$sigma%*%aux$Y
+    precision.L   = t(bandchol(V.tau.bar.inv))
     epsilon       = rnorm(T)
     b.tau.tmp     = forwardsolve(precision.L, b.tau)
     tau.draw      = backsolve(t(precision.L), b.tau.tmp + epsilon)
     aux$tau       = tau.draw
-    
-    # Sampling sigma
-    ###########################
-    sigma.s   = priors$sigma.s +t(aux$Y)%*%aux$Y - t(aux$Y)%*%aux$tau%*%aux$Y
-    sigma.nu  = priors$sigma.nu + 2*T
-    sigma.draw= sigma.s/rchisq(1,sigma.nu)
 
     posteriors$tau[,s]     = aux$tau
     posteriors$sigma[,s]   = aux$sigma
-    # posteriors$non.stationary.iterations[s] = ns.i
     if (s%%1000==0){cat(" ",s)}
   }
 
@@ -256,6 +264,7 @@ UC.local.simple.Gibbs.sampler    = function(S, starting.values, priors){
   )
   return(output)
 }
+
 
 ```
 # Hierarchical modeling
