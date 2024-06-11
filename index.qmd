@@ -101,7 +101,7 @@ The state equation for $\boldsymbol\tau$ can be rewritten as follows:
 $$
 \begin{gather}
 \boldsymbol\tau = \mathbf{H}^{-1} \mathbf{i} \tau_0+\mathbf{H}^{-1}\boldsymbol\eta \\
-\\ \boldsymbol\eta \sim \mathcal{N}(\mathbf{0}_T, \sigma_\eta^2 \mathbf{I}_T) \\
+\boldsymbol\eta \sim \mathcal{N}(\mathbf{0}_T, \sigma_\eta^2 \mathbf{I}_T) \\
 \mathbf{H}^{-1} \boldsymbol\eta \sim \mathcal{N}(\mathbf{0}_T, \sigma_\eta^2\left(\mathbf{H}^{\prime} \mathbf{H}\right)^{-1})
 \end{gather}
 $$
@@ -112,32 +112,18 @@ $$
 \\ &\propto \exp \left\{-\frac{1}{2} \frac{1}{\sigma_\eta^2}\left(\boldsymbol\tau-\mathbf{H}^{-1} \mathbf{i} \tau_0\right)^{\prime}\left(\mathbf{H}^{\prime} \mathbf{H}\right)\left(\boldsymbol\tau-\mathbf{H}^{-1} \mathbf{i} \tau_0\right)\right\}
 \end{align}
 $$
-where the prior distribution of $\tau_0$ is derived as follows:
+Next, the prior distribution of $\tau_0$ is defined as uni-variate normal:
 $$
 \begin{align}
 \tau_0 &\sim \mathcal{N}(\underline{\tau_0}, \underline{V_{\tau_{0}}}) 
 \\ &\propto \exp \left\{-\frac{1}{2}(\tau_0-\underline{\tau_0})^{\prime} \underline{V_{\tau_{0}}}^{-1}(\tau_0-\underline{\tau_0})\right\}
 \end{align}
 $$
-and the prior distribution of $\sigma_\eta^2$ is the following:
+and the prior distribution of $\sigma_\eta^2$ is inverted gamma 2:
 $$
 \begin{align}
 \sigma_\eta^2 &\sim \mathcal{IG}2(\underline{s_\eta}, \underline{v_\eta}) \\
 &\propto (\sigma_\eta^2)^{-\frac{\underline{v}+2}{2}} \exp \left\{-\frac{1}{2} \frac{s}{\sigma_\eta^2}\right\}
-\end{align}
-$$
-
-Given that $\boldsymbol\epsilon$ follows normal distribution,
-$$
-\begin{align}
-\boldsymbol\epsilon &\sim \mathcal{N}(\mathbf{0}_T, \sigma^2 \mathbf{I}_T)
-\end{align}
-$$
-the prior distribution of $\boldsymbol\epsilon$ given $\sigma^2$ is the following:
-$$
-\begin{align}
-\boldsymbol\epsilon | \sigma^2 &\sim \mathcal{N}(\mathbf{0}_T, \sigma^2 \mathbf{I}_T)
-\\ &\propto \exp \left\{-\frac{1}{2} \frac{1}{\sigma^2} \boldsymbol\epsilon^{\prime}\boldsymbol\epsilon\right\}
 \end{align}
 $$
 
@@ -149,11 +135,25 @@ $$
 \end{align}
 $$
 
-The Joint prior distribution of $\boldsymbol\tau$, $\tau_0$, $\sigma^2_{\eta}$, and $\sigma^2$ is then derived as follows:
+The Joint prior distribution of the parameters of the model $\boldsymbol\tau$, $\tau_0$, $\sigma^2_{\eta}$, and $\sigma^2$ is then given by:
 $$
 \begin{aligned}
 p(\boldsymbol\tau,\tau_{0},\sigma_{\eta}^{2},\sigma^{2}) = p(\boldsymbol\tau|\tau_{0},\sigma_{\eta}^{2}) \space p(\tau_{0}) \space p(\sigma_{\eta}^{2}) \space p(\sigma^{2})
 \end{aligned}
+$$
+where the individual distributions on the RHS are as specified above.
+
+Finally, given that $\boldsymbol\epsilon$ follows normal distribution,
+$$
+\begin{align}
+\boldsymbol\epsilon\mid\sigma^2 &\sim \mathcal{N}(\mathbf{0}_T, \sigma^2 \mathbf{I}_T)
+\end{align}
+$$
+the prior distribution of $\boldsymbol\epsilon$ given $\sigma^2$ is proportional to:
+$$
+\begin{align}
+\boldsymbol\epsilon | \sigma^2 &\propto \exp \left\{-\frac{1}{2} \frac{1}{\sigma^2} \boldsymbol\epsilon^{\prime}\boldsymbol\epsilon\right\}
+\end{align}
 $$
 
 # Bayesian estimation
