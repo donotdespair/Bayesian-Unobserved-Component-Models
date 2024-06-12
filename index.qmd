@@ -7,6 +7,8 @@ author:
   - name: Inhye Kang
     url: https://github.com/inhyekang-au
     orcid: 0009-0007-8544-4952
+  - name: Yuqiao Yang
+    url: https://github.com/JimmyYang917
   
     execute:
   #echo: false
@@ -328,6 +330,109 @@ UC.Gibbs.sampler    = function(S, starting.values, priors){
 
 
 ## Simulation smoother and precision sampler
+
+```{r}
+#| echo: false
+#| message: false
+#| warning: false
+
+library(mgcv) 
+library(microbenchmark)
+library(knitr)
+
+```
+
+Simulation Smoother is used when drawing state variables in discrete time state-space models from their conditional distribution. This tool greatly improved Bayesian estimation process in conditional linear Gaussian state-space models. The benefit of using this method comes from the fact that one does not rely on an iterative procedure of forward filtering and backward smoothing. Instead, this step is performed all without a loop.
+
+Consider sampling random draws from a multivariate normal distribution presented as:
+
+$$
+N_{T}(D^{-1}b,D^{-1})
+$$
+
+where: $D$ is a $T \times T$ precision matrix of covariance matrix $\Sigma$, such that $D = \Sigma^{-1}$, and $b$ is an $T\times1$ restriction vector to specify the **Mean** of multivariate normal distribution, where $M = \Sigma b$.
+
+This parameterisation is particularly useful as matrices $D$ and $b$ can be computed easily. Additionally, matrix $D$ that in the simulation smoother for state-space models is a band matrix and often a tridiagonal matrix. The latter case arises for a one-lag autoregressive state-space process. Therefore, the computation time is much shorter if dedicated numerical algorithms are employed. For tridiagnal matrix $D$ in state space model, let $L$ be a lower-triangular matrix obtained by Cholesky decomposition, where $D = LL'$ (Assume that $L^{-1}$ can be compute efficiently).
+
+Therefore, the mean of the normal distribution above can be presented as:
+
+$$
+M = D^{-1}b = (LL')^{-1}b = L'^{-1}L^{-1}b
+$$
+
+Let a $T \times 1$ vector x contain $T$ independent random draws from a standard normal distribution, $X\sim N_{T} ( 0_{T}, I_{T})$. Therefore, the target distribution, $Y\sim N_{T}(D^{-1}b,D^{-1})$, can be treated as:
+
+$$
+Y = D^{-1}b + \sqrt{D^{-1}} X = L'^{-1}L^{-1}b + L'^{-1} X
+$$
+
+Therefor a draw form the target distribution, $N_{T}(D^{-1}b,D^{-1})$, it's equivalent to:
+
+$$
+L'^{-1}L^{-1}b + L'^{-1}x = L'^{-1}(L^{-1}b + x)
+$$
+
+Following algorithm base on solving a linear equation by back-substitution rather than computation of the inverse matrix:
+
+1.  **Compute** $L = chol(D)$ such that $D = LL'$
+2.  **Sample** $x\sim N_{T} ( 0_{T}, I_{T})$
+3.  **Compute** a draw from the distribution via the affine transformation: $L '\smallsetminus (L \smallsetminus b + x)$
+
+Note: Let $L \smallsetminus b$ denote the unique solution to the triangular system Lx = b obtained by forward (backward) substitution, that is, $L \smallsetminus b = L^{−1}b$.
+
+### Simulation smoother algorithm in R
+
+
+Compare the computational speed of generating random numbers from a multivariate normal distribution using dedicated numerical algorithms in function `rmvnorm.tridiag.precision` and function `solve` for the matrix inversion ignoring the tridiagonality of the precision matrix in function `rmvnorm.usual`:
+
+```{R Simulation smoother in R comparison}
+#| echo: true
+#| cache: true
+
+library(mgcv)
+rmvnorm.tridiag.precision = function(n, D, b){
+  N           = dim(D)[1]
+  lead.diag   = diag(D)
+  sub.diag    = sdiag(D, -1)
+  D.chol      = trichol(ld = lead.diag, sd=sub.diag)
+  D.L         = diag(D.chol$ld)
+  sdiag(D.L,-1) = D.chol$sd
+  x           = matrix(rnorm(n*N), ncol=n)
+  a           = forwardsolve(D.L, b)
+  draw        = backsolve(t(D.L), matrix(rep(a,n), ncol=n) + x)
+  return(draw)
+}
+
+# Function of normal method
+rmvnorm.usual = function(n, D, b){
+  N           = dim(D)[1]
+  D.chol      = t(chol(D))
+  variance.chol = solve(D.chol)
+  x           = matrix(rnorm(n*N), ncol=n)
+  draw        = t(variance.chol) %*%
+           (matrix(rep(variance.chol%*%b,n), ncol=n) + x)
+  return(draw)
+}
+
+# Comparison
+set.seed(12345)
+T = 300
+md = rgamma(T, shape=10, scale=10) 
+od = rgamma(T-1, shape=10, scale=1) 
+D = 2*diag(md)
+sdiag(D, 1) = -od
+sdiag(D, -1) = -od
+b = as.matrix(rnorm(T))
+
+microbenchmark(
+  trid  = rmvnorm.tridiag.precision(n=100, D=D, b=b),
+  usual = rmvnorm.usual(n=100, D=D, b=b),
+  check = "equal", setup=set.seed(123456)
+)
+
+```
+
+Therefore, we could clearly see that the computational time drops substatially due to simulation smoothing method.
 
 ## Analytical solution for a joint posterior
 
