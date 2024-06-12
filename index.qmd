@@ -113,27 +113,17 @@ library(knitr)
 
 ```
 
-Simulation Smoother is used when drawing state variables in discrete time state-space models from their conditional distribution[@mccausland2011]. This tool greatly improved Bayesian estimation process in conditional linear Gaussian state-space models. The benefit of using this method comes from the fact that one does not rely on an iterative procedure of forward filtering and backward smoothing. Instead, this step is performed all without a loop[@mccausland2011].
+Simulation Smoother is used when drawing state variables in discrete time state-space models from their conditional distribution. This tool greatly improved Bayesian estimation process in conditional linear Gaussian state-space models. The benefit of using this method comes from the fact that one does not rely on an iterative procedure of forward filtering and backward smoothing. Instead, this step is performed all without a loop.
 
-Consider sampling random draws from a multivariate normal distribution present as:
-
-$$
-N_{T}(M,\Sigma)
-$$
-
-And given that:
-
-$D$: a $T \times T$ precision matrix of covariance matrix $\Sigma$, compute as $D = \Sigma^{-1}$.
-
-$b$: a $N\times1$ restriction vector to specify the **Mean** of multivariate normal distribution, where $M = \Sigma\times b$.
-
-Therefore, by $\Sigma = D^{-1}$, we could transform multivariate normal distribution into:
+Consider sampling random draws from a multivariate normal distribution presented as:
 
 $$
 N_{T}(D^{-1}b,D^{-1})
 $$
 
-This parameterisation is particularly useful as matrices $D$ and $b$ can be computed easily. Additionally, matrix $D$ that in the simulation smoother for state-space models is a band matrix and often a tridiagonal matrix. Therefore, the computation time is much shorter than usual ways. For tridiagnal matrix $D$ in state space model, let $L$ be a lower-triangular matrix obtained by Cholesky decomposition, where $D = LL'$ (Assume that $L^{-1}$ can be compute efficiently).
+where: $D$ is a $T \times T$ precision matrix of covariance matrix $\Sigma$, such that $D = \Sigma^{-1}$, and $b$ is an $T\times1$ restriction vector to specify the **Mean** of multivariate normal distribution, where $M = \Sigma b$.
+
+This parameterisation is particularly useful as matrices $D$ and $b$ can be computed easily. Additionally, matrix $D$ that in the simulation smoother for state-space models is a band matrix and often a tridiagonal matrix. The latter case arises for a one-lag autoregressive state-space process. Therefore, the computation time is much shorter if dedicated numerical algorithms are employed. For tridiagnal matrix $D$ in state space model, let $L$ be a lower-triangular matrix obtained by Cholesky decomposition, where $D = LL'$ (Assume that $L^{-1}$ can be compute efficiently).
 
 Therefore, the mean of the normal distribution above can be presented as:
 
@@ -141,10 +131,10 @@ $$
 M = D^{-1}b = (LL')^{-1}b = L'^{-1}L^{-1}b
 $$
 
-Let a $T \times 1$ vector x contain T independent random draws from a standard normal distribution, $x\sim N_{T} ( 0_{T}, I_{T})$. Therefore, the target distribution, $Y\sim N_{T}(D^{-1}b,D^{-1})$, can be treated as:
+Let a $T \times 1$ vector x contain $T$ independent random draws from a standard normal distribution, $X\sim N_{T} ( 0_{T}, I_{T})$. Therefore, the target distribution, $Y\sim N_{T}(D^{-1}b,D^{-1})$, can be treated as:
 
 $$
-Y = D^{-1}b + \sqrt{D^{-1}} \times I_{T} = L'^{-1}L^{-1}b + L'^{-1} \times I_{T}
+Y = D^{-1}b + \sqrt{D^{-1}} X = L'^{-1}L^{-1}b + L'^{-1} X
 $$
 
 Therefor a draw form the target distribution, $N_{T}(D^{-1}b,D^{-1})$, it's equivalent to:
@@ -161,35 +151,16 @@ Following algorithm base on solving a linear equation by back-substitution rathe
 
 Note: Let $L \smallsetminus b$ denote the unique solution to the triangular system Lx = b obtained by forward (backward) substitution, that is, $L \smallsetminus b = L^{−1}b$.
 
-###Simulation smoother algorithm in R
+### Simulation smoother algorithm in R
 
-```{R Simulation smoother in R for tridiagonal D matrix}
-#| echo: true
 
-library(mgcv)
-rmvnorm.tridiag = function(n, D, b){
-  N             = dim(D)[1]                                 # Obtain number of raw
-  # Extract the main diagonal elements of matrix D
-  lead.diag     = diag(D)
-  # Extract the sub diagonal elements of matrix D
-  sub.diag      = sdiag(D, -1)
-
-  D.chol        = trichol(ld = lead.diag, sd=sub.diag)      # Choleskey Composition
-  D.L           = diag(D.chol$ld)                           # Create new Matrix D.L
-  sdiag(D.L,-1) = D.chol$sd
-
-  x             = matrix(rnorm(n*N), ncol=n)                # Create random matrix
-  a             = forwardsolve(D.L, b)                      # Solve L \ b
-  draw          = backsolve(t(D.L), a + x)                  # Solve L' \ (a + x)
-  return(draw)
-}
-```
-
-Compare with usual ways:
+Compare the computational speed of generating random numbers from a multivariate normal distribution using dedicated numerical algorithms in function `rmvnorm.tridiag.precision` and function `solve` for the matrix inversion ignoring the tridiagonality of the precision matrix in function `rmvnorm.usual`:
 
 ```{R Simulation smoother in R comparison}
 #| echo: true
-# Function of chol method
+#| cache: true
+
+library(mgcv)
 rmvnorm.tridiag.precision = function(n, D, b){
   N           = dim(D)[1]
   lead.diag   = diag(D)
@@ -216,7 +187,7 @@ rmvnorm.usual = function(n, D, b){
 
 # Comparison
 set.seed(12345)
-T =720
+T = 300
 md = rgamma(T, shape=10, scale=10) 
 od = rgamma(T-1, shape=10, scale=1) 
 D = 2*diag(md)
@@ -232,7 +203,7 @@ microbenchmark(
 
 ```
 
-Therefore, we could clearly see that the taking time drop a lot due to simulation smoothing method.
+Therefore, we could clearly see that the computational time drops substatially due to simulation smoothing method.
 
 ## Analytical solution for a joint posterior
 
