@@ -4,15 +4,10 @@ author:
   - name: Tomasz Woźniak
     url: https://github.com/donotdespair
     orcid: 0000-0003-2212-2378
-  - name: Ben Gussen
-    url: https://github.com/bgussen
-    orcid: 0000-0003-4406-4076
   - name: Rui Liu
     url: https://github.com/rruiliu1005
     orcid: 0009-0008-9348-8581
-  - name: Zheyuan Li
-    url: https://github.com/lzyzero3
-  
+
     execute:
   #echo: false
 citation: 
@@ -109,40 +104,19 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 ## Simulation smoother and precision sampler
 
 ## Analytical solution for a joint posterior
-$$\underset{T \times 1}{y} = \begin{pmatrix} y_1 \\ y_2 \\ \vdots \\ y_T \end{pmatrix} \qquad 
-\underset{T \times 1}{\tau} = \begin{pmatrix} \tau_1 \\ \tau_2 \\ \vdots \\\tau_T \end{pmatrix} \qquad 
-\underset{T \times 1}{\epsilon} = \begin{pmatrix} \epsilon_1 \\ \epsilon_2 \\ \vdots \\ \epsilon_T \end{pmatrix} \qquad 
-\underset{T \times 1}{\eta} = \begin{pmatrix} \eta_1 \\ \eta_2 \\ \vdots \\ \eta_T \end{pmatrix}$$
 
-$$\underset{T \times T}{H} = 
-\begin{pmatrix} 1 & 0 & 0 & \cdots & 0 & 0 \\ 
--1 & 1 & 0 & \cdots & 0 & 0 \\ 
-0 & -1 & 1 & \cdots & 0 & 0 \\ 
-\vdots & \vdots & \ddots & \ddots & \vdots & \vdots \\ 
-0&0&0 & \cdots & 1 & 0  \\ 
-0 & 0 & 0 &0& -1 & 1 \end{pmatrix}$$
+Consider a simplified model with a fixed signal-to-noise ratio $c$ given by
+
+\begin{align}
+\text{measurement equation} && y &= \tau + \epsilon\\
+\text{state equation} && \mathbf{H}\tau &= \eta\\
+\text{error term} && \epsilon\mid\tau &\sim \mathcal{N}_T(\mathbf{0}_T, \sigma^2\mathbf{I}_T)\\
+\text{innovation} && \eta &\sim \mathcal{N}_T(\mathbf{0}_T, c\sigma^2\mathbf{I}_T)
+\end{align}
+where $c$ is a constant, and $\tau_0 = 0$.
 
 
-In this setting, we have out state equations as: 
-
-$$y = \tau + \epsilon \quad\quad\qquad \qquad \qquad \qquad \text{measurement equation}$$
-
-$$\color{purple}{\mathbf{H\tau = \eta \implies \tau = H^{-1} \eta}} \quad \qquad \color{black}{  \qquad \qquad\text{state equation 1}}$$
-
-The state equations in matrix notation are derived as follows: 
-
-(1) In an unobserved component model, the measurement equation is defined as $y_t = \tau_t + \epsilon_t$, in matrix notation, we have: 
-
-$$y = \begin{pmatrix} y_1 \\ y_2 \\ \vdots \\ y_T \end{pmatrix} = \begin{pmatrix} \tau_1 \\ \tau_2 \\ \vdots \\ \tau_T \end{pmatrix} + \begin{pmatrix} \epsilon_1 \\ \epsilon_2 \\ \vdots \\ \epsilon_T \end{pmatrix} = \tau + \epsilon$$
-(2) We have for each t = 1,...,T, $\tau_t = \tau_{t-1} + \eta_t$, and $\tau_0 = 0$, so in matrix notation: 
-
-$$\tau = \begin{pmatrix} \tau_1 \\ \tau_2 \\ \vdots \\ \tau_T \end{pmatrix} = \begin{pmatrix} \eta_1 \\ 
-\tau_1+ \eta_2 \\
-\tau_2+ \eta_3 \\ 
-\vdots \\ 
-\tau_{T-1} + \eta_T  \end{pmatrix} = \begin{pmatrix} 0 \\ \tau_1 \\ \vdots \\ \tau_{T-1} \end{pmatrix} + \eta$$
-
-Moving the lagged $\tau$ terms on the right hand side to the left:
+In this model the state equation for $\tau$ is given by a Gaussian random ralk presented as:
 
 $$\begin{pmatrix} 
 1 & 0 & \cdots & 0 \\
@@ -151,102 +125,95 @@ $$\begin{pmatrix}
 0 & 0 & -1 & 1
 \end{pmatrix} \begin{pmatrix} \tau_1 \\ \tau_2 \\ \vdots \\ \tau_T \end{pmatrix}  = \begin{pmatrix} \tau_1 \\ \tau_2-\tau_1 \\ \vdots \\ \tau_T - \tau_{T-1} \end{pmatrix} = \eta$$
 
-Hence, we have: 
-$$H \tau = \eta \implies \tau = H^{-1}\eta$$
-
-We assume $\mathbf{\color{purple}{\eta \sim \mathcal{N}(0_T, c\sigma^2I_T)}}$ and $\sigma^2 \sim \mathcal{IG2}(s_{prior}, \nu_{prior})$
-
 The parameters to be estimated are: $\mathbf{\color{purple}{\tau, \sigma^2}}$
 
-### 2.Prior distributions 
+### Prior distributions 
 
-(1) **Prior distribution for** $\tau$ 
+#### Prior distribution for $\tau$ 
 
-From the state equation, we have: 
+Rewrite the state equation as
 $$\tau =  H^{-1}\eta$$
-we know that $$\mathbf{\color{purple}{\eta \sim \mathcal{N}(0_T, c \sigma^2 I_T) \implies H^{-1}\eta \sim \mathcal{N}(0_T, c\sigma^2(H^T H)^{-1})}}$$
+Then the prior distribution of $\tau$ is formed using
+$$\mathbf{\color{purple}{\eta \sim \mathcal{N}(0_T, c \sigma^2 I_T) \implies H^{-1}\eta \sim \mathcal{N}(0_T, c\sigma^2(H^T H)^{-1})}}$$
 since $Var(H^{-1}\eta) = H^{-1}Var(\eta)(H^{-1})^T =c\sigma^2(H^TH)^{-1}$
-Then, the prior distribution of $\tau|c\sigma^2$ is 
-$$\tau|c\sigma^2 \sim \mathcal{N}(0_T, c\sigma^2(H^TH)^{-1}) \\ \propto (c\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{\tau^TH^T H\tau}{2c\sigma^2}\right)
+
+Then, the prior distribution of $\tau|\sigma^2$ is 
+$$\tau|\sigma^2 \sim \mathcal{N}(0_T, c\sigma^2(H^TH)^{-1}) \\ \propto (c\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{\tau^TH^T H\tau}{2c\sigma^2}\right)
 $$
-(2) **Prior assumptions for $\sigma^2$**
+
+#### Prior assumptions for $\sigma^2$
 
 $$\sigma^2 \sim \mathcal{IG2}(s_{prior}, \nu_{prior}) \propto (\sigma^2)^\frac{-\nu_{prior}+2}{2}exp\left(-\frac{s_{prior}}{2\sigma^2}\right)$$
 
-### 3. Posterior distributions
+### The Joint Posterior Distribution
 
-1. $\mathbf{p(\tau|y, \alpha, \beta, \sigma^2_e)}$
-We have, from the measurement equation: 
+The likelihood function is constructed using the the measurement equation: 
 $$y = \tau + \epsilon$$
-since $\epsilon \sim \mathcal{N}(0_T, \sigma^2I_T)$
+and the distributional assumption on its error term
+$$\epsilon \sim \mathcal{N}(0_T, \sigma^2I_T)$$
+which results in the likelihood function:
 $$y|\tau, \sigma^2 \sim \mathcal{N}(\tau, \sigma^2I_T)\propto (\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{1}{2\sigma^2}(y-\tau)^T(y-\tau)\right)$$
-and the prior of $\tau$ is: 
 
-$$\tau|c\sigma^2 \sim \mathcal{N}(0_T, c\sigma^2I_T) \\ \propto (\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{\tau^TH^T H\tau}{2c\sigma^2}\right)$$
-
-the prior of $\sigma^2$ is: 
-$$p(\sigma^2) \propto (\sigma^2)^-{\frac{\nu_{prior}+2}{2}}exp(-\frac{s_{prior}}{2\sigma^2})$$
-
-The joint posterior of $\tau$ and $\sigma^2$ can be derived as follows: 
+The likelihood is combined with the joint prior distribution of $\tau$ and $\sigma^2$ to derive the joint posterior distribution of $\tau$ and $\sigma^2$. It is derived as follows: 
 
 $$
 p(\tau, \sigma^2 |y) = \frac{p(\tau, \sigma^2, y)}{p(y)} \propto p(\tau, \sigma^2, y) = p(y | \tau, \sigma^2)p(\tau, \sigma^2) =p(y | \tau, \sigma^2)p(\tau|\sigma^2)p(\sigma^2)
 $$
 
-$$
-\propto (\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{(y-\tau)^T(y-\tau)}{2\sigma^2}\right) \times 
-(\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{\tau^TH^T H\tau}{2c\sigma^2}\right) \times
-(\sigma^2)^{-\frac{\nu_{prior}+2}{2}} exp(-\frac{s_{prior}}{2\sigma^2})
-$$
-$$
-\propto exp(-\frac{y^Ty - 2\tau^T y + \tau^T\tau + c^{-1}\tau^TH^T H\tau}{2\sigma^2}) \times \\ 
-exp(-\frac{s_{prior}}{2\sigma^2})\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}}
-$$
-$$ = exp(-\frac{\tau^T(c^{-1}H^T H + I_T)\tau - 2\tau^Ty}{2\sigma^2}) \times \\ 
-exp(-\frac{y^Ty + s_{prior}}{2\sigma^2})\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}} $$
+This expression is proportional to
+\begin{align}
+&\propto (\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{(y-\tau)^T(y-\tau)}{2\sigma^2}\right) \times 
+(\sigma^2)^{-\frac{T}{2}}\exp\left(-\frac{\tau^TH^T H\tau}{2c\sigma^2}\right)\\
+&\qquad\times(\sigma^2)^{-\frac{\nu_{prior}+2}{2}} \exp(-\frac{s_{prior}}{2\sigma^2})\\
+&\propto \exp(-\frac{y^Ty - 2\tau^T y + \tau^T\tau + c^{-1}\tau^TH^T H\tau}{2\sigma^2})\\ &\qquad\times \exp(-\frac{s_{prior}}{2\sigma^2})\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}}\\
+&= \exp(-\frac{\tau^T(c^{-1}H^T H + I_T)\tau - 2\tau^Ty}{2\sigma^2})\\ 
+&\qquad\times\exp(-\frac{y^Ty + s_{prior}}{2\sigma^2})\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}}
+\end{align}
 
-Let $\bar{\Sigma} = (c^{-1}H^T H + I_T)^{-1}$, we have 
-$$p(\tau, \sigma^2 |y) \propto exp(-\frac{\tau^T\bar{\Sigma}^{-1}\tau - 2\tau^Ty + y^T\bar{\Sigma}y}{2\sigma^2})exp(-\frac{y^Ty + s_{prior}-y^T\bar{\Sigma}y}{2\sigma^2})\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}}$$
-Hence, $\tau, \Sigma |y \sim \mathcal{NIG2}(\bar{\tau}, \bar{\Sigma}, \bar{\nu}, \bar{s})$ where 
-$$\bar{\Sigma} = (c^{-1}H^T H + I_T)^{-1}$$
-$$\bar{\tau} = \bar{\Sigma}y$$
-$$\bar{\nu} = 2T+\nu_{prior}$$
-$$\bar{s} = s_{prior}+y^Ty-y^T\bar{\Sigma}y$$
-```{r}
-#| code-fold: true
-#| code-summary: "Show code"
+Let $\bar{\Sigma} = (c^{-1}H^T H + I_T)^{-1}$, then
+\begin{align}
+p(\tau, \sigma^2 |y) &\propto \exp(-\frac{\tau^T\bar{\Sigma}^{-1}\tau - 2\tau^Ty + y^T\bar{\Sigma}y}{2\sigma^2})\exp(-\frac{y^Ty + s_{prior}-y^T\bar{\Sigma}y}{2\sigma^2})\\
+&\qquad\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}}
+\end{align}
+
+In the expression above, we recognise the kernel of the $T$-variate normal inverted gamma 2 distribution. Therefore, the joint posterior of the parameters of the model is given by:
+\begin{align}
+\tau, \Sigma |y &\sim \mathcal{NIG2}(\bar{\tau}, \bar{\Sigma}, \bar{\nu}, \bar{s})\\[2ex]
+\bar{\Sigma} &= (c^{-1}H^T H + I_T)^{-1}\\
+\bar{\tau} &= \bar{\Sigma}y\\
+\bar{\nu} &= 2T+\nu_{prior}\\
+\bar{s} &= s_{prior}+y^Ty-y^T\bar{\Sigma}y
+\end{align}
+
+The function below implements the sampler from this joint distribution.
+
+```{r joint_sampler}
+
 UC.local.tau.sigma.Gibbs.sampler    = function(S, starting.values, priors){
-  # Estimation of a simple UC-AR(p) model with sigma_{\eta e}=0
-  # as specified in Lecture 17 slides 
   
   aux     = starting.values
-  p       = length(aux$alpha)
   T       = nrow(aux$Y)
 
   posteriors    = list(
     tau     = matrix(NA,T,S),
-    epsilon = matrix(NA,T,S),
-    beta    = matrix(NA,2,S),
-    alpha   = matrix(NA,p,S),
-    sigma   = matrix(NA,2,S),
-    non.stationary.iterations = rep(NA,S)
+    sigma   = rep(NA,S)
   )
 
   for (s in 1:S){
-    # Sampling sigma
-    ###########################
+    
     V.tau.bar.inv = priors$c^(-1)*t(aux$H)%*%aux$H + diag(T)
     V.tau.bar.inv = 0.5*(V.tau.bar.inv + t(V.tau.bar.inv))
-    V.tau.bar = solve(V.tau.bar.inv)
-    V.tau.bar = 0.5*(V.tau.bar + t(V.tau.bar))
-    sigma.s   = as.numeric(priors$sigma.s + t(aux$Y)%*%aux$Y - t(aux$Y)%*%V.tau.bar%*%aux$Y)
+    
+    # Sampling sigma
+    ###########################
+    sigma.s   = as.numeric(priors$sigma.s + t(aux$Y)%*%aux$Y - t(aux$tau)%*%V.tau.bar.inv%*%aux$tau)
     sigma.nu  = priors$sigma.nu + 2*T
     sigma.draw= sigma.s/rchisq(1,sigma.nu)
     aux$sigma     = sigma.draw
 
     # Sampling tau
     ###########################
-    b.tau         = aux$sigma%*%aux$Y
+    b.tau         = aux$Y
     precision.L   = t(bandchol(V.tau.bar.inv))
     epsilon       = rnorm(T)
     b.tau.tmp     = forwardsolve(precision.L, b.tau)
@@ -255,7 +222,6 @@ UC.local.tau.sigma.Gibbs.sampler    = function(S, starting.values, priors){
 
     posteriors$tau[,s]     = aux$tau
     posteriors$sigma[,s]   = aux$sigma
-    if (s%%1000==0){cat(" ",s)}
   }
 
   output      = list(
@@ -270,99 +236,6 @@ UC.local.tau.sigma.Gibbs.sampler    = function(S, starting.values, priors){
 # Hierarchical modeling
 
 ## Estimating gamma error term variance prior scale
-To estimate the gamma error term variance, we need to firstly put a prior on the prior scale of and present its full conditional posterior distribution.
-
-The prior is below:
-
-```{=tex}
-\begin{align*}
-\sigma^2 \mid s &\sim \text{IG2}(s, \nu) \\
-s &\sim \mathcal{G}(s, a)
-\end{align*}
-```
-
-
-Then we use Gibbs sampling to draw samples from the full conditional distributions: 
-```{r}
-#| echo: true
-#| message: false
-#| warning: false
-library(MCMCpack)
-# Define prior parameters
-s_prior <- 2
-nu_prior <- 2
-a_prior <- 2
-
-# Define the function for the conditional posterior distribution
-posterior_sampler <- function(y, n_iter = 1000) {
-  # Store samples
-  s <- rgamma(1, shape = a_prior, rate = s_prior)
-  sigma2 <- rinvgamma(1, shape = s, scale = nu_prior)  
-
-  s_samples <- numeric(n_iter)
-  sigma2_samples <- numeric(n_iter)
-
-  for (i in 1:n_iter) {
-    shape_sigma2 <- (length(y) / 2) + s
-    rate_sigma2 <- (sum((y - mean(y))^2) / 2) + nu_prior
-    sigma2 <- rinvgamma(1, shape = shape_sigma2, scale = rate_sigma2)  
-
-    shape_s <- a_prior + 1
-    rate_s <- s_prior + sigma2
-    s <- rgamma(1, shape = shape_s, rate = rate_s)
-
-    sigma2_samples[i] <- sigma2
-    s_samples[i] <- s
-  }
-
-  return(list(sigma2_samples = sigma2_samples, s_samples = s_samples))
-}
-
-set.seed(123)
-y <- rnorm(100, mean = 0, sd = 1)
-
-# Run the sampler
-posterior_samples <- posterior_sampler(y, n_iter = 1000)
-
-# Plot posterior distributions
-par(mfrow = c(2, 1))
-hist(posterior_samples$sigma2_samples, main = expression(paste("Posterior of ", sigma^2)), xlab = expression(sigma^2))
-hist(posterior_samples$s_samples, main = "Posterior of s", xlab = "s")
-```
-
-Based on the sampling results, we summarize the posterior distribution of these parameters.
-
-As can be seen from the histogram, the values of $\sigma^2$ are mostly concentrated between 0.6 and 1.0. The distribution has a certain skewness, with a small number of higher values on the right, but it is generally concentrated.
-
-Most of the values of $s$ are concentrated between 0 and 2, indicating that the probability of s is higher in this range and the distribution has a longer right tail.
-
-To derive the full conditional posteriors for $\sigma^2$ and $s$, we start with the joint posterior distribution of these parameters given the data $y$.
-
-The joint posterior distribution is below:
-
-```{=tex}
-\begin{equation}
-p(\sigma^2, s \mid y) \propto p(y \mid \sigma^2) p(\sigma^2 \mid s) p(s)
-\end{equation}
-```
-
-
-Full Conditional Posterior for $\sigma^2$ is: 
-
-```{=tex}
-\begin{equation}
-p(\sigma^2 \mid y, s) \propto (\sigma^2)^{-\left( \frac{T}{2} + s + 1 \right)} \exp \left( -\frac{1}{\sigma^2} \left( \frac{(y - \tau)'(y - \tau)}{2} + \nu \right) \right)
-\end{equation}
-```
-
-
-Full Conditional Posterior for $s$ is:
-
-```{=tex}
-\begin{equation}
-p(s \mid \sigma^2) \propto s^{a-1} \nu^s (\sigma^2)^{-(s+1)} \exp \left( -s - \frac{\nu}{\sigma^2} \right)
-\end{equation}
-```
 
 
 ## Estimating inverted-gamma 2 error term variance prior scale
@@ -372,225 +245,6 @@ p(s \mid \sigma^2) \propto s^{a-1} \nu^s (\sigma^2)^{-(s+1)} \exp \left( -s - \f
 ## Student-t prior for the trend component
 
 ## Estimating Student-t degrees of freedom parameter
-
-The Student-t distribution is commonly used in statistical modeling to handle data with heavier tails than the normal distribution. An essential parameter of the Student-t distribution is the degrees of freedom $\nu$, which controls the tail heaviness. In this note, we present the Bayesian estimation of the degrees of freedom parameter for an N-variate Student-t distribution using the Inverted-Gamma 2 (IG2) scale mixture of normals.
-
-The N-variate Student-t distribution can be represented as a scale mixture of normals:
-
-$$
-\mathbf{y} \mid \mathbf{\mu}, \lambda \sim \mathcal{N}(\mathbf{\mu}, \lambda \mathbf{I}_N)
-$$
-
-$$
-\lambda \mid \nu \sim \mathcal{IG2}(\nu, \nu)
-$$
-
-where:
-
-- $\mathbf{y}$ is the $N$-dimensional observation vector.
-- $\mathbf{\mu}$ is the mean vector.
-- $\lambda$ is the latent scale variable.
-- $\nu$ is the degrees of freedom parameter.
-
-### Derivation of Full Conditional Posteriors
-
-#### Full Conditional Posterior of $\lambda$
-
-Given the prior distribution:
-
-$$
-\lambda \mid \nu \sim \mathcal{IG2}(\nu, \nu)
-$$
-
-The likelihood of the data given $\lambda$ is:
-
-$$
-\mathbf{y} \mid \mathbf{\mu}, \lambda \sim \mathcal{N}(\mathbf{\mu}, \lambda \mathbf{I}_N)
-$$
-
-The full conditional posterior of $\lambda$ can be derived as follows:
-
-1. **Likelihood of $\mathbf{y}$ given $\mathbf{\mu}$ and $\lambda$**:
-
-   $$
-   p(\mathbf{y} \mid \mathbf{\mu}, \lambda) \propto \lambda^{-\frac{N}{2}} \exp\left(-\frac{(\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})}{2\lambda}\right)
-   $$
-
-2. **Prior for $\lambda$ given $\nu$**:
-
-   $$
-   p(\lambda \mid \nu) \propto \lambda^{-\nu - 1} \exp\left(-\frac{\nu}{\lambda}\right)
-   $$
-
-3. **Joint distribution**:
-
-   $$
-   p(\mathbf{y}, \lambda \mid \mathbf{\mu}, \nu) = p(\mathbf{y} \mid \mathbf{\mu}, \lambda) p(\lambda \mid \nu)
-   $$
-
-4. **Full conditional posterior**:
-
-   $$
-   p(\lambda \mid \mathbf{y}, \mathbf{\mu}, \nu) \propto \lambda^{-\frac{N}{2}} \exp\left(-\frac{(\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})}{2\lambda}\right) \lambda^{-\nu - 1} \exp\left(-\frac{\nu}{\lambda}\right)
-   $$
-
-   Combining terms:
-
-   $$
-   p(\lambda \mid \mathbf{y}, \mathbf{\mu}, \nu) \propto \lambda^{-\left(\nu + \frac{N}{2} + 1\right)} \exp\left(-\frac{\nu + \frac{(\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})}{2}}{\lambda}\right)
-   $$
-
-   This is recognized as the kernel of an Inverted-Gamma 2 distribution:
-
-   $$
-   \lambda \mid \mathbf{y}, \mathbf{\mu}, \nu \sim \mathcal{IG2}\left(\nu + N, \nu + (\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})\right)
-   $$
-
-#### Full Conditional Posterior of $\nu$
-
-To estimate $\nu$, we use the Metropolis-Hastings algorithm due to its non-standard form. The steps for deriving the full conditional posterior of $\nu$ are as follows:
-
-1. **Likelihood of $\lambda$ given $\nu$**:
-
-   $$
-   p(\lambda \mid \nu) = \frac{\left(\frac{\nu}{2}\right)^{\nu/2}}{\Gamma(\nu/2)} \lambda^{-\left(\nu/2 + 1\right)} \exp\left(-\frac{\nu}{2\lambda}\right)
-   $$
-
-2. **Log-likelihood for $\nu$ given $\lambda$**:
-
-   $$
-   \log p(\lambda \mid \nu) = \frac{\nu}{2} \log\left(\frac{\nu}{2}\right) - \log\Gamma\left(\frac{\nu}{2}\right) - \left(\frac{\nu}{2} + 1\right) \log \lambda - \frac{\nu}{2\lambda}
-   $$
-
-3. **Log-prior for $\nu$ (assuming a non-informative prior)**:
-
-   $$
-   \log p(\nu) = \text{constant}
-   $$
-
-4. **Full conditional posterior**:
-
-   The full conditional posterior for $\nu$ is proportional to the product of the likelihood and the prior:
-
-   $$
-   p(\nu \mid \lambda) \propto p(\lambda \mid \nu) p(\nu)
-   $$
-
-   Since $p(\nu)$ is constant, we focus on $p(\lambda \mid \nu)$:
-
-   $$
-   \log p(\nu \mid \lambda) = \frac{\nu}{2} \log\left(\frac{\nu}{2}\right) - \log\Gamma\left(\frac{\nu}{2}\right) - \left(\frac{\nu}{2} + 1\right) \log \lambda - \frac{\nu}{2\lambda}
-   $$
-
-   This expression does not have a closed form, so we use the Metropolis-Hastings algorithm to sample from this posterior.
-
-### R Function for Gibbs Sampler
-
-Below is the R function implementing the Gibbs sampler for estimating $\nu$ using the IG2-scale mixture of normals representation.
-
-```{r echo=TRUE}
-metropolis_hastings_nu <- function(y, mu, n_iter, init_nu, proposal_sd) {
-  # Initialize parameter
-  nu <- init_nu
-  N <- length(y)
-  
-  # Storage for samples
-  nu_samples <- numeric(n_iter)
-  
-  # Log-likelihood function
-  log_likelihood <- function(nu, y, mu) {
-    sum(dt((y - mu) / sqrt(nu), df = nu, log = TRUE))
-  }
-  
-  for (i in 1:n_iter) {
-    # Propose new value for nu
-    nu_proposal <- nu + rnorm(1, 0, proposal_sd)
-    
-    if (nu_proposal > 0) {
-      # Calculate log acceptance ratio
-      log_acceptance_ratio <- log_likelihood(nu_proposal, y, mu) - log_likelihood(nu, y, mu)
-      
-      # Accept or reject the proposal
-      if (log(runif(1)) < log_acceptance_ratio) {
-        nu <- nu_proposal
-      }
-    }
-    
-    # Store the sample
-    nu_samples[i] <- nu
-  }
-  
-  return(nu_samples)
-}
-
-gibbs_sampler_t <- function(y, n_iter, init_values) {
-  # Initialize parameters
-  nu <- init_values$nu
-  mu <- init_values$mu
-  N <- length(y)
-  
-  # Storage for samples
-  nu_samples <- numeric(n_iter)
-  mu_samples <- numeric(n_iter)
-  lambda_samples <- numeric(n_iter)
-  
-  for (i in 1:n_iter) {
-    # Sample lambda
-    shape_lambda <- nu + N
-    rate_lambda <- nu + sum((y - mu)^2)
-    lambda <- 1 / rgamma(1, shape = shape_lambda, rate = rate_lambda)
-    
-    # Sample mu
-    mu <- rnorm(1, mean = mean(y), sd = sqrt(lambda / N))
-    
-    # Sample nu using Metropolis-Hastings
-    log_likelihood <- function(nu, y, mu) {
-      sum(dt((y - mu) / sqrt(nu), df = nu, log = TRUE))
-    }
-    
-    proposal_nu <- nu + rnorm(1, 0, 0.1) # proposal distribution: normal random walk
-    if (proposal_nu > 0) {
-      log_acceptance_ratio <- log_likelihood(proposal_nu, y, mu) - log_likelihood(nu, y, mu)
-      if (log(runif(1)) < log_acceptance_ratio
-
-) {
-        nu <- proposal_nu
-      }
-    }
-    
-    # Store samples
-    nu_samples[i] <- nu
-    mu_samples[i] <- mu
-    lambda_samples[i] <- lambda
-  }
-  
-  return(list(nu = nu_samples, mu = mu_samples, lambda = lambda_samples))
-}
-
-# Example usage
-set.seed(123)
-y <- rnorm(100)
-init_values <- list(nu = 5, mu = mean(y))
-n_iter <- 1000
-result <- gibbs_sampler_t(y, n_iter, init_values)
-
-# Display the results
-print(summary(result$nu))
-print(summary(result$mu))
-print(summary(result$lambda))
-```
-
-### Conclusion
-
-This note provided a comprehensive step-by-step algebraic derivation and a sampler for estimating the degrees of freedom parameter $\nu$ for an N-variate Student-t distribution using an IG2-scale mixture of normals approach within a Bayesian framework. By using the Metropolis-Hastings algorithm, we avoid the need to assume a prior distribution for $\nu$, simplifying the estimation process. This approach allows for flexible modeling of heavy-tailed data, which is often encountered in practice.
-
-### References
-
-- Geweke, J. (1993). Bayesian treatment of the independent Student-t linear model. *Journal of Applied Econometrics*, 8(S1), S19-S40.
-- Chib, S., & Greenberg, E. (1995). Understanding the Metropolis-Hastings Algorithm. *The American Statistician*, 49(4), 327-335.
-
-
-
 
 ## Laplace prior for the trend component
 
