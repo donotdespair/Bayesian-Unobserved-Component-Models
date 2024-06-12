@@ -4,6 +4,9 @@ author:
   - name: Tomasz Woźniak
     url: https://github.com/donotdespair
     orcid: 0000-0003-2212-2378
+  - name: Inhye Kang
+    url: https://github.com/inhyekang-au
+    orcid: 0009-0007-8544-4952
   - name: Yuqiao Yang
     url: https://github.com/JimmyYang917
   
@@ -96,9 +99,235 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 
 ## Prior distributions
 
+The state equation for $\boldsymbol\tau$ can be rewritten as follows:
+$$
+\begin{gather}
+\boldsymbol\tau = \mathbf{H}^{-1} \mathbf{i} \tau_0+\mathbf{H}^{-1}\boldsymbol\eta \\
+\boldsymbol\eta \sim \mathcal{N}(\mathbf{0}_T, \sigma_\eta^2 \mathbf{I}_T) \\
+\mathbf{H}^{-1} \boldsymbol\eta \sim \mathcal{N}(\mathbf{0}_T, \sigma_\eta^2\left(\mathbf{H}^{\prime} \mathbf{H}\right)^{-1})
+\end{gather}
+$$
+Using the state equation for $\boldsymbol\tau$ above, we can derive the prior distribution of $\boldsymbol\tau$ as:
+$$
+\begin{align}
+\boldsymbol\tau | \tau_0, \sigma_\eta^2 &\sim \mathcal{N}_T(\mathbf{H}^{-1} \mathbf{i} \tau_0, \sigma_\eta^2(\mathbf{H}^{\prime} \mathbf{H})^{-1})
+\\ &\propto \exp \left\{-\frac{1}{2} \frac{1}{\sigma_\eta^2}\left(\boldsymbol\tau-\mathbf{H}^{-1} \mathbf{i} \tau_0\right)^{\prime}\left(\mathbf{H}^{\prime} \mathbf{H}\right)\left(\boldsymbol\tau-\mathbf{H}^{-1} \mathbf{i} \tau_0\right)\right\}
+\end{align}
+$$
+Next, the prior distribution of $\tau_0$ is defined as uni-variate normal:
+$$
+\begin{align}
+\tau_0 &\sim \mathcal{N}(\underline{\tau_0}, \underline{V_{\tau_{0}}}) 
+\\ &\propto \exp \left\{-\frac{1}{2}(\tau_0-\underline{\tau_0})^{\prime} \underline{V_{\tau_{0}}}^{-1}(\tau_0-\underline{\tau_0})\right\}
+\end{align}
+$$
+and the prior distribution of $\sigma_\eta^2$ is inverted gamma 2:
+$$
+\begin{align}
+\sigma_\eta^2 &\sim \mathcal{IG}2(\underline{s_\eta}, \underline{v_\eta}) \\
+&\propto (\sigma_\eta^2)^{-\frac{\underline{v}+2}{2}} \exp \left\{-\frac{1}{2} \frac{s}{\sigma_\eta^2}\right\}
+\end{align}
+$$
+
+The prior distribution of $\sigma^2$ is the following:
+$$
+\begin{align}
+\sigma^2 &\sim \mathcal{IG}2(\underline{s}, \underline{v}) \\
+&\propto (\sigma^2)^{-\frac{\underline{v}+2}{2}} \exp \left\{-\frac{1}{2} \frac{s}{\sigma^2}\right\}
+\end{align}
+$$
+
+The Joint prior distribution of the parameters of the model $\boldsymbol\tau$, $\tau_0$, $\sigma^2_{\eta}$, and $\sigma^2$ is then given by:
+$$
+\begin{aligned}
+p(\boldsymbol\tau,\tau_{0},\sigma_{\eta}^{2},\sigma^{2}) = p(\boldsymbol\tau|\tau_{0},\sigma_{\eta}^{2}) \space p(\tau_{0}) \space p(\sigma_{\eta}^{2}) \space p(\sigma^{2})
+\end{aligned}
+$$
+where the individual distributions on the RHS are as specified above.
+
+Finally, given that $\boldsymbol\epsilon$ follows normal distribution,
+$$
+\begin{align}
+\boldsymbol\epsilon\mid\sigma^2 &\sim \mathcal{N}(\mathbf{0}_T, \sigma^2 \mathbf{I}_T)
+\end{align}
+$$
+the prior distribution of $\boldsymbol\epsilon$ given $\sigma^2$ is proportional to:
+$$
+\begin{align}
+\boldsymbol\epsilon | \sigma^2 &\propto \exp \left\{-\frac{1}{2} \frac{1}{\sigma^2} \boldsymbol\epsilon^{\prime}\boldsymbol\epsilon\right\}
+\end{align}
+$$
+
 # Bayesian estimation
 
+## Derivation of full conditional posterior distributions
+
+Full conditional posterior distribution could be estimated basing on Bayes' theorem and priors shown above. Therefore, the full conditional posterior distribution is proportional to the product of likelihood functions and priors.
+$$
+\begin{aligned}
+p(\tau,\tau_{0},\sigma^{2},\sigma_{\eta}^{2}|\mathbf{y}) & \propto p(\mathbf{y}|\tau,\tau_{0},\sigma^{2},\sigma_{\eta}^{2}) \space p(\tau,\tau_{0},\sigma^{2},\sigma_{\eta}^{2})
+\end{aligned}
+$$
+The joint prior is as specified in the section above.
+
+Two Conditional likelihood functions to derive the **full Conditional posterior distribution** of $\tau,\tau_{0},\sigma^{2},\sigma_{\eta}^{2}$ is as follows:
+$$
+\begin{align}
+L(\boldsymbol\tau,\sigma^{2}|\mathbf{y},\tau_{0},\sigma_{\eta}^{2}) \propto \left( \sigma^{2} \right)^{-\frac{T}{2}} \times\exp\left\{ -\frac{1}{2}\sigma^{-2}\left( \mathbf{y}-\boldsymbol\tau \right)'\left( \mathbf{y}-\boldsymbol\tau \right) \right\}
+\end{align}
+$$
+and
+$$
+\begin{align}
+L(\tau_{0},\sigma_{\eta}^{2}|\mathbf{y},\boldsymbol\tau,\sigma^{2}) \propto \left( \sigma_{\eta}^{2} \right)^{-\frac{T}{2}} \times\exp\left\{-\frac{1}{2}\sigma_{\eta}^{-2}\left(\mathbf{H}\boldsymbol\tau -\mathbf{i}\tau_{0}\right)'\left(\mathbf{H}\boldsymbol\tau-\mathbf{i}\tau_{0}\right)\right\}
+\end{align}
+$$
+
+The full Conditional posterior distribution of $\boldsymbol\tau$ is derived as follows:
+$$
+\begin{align}
+P(\boldsymbol\tau|\mathbf{y},\tau_{0},\sigma^{2},\sigma_{\eta}^{2})&\propto L(\boldsymbol\tau,\sigma^{2}|\mathbf{y},\tau_{0},\sigma_{\eta}^{2}) \space P(\boldsymbol\tau|\tau_{0},\sigma_{\eta}^{2})\\
+\\&\propto \exp\left\{ -\frac{1}{2}\sigma^{-2}\left( \mathbf{y}-\boldsymbol\tau \right)'\left( \mathbf{y}-\boldsymbol\tau \right) \right\}\\
+&\qquad\times \exp\left\{ -\frac{1}{2}\sigma_{\eta}^{-2}\left(\boldsymbol\tau-\mathbf{H}^{-1} \mathbf{i}\tau_{0}\right)'\mathbf{H}'\mathbf{H}\left( \boldsymbol\tau-\mathbf{H}^{-1} \mathbf{i}\tau_{0} \right) \right\}
+\end{align}
+$$
+that after completing th squares results in a multivariate normal full conditional posterior distribution:
+$$
+\begin{align}
+P(\boldsymbol\tau &|\mathbf{y},\tau_{0},\sigma^{2},\sigma_{\eta}^{2}) \sim \mathcal{N}(\overline{\boldsymbol\tau},\overline{V_{\boldsymbol\tau}}) \\ 
+\\ \overline{V_{\boldsymbol\tau}} &= \left[ \sigma^{-2}\mathbf{I}_T +\sigma_{\eta}^{-2}\mathbf{H}'\mathbf{H}\right]^{-1}\\
+\overline{\boldsymbol\tau} &= \overline{V_{\tau}}\left[\sigma^{-2}\mathbf{y} + \sigma_{\eta}^{-2}\mathbf{H}'\mathbf{i}\tau_{0} \right]
+\end{align}
+$$
+The full conditional posterior distribution of $\tau_{0}$ is the following:
+$$
+\begin{align}
+P(\tau_{0}|\mathbf{y},\boldsymbol\tau,\sigma^{2},\sigma_{\eta}^{2}) &\propto L(\tau_{0}|\mathbf{y},\boldsymbol\tau,\sigma^{2},\sigma_{\eta}^{2}) \space P(\tau_{0}|\sigma_{\eta}^{2}) \\
+\\ &\propto \exp\left\{ -\frac{1}{2}\sigma_{\eta}^{-2}\left(\mathbf{H}\boldsymbol\tau -\mathbf{i}\tau_{0}\right)'\left(\mathbf{H}\boldsymbol\tau-\mathbf{i}\tau_{0}\right)\right\}\\
+&\times \exp\left\{ -\frac{1}{2}\left(\tau_{0}-  \underline{\tau_0}\right)'\underline{V_{\tau_{0}}}^{-1}\left(\tau_{0}-  \underline{\tau_0}\right) \right\}
+\end{align}
+$$
+and is given by a uni-variate normal distribution:
+$$
+\begin{align}
+P(\tau_{0} &|\mathbf{y},\boldsymbol\tau,\sigma^{2},\sigma_{\eta}^{2}) \sim N(\overline{\tau_{0}},\overline{V_{\tau_{0}}}) \\
+\\ \overline{V_{\tau_{0}}}&=\left[ \sigma_{\eta}^{-2}\mathbf{i}'\mathbf{i} +\underline{V_{\tau_{0}}}^{-1}\right]^{-1} =\left[ \sigma_{\eta}^{-2} +\underline{V_{\tau_{0}}}^{-1}\right]^{-1} \\
+\overline{\tau_{0}}&=\overline{V_{\tau_{0}}}\left[ \sigma_{\eta}^{-2} \mathbf{i}'\mathbf{H}\boldsymbol\tau +\underline{V_{\tau_{0}}}^{-1}\underline{\tau_{0}}\right]\\
+&= \overline{V_{\tau_{0}}}\left[ \sigma_{\eta}^{-2} \tau_1 +\underline{V_{\tau_{0}}}^{-1}\underline{\tau_{0}}\right]
+\end{align}
+$$
+The full conditional posterior distribution of $\sigma_{\eta}^{2}$ is derived as:
+$$
+\begin{align}
+P(\sigma_{\eta}^{2}|\mathbf{y},\boldsymbol\tau,\tau_{0},\sigma^{2}) &\propto L(\sigma_{\eta}^{2}|\mathbf{y},\boldsymbol\tau,\tau_{0},\sigma^{2}) \space P(\sigma_{\eta}^{2}) \\
+\\ &\propto \left( \sigma_{\eta}^{2} \right)^{-\frac{T}{2}} \exp\left\{ -\frac{1}{2}\sigma_{\eta}^{-2}\left(\mathbf{H}\boldsymbol\tau -\mathbf{i}\tau_{0}\right)'\left(\mathbf{H}\boldsymbol\tau -\mathbf{i}\tau_{0}\right)\right\}
+\\ &\times \left( \sigma_{\eta}^{2} \right)^{-\frac{\underline{\upsilon}+2}{2}} \exp\left\{ -\frac{1}{2}\frac{\underline{s}}{\sigma_{\eta}^{2}}\right\}
+\end{align}
+$$
+where
+$$
+\begin{align}
+P(\sigma_{\eta}^{2}&|\mathbf{y},\boldsymbol\tau,\tau_{0},\sigma^{2}) \sim \mathcal{IG}2(\overline{s_{\eta}},\overline{\upsilon_{\eta}}) \\
+\\ \overline{s_{\eta}}&=\underline{s} + \left(\mathbf{H}\boldsymbol\tau -\mathbf{i}\tau_{0}\right)'\left(\mathbf{H}\boldsymbol\tau -\mathbf{i}\tau_{0}\right) \\
+\overline{\upsilon_{\eta}}&= \underline{\upsilon}+T
+\end{align}
+$$
+Finally, the full conditional posterior distribution of $\sigma^{2}$ is the following:
+$$
+\begin{align}
+P(\sigma^{2}|\mathbf{y},\boldsymbol\tau,\tau_{0},\sigma_{\eta}^{2})&=L(\sigma^{2}|\mathbf{y},\boldsymbol\tau,\tau_{0},\sigma_{\eta}^{2}) \space P(\sigma^{2}) \\
+\\ &\propto \left( \sigma^{2} \right)^{-\frac{T}{2}} \exp\left\{ -\frac{1}{2}\sigma^{-2}\left(\mathbf{y}-\boldsymbol\tau\right)'\left(\mathbf{y}-\boldsymbol\tau\right)\right\}
+\\ &\times \left( \sigma^{2} \right)^{-\frac{\underline{\upsilon}+2}{2}} \exp\left\{ -\frac{1}{2}\frac{\underline{s}}{\sigma^{2}}\right\}
+\end{align}
+$$
+where
+$$
+\begin{align}
+P(\sigma^{2}|&\mathbf{y},\boldsymbol\tau,\tau_{0},\sigma_{\eta}^{2}) \sim \mathcal{IG}2(\overline{s},\overline{\upsilon}) \\
+\\ \overline{s}&=\underline{s} + \left(\mathbf{y}-\boldsymbol\tau\right)'\left(\mathbf{y}-\boldsymbol\tau\right) \\
+\overline{\upsilon}&= \underline{\upsilon}+T
+\end{align}
+$$
+
 ## Gibbs sampler
+
+A **Gibbs Sampler** can be applied using the following steps:
+
+At each iteration $s$ where $s$ goes from 1 to $S$,
+
+|    Step 1. Draw $\tau_0^{(s)}$ from the $N({\tau_{0}}, {V_{\tau_{0}}})$ distribution and collect $\tau_0$.
+|    Step 2. Draw ${\sigma^2_{\eta}}^{(s)}$ from the $\mathcal{IG}2({S_\eta}, {v_\eta})$ distribution and collect $\sigma_\eta^2$.
+|    Step 3. Draw ${\sigma^2}^{(s)}$ from the $\mathcal{IG}2(S, v)$ distribution and collect $\sigma^2$.
+|    Step 4. Draw $\boldsymbol\tau^{(s)}$ from the $\mathcal{N}({\boldsymbol\tau},{V_{\tau}})$ distribution and collect $\boldsymbol\tau$.
+
+```{r Gibbs Sampler}
+#| echo: true
+# Gibbs sampler for a simple UC model using simulation smoother
+############################################################
+
+UC.Gibbs.sampler    = function(S, starting.values, priors){
+  # Initialize the data 
+  aux     = starting.values
+  T       = nrow(aux$Y)
+  i_matrix <- diag(T)
+  i <- matrix(0, T, 1)  
+  i[1, 1] <- 1 
+  # Posteriors list
+  posteriors    = list(
+    tau     = matrix(NA,T,S),
+    tau_0   = matrix(NA,1,S),
+    sigma   = matrix(NA,2,S)
+  )
+  HH = crossprod(priors$H)
+  
+  for (s in 1:S){
+    
+    # Sampling tau_0
+    ###########################
+    tau_0.v.inv    = 1/priors$tau_0.v
+    V.tau_0.bar    = 1/((1/aux$sigma[1]) + tau_0.v.inv )
+    tau_0.bar      = V.tau_0.bar %*% ( (1/aux$sigma[1])*aux$tau[1] + tau_0.v.inv*priors$tau_0 )
+    tau_0.draw     = rnorm(1,as.vector(tau_0.bar),sqrt(V.tau_0.bar))
+    aux$tau_0      = tau_0.draw
+    
+    # Sampling sigma
+    ###########################
+    # sigma of tau (sigma_eta)
+    sigma.eta.s   = as.numeric(priors$sigma.s + crossprod(priors$H%*%aux$tau - i%*%priors$tau_0))
+    sigma.eta.nu  = priors$sigma.nu + T
+    sigma.eta.draw = sigma.eta.s/rchisq(1,sigma.eta.nu)
+    # sigma of errors (sigma)
+    sigma.e.s     = as.numeric(priors$sigma.s + crossprod(aux$Y - aux$tau))
+    sigma.e.nu    = priors$sigma.nu + T
+    sigma.e.draw  = sigma.e.s/rchisq(1,sigma.e.nu)
+    aux$sigma     = c(sigma.eta.draw,sigma.e.draw)
+    
+    # Sampling tau
+    ###########################
+    V.tau.inv     = (1/aux$sigma[2])*i_matrix + (1/aux$sigma[1])*HH
+    V.tau.inv     = 0.5*(V.tau.inv + t(V.tau.inv))
+    b.tau         = (1/aux$sigma[2])*aux$Y + (1/aux$sigma[1])*t(priors$H)%*%i*priors$tau_0
+    precision.L   = t(bandchol(V.tau.inv))
+    epsilon       = rnorm(T)
+    b.tau.tmp     = forwardsolve(precision.L, b.tau)
+    tau.draw      = backsolve(t(precision.L), b.tau.tmp + epsilon)
+    aux$tau       = tau.draw
+    
+    posteriors$tau[,s]     = aux$tau
+    posteriors$tau_0[,s]   = aux$tau_0
+    posteriors$sigma[,s]   = aux$sigma
+    
+    if (s%%1000==0){cat(" ",s)}
+  }
+  
+  output      = list(
+    posterior = posteriors,
+    last.draw = aux
+  )
+  return(output)
+}
+```
+
 
 ## Simulation smoother and precision sampler
 
