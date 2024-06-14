@@ -11,6 +11,7 @@
 <meta name="author" content="Inhye Kang">
 <meta name="author" content="Zheyuan Li">
 <meta name="author" content="Rui Liu">
+<meta name="author" content="Yansong Yang">
 <meta name="author" content="Yuqiao Yang">
 
 <title>Macroeconometrics Students Present - Bayesian Unobserved Component Models</title>
@@ -211,6 +212,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
              <p><a href="https://github.com/inhyekang-au">Inhye Kang</a> <a href="https://orcid.org/0009-0007-8544-4952" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
              <p><a href="https://github.com/lzyzero3">Zheyuan Li</a> </p>
              <p><a href="https://github.com/rruiliu1005">Rui Liu</a> <a href="https://orcid.org/0009-0008-9348-8581" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+             <p><a href="https://github.com/russellyang728">Yansong Yang</a> </p>
              <p><a href="https://github.com/JimmyYang917">Yuqiao Yang</a> </p>
           </div>
   </div>
@@ -732,6 +734,37 @@ p(s|\tau, \sigma^2) &amp;\propto L(\tau, \sigma^2|y) \cdot p(\epsilon|\sigma^2) 
 </section>
 <section id="estimating-the-initial-condition-prior-scale" class="level2">
 <h2 class="anchored" data-anchor-id="estimating-the-initial-condition-prior-scale">Estimating the initial condition prior scale</h2>
+<p>In the univariate local-level model, the initial state <span class="math inline">\(\tau_0\)</span> and the variance <span class="math inline">\(s^2\)</span> are key parameters determining the behavior of the stochastic process. For the initial state <span class="math inline">\(\tau_0\)</span>, a prior is specified as a univariate normal distribution, denoted by</p>
+<p><span class="math display">\[\tau_0\mid s^2 \sim \text{N}(\underline\tau_0, s^2)\]</span></p>
+<p>reflecting our belief about the distribution of <span class="math inline">\(\tau_0\)</span> before observing the data. While, for the variance <span class="math inline">\(s^2\)</span>, which controls the fluctuation of the process, we use inverse gamma 2 distribution, <span class="math display">\[s^2 \sim \text{IG2}(\underline{s}, \underline{\nu})\]</span></p>
+<p>The full posterior of <span class="math inline">\(s^2\)</span> is derived below:</p>
+<p><span class="math display">\[\begin{align}
+p(s^2|y,\sigma,\tau,\tau_0,\sigma_{\eta}, \underline{s}, \underline{\nu}) &amp;\propto
+p(y|\tau,\sigma)p(\tau|\tau_0,\sigma_{\eta}^2)p(\tau_0|s^2)p(s^2) \\
+&amp;\propto p(\tau_0|s^2)p(s^2|\underline{s}, \underline{\nu}) \\
+&amp;= (s^2)^{-\frac{1}{2}}\exp\left\{-\frac{1}{2}(\tau_0-\underline{\tau_0})'(s^2)^{-1}(\tau_0-\underline{\tau_0})\right\}\\
+&amp;\qquad\times (s^2)^{-\frac{\underline{\nu}+2}{2}}\exp\left\{-\frac{1}{2}\frac{\underline{s}}{s^2}\right\} \\
+&amp;= (s^2)^{-\frac{1+\underline{\nu}+2}{2}}
+\exp \left\{-\frac{1}{2}\frac{(\tau_0-\underline{\tau_0})^2+\underline{s}}{s^2}\right\}
+\end{align}\]</span></p>
+<p>Hence, full conditional posterior of <span class="math inline">\(s^2\)</span> in a form of inverse gamma 2 distribution, where</p>
+<p><span class="math display">\[\begin{align}
+s^2\mid \mathbf{y}, \mathbf{\tau}, \tau_0 &amp;\sim\mathcal{IG}2(\overline{s}, \overline{\nu})\\
+\overline{\nu} &amp;= 1+\underline{\nu} \\
+\overline{s} &amp;= (\tau_0-\underline{\tau_0})^2+\underline{s}
+\end{align}\]</span></p>
+<p>This R code below implements a sampler from the full-conditional posterior distribution of <span class="math inline">\(s^2\)</span>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>s2_sampler <span class="ot">&lt;-</span> <span class="cf">function</span>(tau_0, tau_0_prior, s_prior, nu_prior) {</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    nu_posterior <span class="ot">&lt;-</span> nu_prior <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    s_posterior <span class="ot">&lt;-</span> (tau_0 <span class="sc">-</span> tau_0_prior)<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> s_prior</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    s2 <span class="ot">&lt;-</span> s_posterior <span class="sc">/</span> <span class="fu">rchisq</span>(<span class="dv">1</span>, nu_posterior)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(s2)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="student-t-prior-for-the-trend-component" class="level2">
 <h2 class="anchored" data-anchor-id="student-t-prior-for-the-trend-component">Student-t prior for the trend component</h2>
@@ -778,7 +811,7 @@ p(s|\tau, \sigma^2) &amp;\propto L(\tau, \sigma^2|y) \cdot p(\epsilon|\sigma^2) 
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{woźniak2024,
   author = {Woźniak, Tomasz and Chen, Gezhi and Kang, Inhye and Li,
-    Zheyuan and Liu, Rui and Yang, Yuqiao},
+    Zheyuan and Liu, Rui and Yang, Yansong and Yang, Yuqiao},
   title = {Bayesian {Unobserved} {Component} {Models}},
   date = {2024-05-01},
   url = {https://donotdespair.github.io/Bayesian-Unobserved-Component-Models/},
@@ -786,9 +819,9 @@ p(s|\tau, \sigma^2) &amp;\propto L(\tau, \sigma^2|y) \cdot p(\epsilon|\sigma^2) 
   langid = {en}
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-woźniak2024" class="csl-entry quarto-appendix-citeas" role="listitem">
-Woźniak, Tomasz, Gezhi Chen, Inhye Kang, Zheyuan Li, Rui Liu, and Yuqiao
-Yang. 2024. <span>“Bayesian Unobserved Component Models.”</span> May 1,
-2024. <a href="https://doi.org/10.26188/25814617">https://doi.org/10.26188/25814617</a>.
+Woźniak, Tomasz, Gezhi Chen, Inhye Kang, Zheyuan Li, Rui Liu, Yansong
+Yang, and Yuqiao Yang. 2024. <span>“Bayesian Unobserved Component
+Models.”</span> May 1, 2024. <a href="https://doi.org/10.26188/25814617">https://doi.org/10.26188/25814617</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
