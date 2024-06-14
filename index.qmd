@@ -810,6 +810,201 @@ sample_nu <- function(nu, lambda, a, b, proposal_sd) {
 
 ## Laplace prior for the trend component
 
+To apply the Laplace prior for our trend component, we have $\lambda_t$ following an exponential distribution with mean alpha, where $\lambda_t \sim exp({\frac{1}{\alpha}})$, with the prior of the trend component is $\tau|\eta,\lambda \sim \mathcal{N}(H^{-1}i\tau_0, \sigma_\eta^2 H^{-1}\Omega(H^{-1})')$, then we have the marginal distribution of $\tau$ is Laplace distribution.
+
+The model is where $\Omega=diag(\lambda_1,\lambda_2,...,\lambda_t)$, each lambda independently drawn from an exponential distribution.
+
+Due to the change prior distribution of the trend component, now we have different full posterior distributions for parameters and in this note we only focus on the derivation for $\tau$ and $\lambda_t$.
+The change of the prior distribution for $\tau$ gives the followings:
+
+$$\tau =y - \epsilon$$
+
+$$\tau = H^{-1}i\tau_0 + H^{-1} \eta $$
+
+$$\tau|\eta,\lambda \sim \mathcal{N}(H^{-1}i\tau_0, \sigma_\eta^2 H^{-1}\Omega(H^{-1})') $$
+
+
+$$\lambda_t \sim exp({\frac{1}{\alpha}})$$
+
+### Full-conditional posterior distribution for $\tau|\tau_0,\sigma^2,\Omega$
+
+**Conditional Likelihood:** 
+$$\tau =y - \epsilon$$
+
+$$\epsilon \sim \mathcal{N}(0_T, \sigma^2I_T)$$
+
+$$L(\tau|y,\sigma^2) = exp({-\frac{1}{2}\frac{1}{\sigma^2}(\mathbf{y} - \boldsymbol\tau)'(\mathbf{y} - \boldsymbol\tau)})$$
+
+The **prior distribution** of $\tau$is:
+
+$$p(\tau|\tau_0,\sigma_\eta^2,\Omega) \propto exp(-\frac{1}{2}\frac{1}{\sigma_\eta^2}(\tau - H^{-1}i\tau_0)'H'\Omega^{-1}H(\tau - H^{-1}i\tau_0))$$
+
+**Full-conditional posterior distribution** of ${\tau}|y,\sigma_\eta^2,\Omega$:
+
+\begin{align}
+P(\tau|y,\tau_0,\sigma^2,\Omega) &\propto L(\tau|y,\sigma^2)\times p(\tau|\tau_0,\sigma_\eta^2,\Omega)\\
+
+&\propto exp({-\frac{1}{2}}\sigma^{-2}\ \times (\tau'\tau -2y'\tau+y'y))\\
+&\times exp({-\frac{1}{2}\sigma_\eta^{-2}\ (\tau'H'\Omega^{-1}H\tau - 2\tau'H'\Omega^{-1}H(H^{-1}i\tau_0) +(H^{-1}i\tau_0)'H\Omega^{-1}H(H^{-1}i\tau_0)}\\
+
+&\propto exp({-\frac{1}{2}}\sigma^{-2}\sigma_\eta^{-2}[\tau'(\sigma_\eta^2+\sigma^2H'\Omega^{-1}H)\tau-2\tau'(\sigma_\eta^2y+\sigma^2H'\Omega^{-1}H(H^{-1}i\tau_0))])\\
+
+&= exp({-\frac{1}{2}}(\tau'(\sigma^{-2}+\sigma_\eta^{-2}H'\Omega^{-1}H\tau-2\tau'(\sigma^{-2}y+\sigma_\eta^{-2}H'\Omega^{-1}H(H^{-1}i\tau_0))
+\end{align}
+
+
+which results in 
+
+\begin{align}
+\tau|y,\tau_0,\sigma^2,\Omega&\sim N(\bar{V_\tau},\bar{\tau})\\[1ex]
+\bar{V_\tau} &= (\sigma^{-2}+\sigma_\eta^{-2}H'\Omega^{-1}H)^{-1}\\
+\bar{\tau} &=\bar{V_\tau} (\sigma^{-2}y+\sigma_\eta^{-2}H'\Omega^{-1}i\tau_0)
+\end{align}
+
+
+### Full-conditional posterior distribution for $\lambda_t|y,\tau,\sigma_\eta^2$
+
+**Conditional Likelihood:** 
+
+Define: $H\tau - i\tau_o=\eta$
+
+\begin{align}
+L(\lambda_t|y,\tau_0,\tau,\sigma_\eta^2)&\propto  (\prod^{T}_{i = 1} \lambda_t^{-\frac{1}{2}}) exp({-\frac{1}{2}\frac{1}{\sigma^2_\eta}(i\tau_0-H\tau)'\Omega^{-1}(i\tau_0-H\tau)})\\
+&= (\prod^{T}_{i = 1} \lambda_t^{-\frac{1}{2}}exp({-\frac{1}{2}\frac{1}{\sigma^2_\eta}\frac{1}{\lambda_t}\eta_t'\eta_t}))                
+
+\end{align}
+
+
+The **prior distribution** of $\lambda_t$ is:
+
+$$
+P(\lambda_t) ={\frac{1}{\alpha}}exp({{-\frac{1}{\alpha}}\lambda_t)}) 
+$$
+
+
+**Full-conditional posterior distribution** of $\lambda_t$is:
+
+\begin{align}
+P(\lambda_t|y,\tau,\sigma_\eta^2) &\propto \lambda_t^{-\frac{1}{2}+1-1}exp(-\frac{1}{2}({\frac{\eta_t'\sigma_\eta^{-2}\eta_t}{\lambda_t}+{\frac{2}{\alpha}}\lambda_t)}) \\
+\end{align}
+
+
+The above expression can be rearranged in the form of a Generalized inverse Gaussian distribution kernel as follows:
+
+\begin{align}
+\lambda_t|Y,A,\Sigma &\sim GIG(a,b,p) \\
+\\
+a &=\frac{2}{\alpha} \\
+b &= \eta_t'\sigma_\eta^{-2}\eta_t \\
+p &= -\frac{1}{2}+1
+\end{align}
+
+
+### R Function for Gibbs Sampler
+
+```{r}
+UC.AR.Gibbs.sampler    = function(S, starting.values, priors){
+  aux     = starting.values
+  p       = length(aux$alpha)
+  T       = nrow(aux$Y)
+  i <- matrix(0, T, 1)  
+  i[1, 1] <- 1 
+  posteriors    = list(
+    tau     = matrix(NA,T,S),
+    epsilon = matrix(NA,T,S),
+    tau_0   = matrix(NA,1,S),
+    sigma   = matrix(NA,2,S)
+  )
+  
+  alpha <- 2
+  lambda.0 <- rexp(T, rate = 1/alpha)
+  lambda.priors = list(alpha = 2)
+  lambda.posterior.draws = array(NA,c(T,S+1))
+  
+  for (s in 1:S){
+    
+    if (s == 1) {
+      lambda.s = lambda.0
+    } else {
+      lambda.s    = lambda.posterior.draws[,s]
+    }
+    
+    Omega = (diag(lambda.s))
+    Omega.inv = diag(1/lambda.s)
+    
+    # Sampling tau
+    ###########################
+    V.tau.inv     = (1/aux$sigma[2]) + (1/aux$sigma[1])*t(H) %*% Omega.inv %*% H
+    V.tau.inv     = 0.5*(V.tau.inv + t(V.tau.inv))
+    b.tau         = (1/aux$sigma[2])%*%aux$Y + (1/aux$sigma[1])*crossprod(H, Omega.inv%*%i%*%priors$tau_0)
+    precision.L   = t(bandchol(V.tau.inv))
+    epsilon       = rnorm(T)
+    b.tau.tmp     = forwardsolve(precision.L, b.tau)
+    tau.draw      = backsolve(t(precision.L), b.tau.tmp + epsilon)
+    aux$tau       = tau.draw
+    
+    # Sampling tau_0
+    ###########################
+    tau_0.v.inv    = diag(1/priors$tau_0.v)
+    V.tau_0.bar    = 1/((1/aux$sigma[1])*crossprod(i,Omega.inv%*%i) + tau_0.v.inv)
+    tau_0.bar      = V.tau_0.bar %*% ( (1/aux$sigma[1])%*%t(i)%*%Omega.inv%*%H%*%aux$tau + tau_0.v.inv * priors$tau_0.m )
+    tau_0.draw     = rnorm(1,as.numeric(tau_0.bar), sqrt(V.tau_0.bar))
+    aux$tau_0      = as.vector(tau_0.draw)
+    
+    # Sampling sigma_epsilon
+    ###########################
+    sigma.eta.s   = as.numeric(priors$sigma.s + crossprod((c(aux$tau_0[1],diff(aux$tau_0)) - i%*%aux$tau_0),(priors$H%*%aux$tau - i%*%aux$tau_0)))
+    sigma.eta.nu  = priors$sigma.nu + T
+    sigma.eta.draw= sigma.eta.s/rchisq(1,sigma.eta.nu)
+    sigma.eta.draw.inv=1/(sigma.eta.draw)
+    
+    sigma.e.s     = as.numeric(priors$sigma.s + crossprod(aux$tau-aux$Y))
+    sigma.e.nu    = priors$sigma.nu + T
+    sigma.e.draw  = sigma.e.s/rchisq(1,sigma.e.nu)
+    aux$sigma     = c(sigma.eta.draw,sigma.e.draw)
+
+    # Sampling lambda
+    ###########################
+    u.t = H%*%aux$tau[,,s]-i%*%aux$tau_0[,,s]
+    #    ---- loop lambda posterior ----   #
+    c                      = -1/2 + 1         
+    a                      = 2 / lambda.priors$alpha
+    for (x in 1:T){
+      b                  = t((u.t)[x,])%*%(1/aux$sigma[1][,,s])%*%(u.t)[x,]
+      lambda.posterior.draws[x,s+1] = GIGrvg::rgig(1, lambda = c, chi = b, psi = a)
+    }
+
+    aux$lambda = lambda.posterior.draws
+  
+    
+    posteriors$tau[,s]     = aux$tau
+    posteriors$tau_0[,s]   = aux$tau_0
+    posteriors$lambda[,s]  = aux$lambda
+    posteriors$sigma[,s]   = aux$sigma
+  }
+  
+  output      = list(
+    posterior = posteriors,
+    last.draw = aux
+  )
+  return(output)
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Model extensions
 
 ## Estimation of autoregressive parameters for cycle component

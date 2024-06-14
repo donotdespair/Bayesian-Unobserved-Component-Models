@@ -13,6 +13,7 @@
 <meta name="author" content="Inhye Kang">
 <meta name="author" content="Zheyuan Li">
 <meta name="author" content="Rui Liu">
+<meta name="author" content="Qingqing Pang">
 <meta name="author" content="Yansong Yang">
 <meta name="author" content="Yuqiao Yang">
 
@@ -175,7 +176,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#estimating-the-initial-condition-prior-scale" id="toc-estimating-the-initial-condition-prior-scale" class="nav-link" data-scroll-target="#estimating-the-initial-condition-prior-scale">Estimating the initial condition prior scale</a></li>
   <li><a href="#student-t-prior-for-the-trend-component" id="toc-student-t-prior-for-the-trend-component" class="nav-link" data-scroll-target="#student-t-prior-for-the-trend-component">Student-t prior for the trend component</a></li>
   <li><a href="#estimating-student-t-degrees-of-freedom-parameter" id="toc-estimating-student-t-degrees-of-freedom-parameter" class="nav-link" data-scroll-target="#estimating-student-t-degrees-of-freedom-parameter">Estimating Student-t degrees of freedom parameter</a></li>
-  <li><a href="#laplace-prior-for-the-trend-component" id="toc-laplace-prior-for-the-trend-component" class="nav-link" data-scroll-target="#laplace-prior-for-the-trend-component">Laplace prior for the trend component</a></li>
+  <li><a href="#laplace-prior-for-the-trend-component" id="toc-laplace-prior-for-the-trend-component" class="nav-link" data-scroll-target="#laplace-prior-for-the-trend-component">Laplace prior for the trend component</a>
+  <ul class="collapse">
+  <li><a href="#full-conditional-posterior-distribution-for-tautau_0sigma2omega" id="toc-full-conditional-posterior-distribution-for-tautau_0sigma2omega" class="nav-link" data-scroll-target="#full-conditional-posterior-distribution-for-tautau_0sigma2omega">Full-conditional posterior distribution for <span class="math inline">\(\tau|\tau_0,\sigma^2,\Omega\)</span></a></li>
+  <li><a href="#full-conditional-posterior-distribution-for-lambda_tytausigma_eta2" id="toc-full-conditional-posterior-distribution-for-lambda_tytausigma_eta2" class="nav-link" data-scroll-target="#full-conditional-posterior-distribution-for-lambda_tytausigma_eta2">Full-conditional posterior distribution for <span class="math inline">\(\lambda_t|y,\tau,\sigma_\eta^2\)</span></a></li>
+  <li><a href="#r-function-for-gibbs-sampler" id="toc-r-function-for-gibbs-sampler" class="nav-link" data-scroll-target="#r-function-for-gibbs-sampler">R Function for Gibbs Sampler</a></li>
+  </ul></li>
   </ul></li>
   <li><a href="#model-extensions" id="toc-model-extensions" class="nav-link" data-scroll-target="#model-extensions">Model extensions</a>
   <ul class="collapse">
@@ -216,6 +222,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
              <p><a href="https://github.com/inhyekang-au">Inhye Kang</a> <a href="https://orcid.org/0009-0007-8544-4952" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
              <p><a href="https://github.com/lzyzero3">Zheyuan Li</a> </p>
              <p><a href="https://github.com/rruiliu1005">Rui Liu</a> <a href="https://orcid.org/0009-0008-9348-8581" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+             <p><a href="https://github.com/comeseemeintheocean">Qingqing Pang</a> </p>
              <p><a href="https://github.com/russellyang728">Yansong Yang</a> </p>
              <p><a href="https://github.com/JimmyYang917">Yuqiao Yang</a> </p>
           </div>
@@ -238,21 +245,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="a-simple-local-level-model" class="level1">
 <h1>A simple local-level model</h1>
-<p>The model is set for a univariate time series whose observation at time <span class="math inline">\(t\)</span> is denoted by <span class="math inline">\(y_t\)</span>. It decomposes the variable into a stochastic trend component, <span class="math inline">\(\tau_t\)</span>, and a stationary error component, <span class="math inline">\(\epsilon_t\)</span>. The former follows a Gaussian random walk process with the conditional variance <span class="math inline">\(\sigma_\eta^2\)</span>, and the latter is zero-mean normally distributed with the variance <span class="math inline">\(\sigma^2\)</span>. These are expressed as the model equations: <span class="math display">\[\begin{align}
+<p>The model is set for a univariate time series whose observation at time <span class="math inline">\(t\)</span> is denoted by <span class="math inline">\(y_t\)</span>. It decomposes the variable into a stochastic trend component, <span class="math inline">\(\tau_t\)</span>, and a stationary error component, <span class="math inline">\(\epsilon_t\)</span>. The former follows a Gaussian random walk process with the conditional variance <span class="math inline">\(\sigma_\eta^2\)</span>, and the latter is zero-mean normally distributed with the variance <span class="math inline">\(\sigma^2\)</span>. These are expressed as the model equations:</p>
+<p><span class="math display">\[
+\begin{align}
 y_t &amp;= \tau_t + \epsilon_t,\\
 \tau_t &amp;= \tau_{t-1} + \eta_t,\\
 \epsilon_t &amp;\sim\mathcal{N}\left(0, \sigma^2\right),\\
 \eta_t &amp;\sim\mathcal{N}\left(0, \sigma_\eta^2\right),
-\end{align}\]</span> where the initial condition <span class="math inline">\(\tau_0\)</span> is a parameter of the model.</p>
+\end{align}
+\]</span> where the initial condition <span class="math inline">\(\tau_0\)</span> is a parameter of the model.</p>
 <section id="matrix-notation-for-the-model" class="level2">
 <h2 class="anchored" data-anchor-id="matrix-notation-for-the-model">Matrix notation for the model</h2>
-<p>To simplify the notation and the derivations introduce matrix notation for the model. Let <span class="math inline">\(T\)</span> be the available sample size for the variable <span class="math inline">\(y\)</span>. Define a <span class="math inline">\(T\)</span>-vector of zeros, <span class="math inline">\(\mathbf{0}_T\)</span>, and of ones, <span class="math inline">\(\boldsymbol\imath_T\)</span>, the identity matrix of order <span class="math inline">\(T\)</span>, <span class="math inline">\(\mathbf{I}_T\)</span>, as well as <span class="math inline">\(T\times1\)</span> vectors: <span class="math display">\[\begin{align}
+<p>To simplify the notation and the derivations introduce matrix notation for the model. Let <span class="math inline">\(T\)</span> be the available sample size for the variable <span class="math inline">\(y\)</span>. Define a <span class="math inline">\(T\)</span>-vector of zeros, <span class="math inline">\(\mathbf{0}_T\)</span>, and of ones, <span class="math inline">\(\boldsymbol\imath_T\)</span>, the identity matrix of order <span class="math inline">\(T\)</span>, <span class="math inline">\(\mathbf{I}_T\)</span>, as well as <span class="math inline">\(T\times1\)</span> vectors:</p>
+<p><span class="math display">\[
+\begin{align}
 \mathbf{y} = \begin{bmatrix} y_1\\ \vdots\\ y_T \end{bmatrix},\quad
 \boldsymbol\tau = \begin{bmatrix} \tau_1\\ \vdots\\ \tau_T \end{bmatrix},\quad
 \boldsymbol\epsilon = \begin{bmatrix} \epsilon_1\\ \vdots\\ \epsilon_T \end{bmatrix},\quad
 \boldsymbol\eta = \begin{bmatrix} \eta_1\\ \vdots\\ \eta_T \end{bmatrix},\qquad
 \mathbf{i} = \begin{bmatrix} 1\\0\\ \vdots\\ 0 \end{bmatrix},
-\end{align}\]</span> and a <span class="math inline">\(T\times T\)</span> matrix <span class="math inline">\(\mathbf{H}\)</span> with the elements: <span class="math display">\[\begin{align}
+\end{align}
+\]</span> and a <span class="math inline">\(T\times T\)</span> matrix <span class="math inline">\(\mathbf{H}\)</span> with the elements:</p>
+<p><span class="math display">\[
+\begin{align}
 \mathbf{H} = \begin{bmatrix}
 1 &amp; 0 &amp; \cdots &amp; 0 &amp; 0\\
 -1 &amp; 1 &amp; \cdots &amp; 0 &amp; 0\\
@@ -261,26 +276,35 @@ y_t &amp;= \tau_t + \epsilon_t,\\
 0 &amp; 0 &amp; \cdots &amp; 1 &amp; 0\\
 0 &amp; 0 &amp; \cdots &amp; -1 &amp; 1
 \end{bmatrix}.
-\end{align}\]</span></p>
-<p>Then the model can be written in a concise notation as: <span class="math display">\[\begin{align}
+\end{align}
+\]</span></p>
+<p>Then the model can be written in a concise notation as: <span class="math display">\[
+\begin{align}
 \mathbf{y} &amp;= \mathbf{\tau} + \boldsymbol\epsilon,\\
 \mathbf{H}\boldsymbol\tau &amp;= \mathbf{i} \tau_0 + \boldsymbol\eta,\\
 \boldsymbol\epsilon &amp;\sim\mathcal{N}\left(\mathbf{0}_T, \sigma^2\mathbf{I}_T\right),\\
 \boldsymbol\eta &amp;\sim\mathcal{N}\left(\mathbf{0}_T, \sigma_\eta^2\mathbf{I}_T\right).
-\end{align}\]</span></p>
+\end{align}
+\]</span></p>
 </section>
 <section id="likelihood-function" class="level2">
 <h2 class="anchored" data-anchor-id="likelihood-function">Likelihood function</h2>
-<p>The model equations imply the predictive density of the data vector <span class="math inline">\(\mathbf{y}\)</span>. To see this, consider the model equation as a linear transformation of a normal vector <span class="math inline">\(\boldsymbol\epsilon\)</span>. Therefore, the data vector follows a multivariate normal distribution given by: <span class="math display">\[\begin{align}
+<p>The model equations imply the predictive density of the data vector <span class="math inline">\(\mathbf{y}\)</span>. To see this, consider the model equation as a linear transformation of a normal vector <span class="math inline">\(\boldsymbol\epsilon\)</span>. Therefore, the data vector follows a multivariate normal distribution given by: <span class="math display">\[
+\begin{align}
 \mathbf{y}\mid \boldsymbol\tau, \sigma^2 &amp;\sim\mathcal{N}_T\left(\boldsymbol\tau, \sigma^2\mathbf{I}_T\right).
-\end{align}\]</span></p>
-<p>This distribution determines the shape of the likelihood function that is defined as the sampling data density: <span class="math display">\[\begin{align}
+\end{align}
+\]</span></p>
+<p>This distribution determines the shape of the likelihood function that is defined as the sampling data density: <span class="math display">\[
+\begin{align}
 L(\boldsymbol\tau,\sigma^2|\mathbf{y})\equiv p\left(\mathbf{y}\mid\boldsymbol\tau, \sigma^2 \right).
-\end{align}\]</span></p>
-<p>The likelihood function that for the sake of the estimation of the parameters, and after plugging in data in place of <span class="math inline">\(\mathbf{y}\)</span>, is considered a function of parameters <span class="math inline">\(\boldsymbol\tau\)</span> and <span class="math inline">\(\sigma^2\)</span> is given by: <span class="math display">\[\begin{align}
+\end{align}
+\]</span></p>
+<p>The likelihood function that for the sake of the estimation of the parameters, and after plugging in data in place of <span class="math inline">\(\mathbf{y}\)</span>, is considered a function of parameters <span class="math inline">\(\boldsymbol\tau\)</span> and <span class="math inline">\(\sigma^2\)</span> is given by: <span class="math display">\[
+\begin{align}
 L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 (2\pi)^{-\frac{T}{2}}\left(\sigma^2\right)^{-\frac{T}{2}}\exp\left\{-\frac{1}{2}\frac{1}{\sigma^2}(\mathbf{y} - \boldsymbol\tau)'(\mathbf{y} - \boldsymbol\tau)\right\}.
-\end{align}\]</span></p>
+\end{align}
+\]</span></p>
 </section>
 <section id="prior-distributions" class="level2">
 <h2 class="anchored" data-anchor-id="prior-distributions">Prior distributions</h2>
@@ -818,6 +842,155 @@ p(\nu\mid\mathbf{y},\boldsymbol\tau,\boldsymbol\lambda,\sigma^2, \nu) \propto p(
 </section>
 <section id="laplace-prior-for-the-trend-component" class="level2">
 <h2 class="anchored" data-anchor-id="laplace-prior-for-the-trend-component">Laplace prior for the trend component</h2>
+<p>To apply the Laplace prior for our trend component, we have <span class="math inline">\(\lambda_t\)</span> following an exponential distribution with mean alpha, where <span class="math inline">\(\lambda_t \sim exp({\frac{1}{\alpha}})\)</span>, with the prior of the trend component is <span class="math inline">\(\tau|\eta,\lambda \sim \mathcal{N}(H^{-1}i\tau_0, \sigma_\eta^2 H^{-1}\Omega(H^{-1})')\)</span>, then we have the marginal distribution of <span class="math inline">\(\tau\)</span> is Laplace distribution.</p>
+<p>The model is where <span class="math inline">\(\Omega=diag(\lambda_1,\lambda_2,...,\lambda_t)\)</span>, each lambda independently drawn from an exponential distribution.</p>
+<p>Due to the change prior distribution of the trend component, now we have different full posterior distributions for parameters and in this note we only focus on the derivation for <span class="math inline">\(\tau\)</span> and <span class="math inline">\(\lambda_t\)</span>. The change of the prior distribution for <span class="math inline">\(\tau\)</span> gives the followings:</p>
+<p><span class="math display">\[\tau =y - \epsilon\]</span></p>
+<p><span class="math display">\[\tau = H^{-1}i\tau_0 + H^{-1} \eta \]</span></p>
+<p><span class="math display">\[\tau|\eta,\lambda \sim \mathcal{N}(H^{-1}i\tau_0, \sigma_\eta^2 H^{-1}\Omega(H^{-1})') \]</span></p>
+<p><span class="math display">\[\lambda_t \sim exp({\frac{1}{\alpha}})\]</span></p>
+<section id="full-conditional-posterior-distribution-for-tautau_0sigma2omega" class="level3">
+<h3 class="anchored" data-anchor-id="full-conditional-posterior-distribution-for-tautau_0sigma2omega">Full-conditional posterior distribution for <span class="math inline">\(\tau|\tau_0,\sigma^2,\Omega\)</span></h3>
+<p><strong>Conditional Likelihood:</strong> <span class="math display">\[\tau =y - \epsilon\]</span></p>
+<p><span class="math display">\[\epsilon \sim \mathcal{N}(0_T, \sigma^2I_T)\]</span></p>
+<p><span class="math display">\[L(\tau|y,\sigma^2) = exp({-\frac{1}{2}\frac{1}{\sigma^2}(\mathbf{y} - \boldsymbol\tau)'(\mathbf{y} - \boldsymbol\tau)})\]</span></p>
+<p>The <strong>prior distribution</strong> of <span class="math inline">\(\tau\)</span>is:</p>
+<p><span class="math display">\[p(\tau|\tau_0,\sigma_\eta^2,\Omega) \propto exp(-\frac{1}{2}\frac{1}{\sigma_\eta^2}(\tau - H^{-1}i\tau_0)'H'\Omega^{-1}H(\tau - H^{-1}i\tau_0))\]</span></p>
+<p><strong>Full-conditional posterior distribution</strong> of <span class="math inline">\({\tau}|y,\sigma_\eta^2,\Omega\)</span>:</p>
+<p><span class="math display">\[\begin{align}
+P(\tau|y,\tau_0,\sigma^2,\Omega) &amp;\propto L(\tau|y,\sigma^2)\times p(\tau|\tau_0,\sigma_\eta^2,\Omega)\\
+
+&amp;\propto exp({-\frac{1}{2}}\sigma^{-2}\ \times (\tau'\tau -2y'\tau+y'y))\\
+&amp;\times exp({-\frac{1}{2}\sigma_\eta^{-2}\ (\tau'H'\Omega^{-1}H\tau - 2\tau'H'\Omega^{-1}H(H^{-1}i\tau_0) +(H^{-1}i\tau_0)'H\Omega^{-1}H(H^{-1}i\tau_0)}\\
+
+&amp;\propto exp({-\frac{1}{2}}\sigma^{-2}\sigma_\eta^{-2}[\tau'(\sigma_\eta^2+\sigma^2H'\Omega^{-1}H)\tau-2\tau'(\sigma_\eta^2y+\sigma^2H'\Omega^{-1}H(H^{-1}i\tau_0))])\\
+
+&amp;= exp({-\frac{1}{2}}(\tau'(\sigma^{-2}+\sigma_\eta^{-2}H'\Omega^{-1}H\tau-2\tau'(\sigma^{-2}y+\sigma_\eta^{-2}H'\Omega^{-1}H(H^{-1}i\tau_0))
+\end{align}\]</span></p>
+<p>which results in</p>
+<p><span class="math display">\[\begin{align}
+\tau|y,\tau_0,\sigma^2,\Omega&amp;\sim N(\bar{V_\tau},\bar{\tau})\\[1ex]
+\bar{V_\tau} &amp;= (\sigma^{-2}+\sigma_\eta^{-2}H'\Omega^{-1}H)^{-1}\\
+\bar{\tau} &amp;=\bar{V_\tau} (\sigma^{-2}y+\sigma_\eta^{-2}H'\Omega^{-1}i\tau_0)
+\end{align}\]</span></p>
+</section>
+<section id="full-conditional-posterior-distribution-for-lambda_tytausigma_eta2" class="level3">
+<h3 class="anchored" data-anchor-id="full-conditional-posterior-distribution-for-lambda_tytausigma_eta2">Full-conditional posterior distribution for <span class="math inline">\(\lambda_t|y,\tau,\sigma_\eta^2\)</span></h3>
+<p><strong>Conditional Likelihood:</strong></p>
+<p>Define: <span class="math inline">\(H\tau - i\tau_o=\eta\)</span></p>
+<p><span class="math display">\[\begin{align}
+L(\lambda_t|y,\tau_0,\tau,\sigma_\eta^2)&amp;\propto  (\prod^{T}_{i = 1} \lambda_t^{-\frac{1}{2}}) exp({-\frac{1}{2}\frac{1}{\sigma^2_\eta}(i\tau_0-H\tau)'\Omega^{-1}(i\tau_0-H\tau)})\\
+&amp;= (\prod^{T}_{i = 1} \lambda_t^{-\frac{1}{2}}exp({-\frac{1}{2}\frac{1}{\sigma^2_\eta}\frac{1}{\lambda_t}\eta_t'\eta_t}))                
+
+\end{align}\]</span></p>
+<p>The <strong>prior distribution</strong> of <span class="math inline">\(\lambda_t\)</span> is:</p>
+<p><span class="math display">\[
+P(\lambda_t) ={\frac{1}{\alpha}}exp({{-\frac{1}{\alpha}}\lambda_t)})
+\]</span></p>
+<p><strong>Full-conditional posterior distribution</strong> of <span class="math inline">\(\lambda_t\)</span>is:</p>
+<p><span class="math display">\[\begin{align}
+P(\lambda_t|y,\tau,\sigma_\eta^2) &amp;\propto \lambda_t^{-\frac{1}{2}+1-1}exp(-\frac{1}{2}({\frac{\eta_t'\sigma_\eta^{-2}\eta_t}{\lambda_t}+{\frac{2}{\alpha}}\lambda_t)}) \\
+\end{align}\]</span></p>
+<p>The above expression can be rearranged in the form of a Generalized inverse Gaussian distribution kernel as follows:</p>
+<p><span class="math display">\[\begin{align}
+\lambda_t|Y,A,\Sigma &amp;\sim GIG(a,b,p) \\
+\\
+a &amp;=\frac{2}{\alpha} \\
+b &amp;= \eta_t'\sigma_\eta^{-2}\eta_t \\
+p &amp;= -\frac{1}{2}+1
+\end{align}\]</span></p>
+</section>
+<section id="r-function-for-gibbs-sampler" class="level3">
+<h3 class="anchored" data-anchor-id="r-function-for-gibbs-sampler">R Function for Gibbs Sampler</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>UC.AR.Gibbs.sampler    <span class="ot">=</span> <span class="cf">function</span>(S, starting.values, priors){</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  aux     <span class="ot">=</span> starting.values</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  p       <span class="ot">=</span> <span class="fu">length</span>(aux<span class="sc">$</span>alpha)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  T       <span class="ot">=</span> <span class="fu">nrow</span>(aux<span class="sc">$</span>Y)</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  i <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, T, <span class="dv">1</span>)  </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  i[<span class="dv">1</span>, <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">1</span> </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  posteriors    <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">tau     =</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,T,S),</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">epsilon =</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,T,S),</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">tau_0   =</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="dv">1</span>,S),</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">sigma   =</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="dv">2</span>,S)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  alpha <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  lambda<span class="fl">.0</span> <span class="ot">&lt;-</span> <span class="fu">rexp</span>(T, <span class="at">rate =</span> <span class="dv">1</span><span class="sc">/</span>alpha)</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  lambda.priors <span class="ot">=</span> <span class="fu">list</span>(<span class="at">alpha =</span> <span class="dv">2</span>)</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  lambda.posterior.draws <span class="ot">=</span> <span class="fu">array</span>(<span class="cn">NA</span>,<span class="fu">c</span>(T,S<span class="sc">+</span><span class="dv">1</span>))</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>S){</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (s <span class="sc">==</span> <span class="dv">1</span>) {</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>      lambda.s <span class="ot">=</span> lambda<span class="fl">.0</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>      lambda.s    <span class="ot">=</span> lambda.posterior.draws[,s]</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    Omega <span class="ot">=</span> (<span class="fu">diag</span>(lambda.s))</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    Omega.inv <span class="ot">=</span> <span class="fu">diag</span>(<span class="dv">1</span><span class="sc">/</span>lambda.s)</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sampling tau</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    <span class="do">###########################</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    V.tau.inv     <span class="ot">=</span> (<span class="dv">1</span><span class="sc">/</span>aux<span class="sc">$</span>sigma[<span class="dv">2</span>]) <span class="sc">+</span> (<span class="dv">1</span><span class="sc">/</span>aux<span class="sc">$</span>sigma[<span class="dv">1</span>])<span class="sc">*</span><span class="fu">t</span>(H) <span class="sc">%*%</span> Omega.inv <span class="sc">%*%</span> H</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    V.tau.inv     <span class="ot">=</span> <span class="fl">0.5</span><span class="sc">*</span>(V.tau.inv <span class="sc">+</span> <span class="fu">t</span>(V.tau.inv))</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>    b.tau         <span class="ot">=</span> (<span class="dv">1</span><span class="sc">/</span>aux<span class="sc">$</span>sigma[<span class="dv">2</span>])<span class="sc">%*%</span>aux<span class="sc">$</span>Y <span class="sc">+</span> (<span class="dv">1</span><span class="sc">/</span>aux<span class="sc">$</span>sigma[<span class="dv">1</span>])<span class="sc">*</span><span class="fu">crossprod</span>(H, Omega.inv<span class="sc">%*%</span>i<span class="sc">%*%</span>priors<span class="sc">$</span>tau_0)</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>    precision.L   <span class="ot">=</span> <span class="fu">t</span>(<span class="fu">bandchol</span>(V.tau.inv))</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a>    epsilon       <span class="ot">=</span> <span class="fu">rnorm</span>(T)</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>    b.tau.tmp     <span class="ot">=</span> <span class="fu">forwardsolve</span>(precision.L, b.tau)</span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>    tau.draw      <span class="ot">=</span> <span class="fu">backsolve</span>(<span class="fu">t</span>(precision.L), b.tau.tmp <span class="sc">+</span> epsilon)</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>    aux<span class="sc">$</span>tau       <span class="ot">=</span> tau.draw</span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sampling tau_0</span></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>    <span class="do">###########################</span></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>    tau_0.v.inv    <span class="ot">=</span> <span class="fu">diag</span>(<span class="dv">1</span><span class="sc">/</span>priors<span class="sc">$</span>tau_0.v)</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>    V.tau_0.bar    <span class="ot">=</span> <span class="dv">1</span><span class="sc">/</span>((<span class="dv">1</span><span class="sc">/</span>aux<span class="sc">$</span>sigma[<span class="dv">1</span>])<span class="sc">*</span><span class="fu">crossprod</span>(i,Omega.inv<span class="sc">%*%</span>i) <span class="sc">+</span> tau_0.v.inv)</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>    tau_0.bar      <span class="ot">=</span> V.tau_0.bar <span class="sc">%*%</span> ( (<span class="dv">1</span><span class="sc">/</span>aux<span class="sc">$</span>sigma[<span class="dv">1</span>])<span class="sc">%*%</span><span class="fu">t</span>(i)<span class="sc">%*%</span>Omega.inv<span class="sc">%*%</span>H<span class="sc">%*%</span>aux<span class="sc">$</span>tau <span class="sc">+</span> tau_0.v.inv <span class="sc">*</span> priors<span class="sc">$</span>tau_0.m )</span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>    tau_0.draw     <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1</span>,<span class="fu">as.numeric</span>(tau_0.bar), <span class="fu">sqrt</span>(V.tau_0.bar))</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>    aux<span class="sc">$</span>tau_0      <span class="ot">=</span> <span class="fu">as.vector</span>(tau_0.draw)</span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sampling sigma_epsilon</span></span>
+<span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a>    <span class="do">###########################</span></span>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>    sigma.eta.s   <span class="ot">=</span> <span class="fu">as.numeric</span>(priors<span class="sc">$</span>sigma.s <span class="sc">+</span> <span class="fu">crossprod</span>((<span class="fu">c</span>(aux<span class="sc">$</span>tau_0[<span class="dv">1</span>],<span class="fu">diff</span>(aux<span class="sc">$</span>tau_0)) <span class="sc">-</span> i<span class="sc">%*%</span>aux<span class="sc">$</span>tau_0),(priors<span class="sc">$</span>H<span class="sc">%*%</span>aux<span class="sc">$</span>tau <span class="sc">-</span> i<span class="sc">%*%</span>aux<span class="sc">$</span>tau_0)))</span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>    sigma.eta.nu  <span class="ot">=</span> priors<span class="sc">$</span>sigma.nu <span class="sc">+</span> T</span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>    sigma.eta.draw<span class="ot">=</span> sigma.eta.s<span class="sc">/</span><span class="fu">rchisq</span>(<span class="dv">1</span>,sigma.eta.nu)</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>    sigma.eta.draw.inv<span class="ot">=</span><span class="dv">1</span><span class="sc">/</span>(sigma.eta.draw)</span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>    sigma.e.s     <span class="ot">=</span> <span class="fu">as.numeric</span>(priors<span class="sc">$</span>sigma.s <span class="sc">+</span> <span class="fu">crossprod</span>(aux<span class="sc">$</span>tau<span class="sc">-</span>aux<span class="sc">$</span>Y))</span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>    sigma.e.nu    <span class="ot">=</span> priors<span class="sc">$</span>sigma.nu <span class="sc">+</span> T</span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>    sigma.e.draw  <span class="ot">=</span> sigma.e.s<span class="sc">/</span><span class="fu">rchisq</span>(<span class="dv">1</span>,sigma.e.nu)</span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>    aux<span class="sc">$</span>sigma     <span class="ot">=</span> <span class="fu">c</span>(sigma.eta.draw,sigma.e.draw)</span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sampling lambda</span></span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>    <span class="do">###########################</span></span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>    u.t <span class="ot">=</span> H<span class="sc">%*%</span>aux<span class="sc">$</span>tau[,,s]<span class="sc">-</span>i<span class="sc">%*%</span>aux<span class="sc">$</span>tau_0[,,s]</span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>    <span class="co">#    ---- loop lambda posterior ----   #</span></span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>    c                      <span class="ot">=</span> <span class="sc">-</span><span class="dv">1</span><span class="sc">/</span><span class="dv">2</span> <span class="sc">+</span> <span class="dv">1</span>         </span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>    a                      <span class="ot">=</span> <span class="dv">2</span> <span class="sc">/</span> lambda.priors<span class="sc">$</span>alpha</span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (x <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>T){</span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>      b                  <span class="ot">=</span> <span class="fu">t</span>((u.t)[x,])<span class="sc">%*%</span>(<span class="dv">1</span><span class="sc">/</span>aux<span class="sc">$</span>sigma[<span class="dv">1</span>][,,s])<span class="sc">%*%</span>(u.t)[x,]</span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>      lambda.posterior.draws[x,s<span class="sc">+</span><span class="dv">1</span>] <span class="ot">=</span> GIGrvg<span class="sc">::</span><span class="fu">rgig</span>(<span class="dv">1</span>, <span class="at">lambda =</span> c, <span class="at">chi =</span> b, <span class="at">psi =</span> a)</span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>    aux<span class="sc">$</span>lambda <span class="ot">=</span> lambda.posterior.draws</span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>    posteriors<span class="sc">$</span>tau[,s]     <span class="ot">=</span> aux<span class="sc">$</span>tau</span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a>    posteriors<span class="sc">$</span>tau_0[,s]   <span class="ot">=</span> aux<span class="sc">$</span>tau_0</span>
+<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a>    posteriors<span class="sc">$</span>lambda[,s]  <span class="ot">=</span> aux<span class="sc">$</span>lambda</span>
+<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a>    posteriors<span class="sc">$</span>sigma[,s]   <span class="ot">=</span> aux<span class="sc">$</span>sigma</span>
+<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-81"><a href="#cb10-81" aria-hidden="true" tabindex="-1"></a>  output      <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a>    <span class="at">posterior =</span> posteriors,</span>
+<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a>    <span class="at">last.draw =</span> aux</span>
+<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb10-85"><a href="#cb10-85" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(output)</span>
+<span id="cb10-86"><a href="#cb10-86" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
 </section>
 </section>
 <section id="model-extensions" class="level1">
@@ -859,13 +1032,13 @@ p(\lambda_{t}|y,\tau,\sigma^{2})&amp;\propto L(\lambda_{t},\tau,\sigma^{2}|y)p(\
 <p>where <span class="math inline">\(\epsilon_{t}=y_{t}-\tau_{t}\)</span>. Therefore, the full conditional posterior for each <span class="math inline">\(\lambda_t\)</span> is:</p>
 <p><span class="math display">\[IG2\sim(1+\nu,\nu+\frac{\epsilon_{t}^2}{\sigma^{2}})\]</span></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>lambda_t <span class="ot">&lt;-</span> <span class="cf">function</span>(y_t,tau_t,sigma2, nu){</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  e_t     <span class="ot">&lt;-</span> y_t <span class="sc">-</span> tau_t</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  lambda  <span class="ot">&lt;-</span> MCMCpack<span class="sc">::</span><span class="fu">rinvgamma</span>(<span class="dv">1</span>, (<span class="dv">1</span> <span class="sc">+</span> nu)<span class="sc">/</span><span class="dv">2</span>, (nu <span class="sc">+</span> (e_t<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span> sigma2)<span class="sc">/</span><span class="dv">2</span>)</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(lambda)</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>lambda_t <span class="ot">&lt;-</span> <span class="cf">function</span>(y_t,tau_t,sigma2, nu){</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  e_t     <span class="ot">&lt;-</span> y_t <span class="sc">-</span> tau_t</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  lambda  <span class="ot">&lt;-</span> MCMCpack<span class="sc">::</span><span class="fu">rinvgamma</span>(<span class="dv">1</span>, (<span class="dv">1</span> <span class="sc">+</span> nu)<span class="sc">/</span><span class="dv">2</span>, (nu <span class="sc">+</span> (e_t<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span> sigma2)<span class="sc">/</span><span class="dv">2</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(lambda)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="conditional-heteroskedasticity" class="level2">
@@ -889,8 +1062,8 @@ p(\lambda_{t}|y,\tau,\sigma^{2})&amp;\propto L(\lambda_{t},\tau,\sigma^{2}|y)p(\
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{woźniak2024,
   author = {Woźniak, Tomasz and Berke, Stephan and Chen, Gezhi and
-    Gussen, Ben and Kang, Inhye and Li, Zheyuan and Liu, Rui and Yang,
-    Yansong and Yang, Yuqiao},
+    Gussen, Ben and Kang, Inhye and Li, Zheyuan and Liu, Rui and Pang,
+    Qingqing and Yang, Yansong and Yang, Yuqiao},
   title = {Bayesian {Unobserved} {Component} {Models}},
   date = {2024-05-01},
   url = {https://donotdespair.github.io/Bayesian-Unobserved-Component-Models/},
@@ -899,7 +1072,7 @@ p(\lambda_{t}|y,\tau,\sigma^{2})&amp;\propto L(\lambda_{t},\tau,\sigma^{2}|y)p(\
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-woźniak2024" class="csl-entry quarto-appendix-citeas" role="listitem">
 Woźniak, Tomasz, Stephan Berke, Gezhi Chen, Ben Gussen, Inhye Kang,
-Zheyuan Li, Rui Liu, Yansong Yang, and Yuqiao Yang. 2024.
+Zheyuan Li, Rui Liu, Qingqing Pang, Yansong Yang, and Yuqiao Yang. 2024.
 <span>“Bayesian Unobserved Component Models.”</span> May 1, 2024. <a href="https://doi.org/10.26188/25814617">https://doi.org/10.26188/25814617</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
