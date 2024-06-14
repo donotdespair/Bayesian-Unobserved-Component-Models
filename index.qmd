@@ -4,6 +4,9 @@ author:
   - name: Tomasz Woźniak
     url: https://github.com/donotdespair
     orcid: 0000-0003-2212-2378
+  - name: Stephan Berke
+    url: https://github.com/sb955/
+    orcid: 0009-0004-8443-1453
   - name: Gezhi Chen
     url: https://github.com/cora1ine
   - name: Inhye Kang
@@ -741,6 +744,57 @@ s2_sampler <- function(tau_0, tau_0_prior, s_prior, nu_prior) {
 ## Random walk with  time-varying drift parameter
 
 ## Student-t error terms
+
+T-distributed error terms enhance robustness against outliers in data. This section outlines a method to incorporate t-distributed error terms into unobserved component models where the error term structure is as follows: 
+
+$$
+\boldsymbol\epsilon\sim N_{T}(0_{T},{\sigma^{2}}diag({\boldsymbol\lambda)})
+$$
+
+where vector $\boldsymbol\lambda = (\lambda_1, \dots, \lambda_T)'$ collects th auxiliary latent variables. Each $\lambda_{t}$ follows independently the following prior:
+$$\lambda_t\sim\mathcal{IG}2(\nu,\nu)$$
+which makes $\epsilon_{t}$  marginally Student-t-distributed. 
+
+The likelihood is given by: 
+
+$$
+L(\mathbf{y}|\boldsymbol\tau,\sigma^{2},\boldsymbol\lambda) = (\sigma^2)^{-\frac{T}{2}}\left(\prod_{t=1}^{T}(\lambda_{t})^{-\frac{1}{2}}\right)
+\exp\left\{-\frac{1}{2}\frac{1}{\sigma^{2}}\sum_{t=1}^{T}\frac{1}{\lambda_{t}}(y_t-\tau_t)^2\right\}.
+$$
+
+The prior density of is proportional to
+
+$$
+\lambda_{t}^{-\frac{\nu+2}{2}} \exp\left\{-\frac{1}{2}\frac{\nu}{\lambda_{t}}\right\}.
+$$
+
+Combining the likelihood and the prior 
+
+\begin{align}
+p(\lambda_{t}|y,\tau,\sigma^{2})&\propto L(\lambda_{t},\tau,\sigma^{2}|y)p(\lambda_{t}|\nu_{\lambda})\\
+&= (\lambda_{t})^{-\frac{{1}}{2}}\exp\{-\frac{1}{2}\frac{1}{\sigma^{2}}\frac{1}{\lambda_{t}}(y-\tau)'(y-(\tau)\} \lambda_{t}^{-\frac{\nu+2}{2}} \exp\left\{-\frac{1}{2}\frac{\nu}{\lambda_{t}}\right\}
+\end{align}
+
+Yields the posterior kernel 
+
+$$
+(\lambda_{t})^{-\frac{_{1+\nu+2}}{2}}\exp\left\{-\frac{1}{2}\frac{1}{\lambda_{t}}\left[ \nu + \frac{\epsilon_t^2}{\sigma^{2}}\right]\right\}
+$$
+
+where $\epsilon_{t}=y_{t}-\tau_{t}$. Therefore, the full conditional posterior for each $\lambda_t$ is:
+
+$$IG2\sim(1+\nu,\nu+\frac{\epsilon_{t}^2}{\sigma^{2}})$$
+
+```{r Lambda}
+lambda_t <- function(y_t,tau_t,sigma2, nu){
+  
+  e_t     <- y_t - tau_t
+  lambda  <- MCMCpack::rinvgamma(1, (1 + nu)/2, (nu + (e_t^2) / sigma2)/2)
+    
+  return(lambda)
+}
+```
+
 
 ## Conditional heteroskedasticity
 
