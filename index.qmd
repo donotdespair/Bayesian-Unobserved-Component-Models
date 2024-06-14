@@ -583,38 +583,18 @@ s &\sim \mathcal{G}(s_s, a)
 \end{align*}
 ```
 
-The kernel of the full conditional distribution of the error term variance $\sigma^2$ is based on the likelihood:
-
-```{=tex}
-\begin{align}
-\mathbf{y} \mid \boldsymbol{\tau}, \sigma^2 &\sim \mathcal{N}_T(\boldsymbol{\tau}, \sigma^2 I_T)\\
-&= (2\pi\sigma^2)^{-T/2} \exp \left( -\frac{1}{2\sigma^2} (\mathbf{y} - \boldsymbol{\tau})' (\mathbf{y} - \boldsymbol{\tau}) \right)
-\end{align}
-```
-and the prior distribution:
-```{=tex}
+The full conditional posterior distribution of the prior scale $s$ is based on the prior $p(\sigma^2 \mid s)$:
 \begin{align}
 p(\sigma^2 \mid s) \propto s^{\frac{\nu}{2}}(\sigma^2)^{-\frac{\nu+2}{2}} \exp \left( -\frac{1}{2}\frac{s}{\sigma^2} \right)
 \end{align}
-```
-
-The resulting full conditional posterior distribution is:
-
-```{=tex}
-\begin{align}
-p(\sigma^2 \mid \mathbf{y}, \boldsymbol{\tau}, s) &\sim\mathcal{IG}2(\bar{s}, \bar{\nu})\\
-\bar{s} &= s + (\mathbf{y} - \boldsymbol{\tau})'(\mathbf{y} - \boldsymbol{\tau})\\
-\bar{\nu} &= T + \nu
-\end{align}
-```
-The full conditional posterior distribution of the prior scale $s$ is based on the prior $p(\sigma^2 \mid s)$ and that for $s$:
+and that for $s$:
 \begin{align}
 s \sim \mathcal{G}(s_s, a) \propto s^{a-1} \exp(-\frac{s}{s_s})
 \end{align}
 which results in the following full conditional posterior distribution:
 \begin{align}
 p(s \mid \mathbf{y}, \mathbf{\tau}, \sigma^2) &= \mathcal{G}(\bar{s}_s,\bar{a})\\
-\bar{s}_s &= \left(s_s^{-1} + (2\sigma^2)^{-1}\right)^{-1}
+\bar{s}_s &= \left(s_s^{-1} + (2\sigma^2)^{-1}\right)^{-1}\\
 \bar{a} &= a + \frac{\nu}{2}
 \end{align}
 

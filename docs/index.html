@@ -663,26 +663,13 @@ p(\tau, \sigma^2 |y) &amp;\propto \exp(-\frac{\tau^T\bar{\Sigma}^{-1}\tau - 2\ta
 \sigma^2 \mid s &amp;\sim \text{IG2}(s, \nu) \\
 s &amp;\sim \mathcal{G}(s_s, a)
 \end{align*}\]</span>
-<p>The kernel of the full conditional distribution of the error term variance <span class="math inline">\(\sigma^2\)</span> is based on the likelihood:</p>
-<span class="math display">\[\begin{align}
-\mathbf{y} \mid \boldsymbol{\tau}, \sigma^2 &amp;\sim \mathcal{N}_T(\boldsymbol{\tau}, \sigma^2 I_T)\\
-&amp;= (2\pi\sigma^2)^{-T/2} \exp \left( -\frac{1}{2\sigma^2} (\mathbf{y} - \boldsymbol{\tau})' (\mathbf{y} - \boldsymbol{\tau}) \right)
-\end{align}\]</span>
-<p>and the prior distribution:</p>
-<span class="math display">\[\begin{align}
+<p>The full conditional posterior distribution of the prior scale <span class="math inline">\(s\)</span> is based on the prior <span class="math inline">\(p(\sigma^2 \mid s)\)</span>: <span class="math display">\[\begin{align}
 p(\sigma^2 \mid s) \propto s^{\frac{\nu}{2}}(\sigma^2)^{-\frac{\nu+2}{2}} \exp \left( -\frac{1}{2}\frac{s}{\sigma^2} \right)
-\end{align}\]</span>
-<p>The resulting full conditional posterior distribution is:</p>
-<span class="math display">\[\begin{align}
-p(\sigma^2 \mid \mathbf{y}, \boldsymbol{\tau}, s) &amp;\sim\mathcal{IG}2(\bar{s}, \bar{\nu})\\
-\bar{s} &amp;= s + (\mathbf{y} - \boldsymbol{\tau})'(\mathbf{y} - \boldsymbol{\tau})\\
-\bar{\nu} &amp;= T + \nu
-\end{align}\]</span>
-<p>The full conditional posterior distribution of the prior scale <span class="math inline">\(s\)</span> is based on the prior <span class="math inline">\(p(\sigma^2 \mid s)\)</span> and that for <span class="math inline">\(s\)</span>: <span class="math display">\[\begin{align}
+\end{align}\]</span> and that for <span class="math inline">\(s\)</span>: <span class="math display">\[\begin{align}
 s \sim \mathcal{G}(s_s, a) \propto s^{a-1} \exp(-\frac{s}{s_s})
 \end{align}\]</span> which results in the following full conditional posterior distribution: <span class="math display">\[\begin{align}
 p(s \mid \mathbf{y}, \mathbf{\tau}, \sigma^2) &amp;= \mathcal{G}(\bar{s}_s,\bar{a})\\
-\bar{s}_s &amp;= \left(s_s^{-1} + (2\sigma^2)^{-1}\right)^{-1}
+\bar{s}_s &amp;= \left(s_s^{-1} + (2\sigma^2)^{-1}\right)^{-1}\\
 \bar{a} &amp;= a + \frac{\nu}{2}
 \end{align}\]</span></p>
 <p>The code below implements the sampler from the full conditional posterior for <span class="math inline">\(s\)</span></p>
