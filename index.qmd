@@ -4,7 +4,7 @@ author:
   - name: Tomasz Woźniak
     url: https://github.com/donotdespair
     orcid: 0000-0003-2212-2378
-    name: Stephan Berke
+  - name: Stephan Berke
     url: https://github.com/sb955/
     orcid: 0009-0004-8443-1453
   
@@ -130,135 +130,55 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 
 ## Student-t error terms
 
-T-distributed error terms enhance robustness against outliers in data. This section outlines a method to incorporate t-distributed error terms into unobserved component models, adopting the approach described by Chan (2020), where the error term structure looks as follows: 
+T-distributed error terms enhance robustness against outliers in data. This section outlines a method to incorporate t-distributed error terms into unobserved component models where the error term structure is as follows: 
 
 $$
-\epsilon\sim N_{T}(0_{T},{\sigma^{2}}diag({\lambda_{t})})
+\boldsymbol\epsilon\sim N_{T}(0_{T},{\sigma^{2}}diag({\boldsymbol\lambda)})
 $$
 
-The model sepeartes the cross sectional and serial covariance, $\sigma^{2}$ and $\lambda_{t}$.
-If each $\lambda_{t}$ follows independently an $IG2\sim(\nu,\nu)$, then marginally $\epsilon_{t}$ follows a t-distribution. 
+where vector $\boldsymbol\lambda = (\lambda_1, \dots, \lambda_T)'$ collects th auxiliary latent variables. Each $\lambda_{t}$ follows independently the following prior:
+$$\lambda_t\sim\mathcal{IG}2(\nu,\nu)$$
+which makes $\epsilon_{t}$  marginally Student-t-distributed. 
 
-The kernel of the likelihood is given by: 
-
-$$
-L(y|\tau,\sigma^{2},\lambda_{t}) = (\sigma^2)^{\frac{T}{2}}(\lambda_{t})^{-\frac{_{N}}{2}}
-exp\{-\frac{1}{2}\frac{1}{\sigma^{2}}\frac{1}{\lambda_{t}}(y-\tau)'(y-\tau)\}.
-$$
-
-In this framework, the parameters $\tau$ and $\sigma^{2}$ follow a normal inverse gamma 2 distribution 
-
-$$p(\tau|\sigma^{2})\sim N(\underline{\tau}, \underline{\sigma_{\tau}^{2}})$$
-
-$$p(\sigma^{2})\sim IG2({\underline{s}, {\underline{{\nu}}})}$$
-
-where 
-$$
-p(\tau|\sigma^{2}) = \exp \left\{-\frac{1}{2} \frac{1}{\sigma^{2}} \frac{1}{\underline{\sigma_{\tau}^{2}}} (\tau - \underline{\tau})' (\tau - \underline{\tau})\right\}
-$$
-$$
-p(\sigma^{2})=(\sigma^{2})^{{\underline{\tau}+ N}}exp\{-\frac{1}{2}\frac{{\underline{s}}}{\sigma^{2}}\}
-$$
-
-Combining the likelihood and the priors 
-
-```{=tex}
-\begin{align}
-p(\tau,\sigma^{2}|y) &\propto L(y|\tau,\sigma^{2},\lambda_{t}) \times p(\tau|\sigma^{2}) \times p(\sigma^{2})
-
-&=(\sigma^{2})^{T/2}(\lambda_{t})^{-\frac{N}{2}}exp\{-\frac{1}{2}\frac{1}{\sigma^{2}}\frac{1}{\lambda_{t}}(y-\tau)'(y-\tau)\}
-
-&\times exp\{-\frac{1}{2}\frac{1}{\sigma^{2}}\frac{1}{\underline{\sigma_{\tau}^{2}}}(\tau-\underline{\tau})'(\tau-\underline{\tau})\}
-
-&\times (\sigma^{2})^{{\underline{\tau}+ N}}exp\{-\frac{1}{2}\frac{\underline{s}}{\sigma^{2}}\}
-\end{align}
-```
-
-After rearranging terms, the posterior function can be obtained as: 
-
-```{=tex}
-\begin{align}
-p(\tau,\sigma^{2}|y) &=(\sigma^{2})^{^{\frac{N+K+\text{{\bar{\tau}}+1}}{2}}}(\lambda_{t})^{-\frac{_{N}}{2}}
-
-&\times exp\{-\frac{1}{2}\frac{1}{\bar{\sigma_{\tau}^{2}}}(\tau-\bar{\tau})'(\tau-\bar{\tau})\}
-
-&\times exp\{-\frac{1}{2}\frac{1}{\sigma^{2}}\bar{s}\}
-\end{align}
-```
-
-The posterior follows a normal inverse wishart distribution
+The likelihood is given by: 
 
 $$
-p(\tau, \sigma^{2} | y) \sim NIW(\bar{\tau}, \bar{\sigma}^{2}, \bar{\nu}, \bar{s})
+L(\mathbf{y}|\boldsymbol\tau,\sigma^{2},\boldsymbol\lambda) = (\sigma^2)^{-\frac{T}{2}}\left(\prod_{t=1}^{T}(\lambda_{t})^{-\frac{1}{2}}\right)
+\exp\left\{-\frac{1}{2}\frac{1}{\sigma^{2}}\sum_{t=1}^{T}\frac{1}{\lambda_{t}}(y_t-\tau_t)^2\right\}.
 $$
 
-With the posterior parameters represented as: 
+The prior density of is proportional to
 
 $$
-\bar{\sigma}_{\tau}^{2}=(\frac{1}{\lambda_{t}}+{\underline{\sigma}_{\tau}^{2}})^{-1}
-$$
-$$
-\bar{\tau}=\bar{\sigma}^{2}(\frac{1}{\lambda_{t}}Y+\underline{\sigma}_{\tau}^{2} \underline{\tau})
-$$
-$$
-\bar{\nu}=T+{\underline{\tau}}
-$$
-
-$$
-\bar{s}= \underline{s}+ \frac{1}{\lambda_{t}}Y'Y+ \underline{\tau}'{\underline{\sigma}_{\tau}^{2}\underline{\tau}}
-$$
-
-###Distribution of $\lambda_{t}$
-
-The prior density of $\lambda_{t}\sim IG2(\nu_{\lambda},\nu_{\lambda})$ defines as
-
-$$
-p(\lambda_{t}|\nu_{\lambda})=\lambda_{t}^{-\frac{\nu_{\lambda}+2}{2}}\times exp\{-\frac{1}{2}\frac{1}{\lambda_{t}}\nu_{\lambda}\}.
+\lambda_{t}^{-\frac{\nu+2}{2}} \exp\left\{-\frac{1}{2}\frac{\nu}{\lambda_{t}}\right\}.
 $$
 
 Combining the likelihood and the prior 
 
-```{=tex}
 \begin{align}
-p(\lambda_{t}|y,\tau,\sigma^{2})\propto L(\lambda_{t},\tau,\sigma^{2}|y)*p(\lambda_{t}|\nu_{\lambda})
-&= (\lambda_{t})^{-\frac{_{N}}{2}}exp\{-\frac{1}{2}\frac{1}{\sigma^{2}}\frac{1}{\lambda_{t}}(y-\tau)'(y-(\tau)\}
-&\times \lambda_{t}^{-\frac{\nu_{\lambda}+2}{2}}\times exp\{-\frac{1}{2}\frac{1}{\lambda_{t}}\nu_{\lambda}\}
+p(\lambda_{t}|y,\tau,\sigma^{2})&\propto L(\lambda_{t},\tau,\sigma^{2}|y)p(\lambda_{t}|\nu_{\lambda})\\
+&= (\lambda_{t})^{-\frac{{1}}{2}}\exp\{-\frac{1}{2}\frac{1}{\sigma^{2}}\frac{1}{\lambda_{t}}(y-\tau)'(y-(\tau)\} \lambda_{t}^{-\frac{\nu+2}{2}} \exp\left\{-\frac{1}{2}\frac{\nu}{\lambda_{t}}\right\}
 \end{align}
-```
-Yields the posterior function
+
+Yields the posterior kernel 
 
 $$
-p(\lambda_{t}|y,\tau,\sigma^{2})=(\lambda_{t})^{-\frac{_{N+\nu+2}}{2}}exp\{-\frac{1}{2}\frac{1}{\lambda_{t}}\epsilon'\frac{1}{\sigma^{2}}\epsilon\}
+(\lambda_{t})^{-\frac{_{1+\nu+2}}{2}}\exp\left\{-\frac{1}{2}\frac{1}{\lambda_{t}}\left[ \nu + \frac{\epsilon_t^2}{\sigma^{2}}\right]\right\}
 $$
 
-where $\epsilon_{t}=y_{t}-\tau_{t}$
+where $\epsilon_{t}=y_{t}-\tau_{t}$. Therefore, the full conditional posterior for each $\lambda_t$ is:
 
-It can be observed. that the kernel of the posterior follows an inverse gamma 2 distribution
+$$IG2\sim(1+\nu,\nu+\frac{\epsilon_{t}^2}{\sigma^{2}})$$
 
-$$IG2\sim(N+\nu_{\lambda},\nu_{\lambda}+\epsilon_{t}'\frac{1}{\sigma^{2}}\epsilon_{t})$$
-
-```{r Lambda function, echo=TRUE}
-#install.packages("MCMCpack")
-library(MCMCpack)
-
-lambda_t <- function(y,tau,sigma.posterior){
-  N = ncol(Y)
-  t = nrow(Y)
-  lambda.nu.prior = 5
-  lambda<- array(t)
-  for (x in 1:t) {
-    e_t <- Y[x,] - tau[x,]
-    lambda[x] <- rinvgamma(1, (N + lambda.nu.prior)/2, (lambda.nu.prior + e_t %*% sigma.posterior %*% t(e_t))/2)
-    
-  }
-  list(lambda = lambda * diag(t))
+```{r Lambda}
+lambda_t <- function(y_t,tau_t,sigma2, nu){
   
+  e_t     <- y_t - tau_t
+  lambda  <- MCMCpack::rinvgamma(1, (1 + nu)/2, (nu + (e_t^2) / sigma2)/2)
+    
+  return(lambda)
 }
 ```
-
-### Reference
-
-Chan, Joshua CC. 2020. “Large Bayesian VARs: A Flexible Kronecker Error Covariance Structure.” Journal of Business & Economic Statistics 38 (1): 68–79.
 
 
 ## Conditional heteroskedasticity
