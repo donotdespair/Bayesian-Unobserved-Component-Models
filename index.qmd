@@ -7,6 +7,9 @@ author:
   - name: Inhye Kang
     url: https://github.com/inhyekang-au
     orcid: 0009-0007-8544-4952
+  - name: Rui Liu
+    url: https://github.com/rruiliu1005
+    orcid: 0009-0008-9348-8581
   - name: Yuqiao Yang
     url: https://github.com/JimmyYang917
   
