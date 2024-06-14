@@ -434,7 +434,134 @@ microbenchmark(
 
 Therefore, we could clearly see that the computational time drops substatially due to simulation smoothing method.
 
-## Analytical solution for a joint posterior
+## Analytical solution for a joint posterior distribution
+
+
+Consider a simplified model with a fixed signal-to-noise ratio $c$ given by
+
+\begin{align}
+\text{measurement equation} && y &= \tau + \epsilon\\
+\text{state equation} && \mathbf{H}\tau &= \eta\\
+\text{error term} && \epsilon\mid\tau &\sim \mathcal{N}_T(\mathbf{0}_T, \sigma^2\mathbf{I}_T)\\
+\text{innovation} && \eta &\sim \mathcal{N}_T(\mathbf{0}_T, c\sigma^2\mathbf{I}_T)
+\end{align}
+where $c$ is a constant, and $\tau_0 = 0$.
+
+
+In this model the state equation for $\tau$ is given by a Gaussian random ralk presented as:
+
+$$\begin{pmatrix} 
+1 & 0 & \cdots & 0 \\
+-1 & 1 & \cdots & 0 \\ 
+\vdots & \ddots & \ddots & \vdots \\ 
+0 & 0 & -1 & 1
+\end{pmatrix} \begin{pmatrix} \tau_1 \\ \tau_2 \\ \vdots \\ \tau_T \end{pmatrix}  = \begin{pmatrix} \tau_1 \\ \tau_2-\tau_1 \\ \vdots \\ \tau_T - \tau_{T-1} \end{pmatrix} = \eta$$
+
+The parameters to be estimated are: $\mathbf{\color{purple}{\tau, \sigma^2}}$
+
+### Prior distributions 
+
+#### Prior distribution for $\tau$ 
+
+Rewrite the state equation as
+$$\tau =  H^{-1}\eta$$
+Then the prior distribution of $\tau$ is formed using
+$$\mathbf{\color{purple}{\eta \sim \mathcal{N}(0_T, c \sigma^2 I_T) \implies H^{-1}\eta \sim \mathcal{N}(0_T, c\sigma^2(H^T H)^{-1})}}$$
+since $Var(H^{-1}\eta) = H^{-1}Var(\eta)(H^{-1})^T =c\sigma^2(H^TH)^{-1}$
+
+Then, the prior distribution of $\tau|\sigma^2$ is 
+$$\tau|\sigma^2 \sim \mathcal{N}(0_T, c\sigma^2(H^TH)^{-1}) \\ \propto (c\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{\tau^TH^T H\tau}{2c\sigma^2}\right)
+$$
+
+#### Prior assumptions for $\sigma^2$
+
+$$\sigma^2 \sim \mathcal{IG2}(s_{prior}, \nu_{prior}) \propto (\sigma^2)^\frac{-\nu_{prior}+2}{2}exp\left(-\frac{s_{prior}}{2\sigma^2}\right)$$
+
+### The Joint Posterior Distribution
+
+The likelihood function is constructed using the the measurement equation: 
+$$y = \tau + \epsilon$$
+and the distributional assumption on its error term
+$$\epsilon \sim \mathcal{N}(0_T, \sigma^2I_T)$$
+which results in the likelihood function:
+$$y|\tau, \sigma^2 \sim \mathcal{N}(\tau, \sigma^2I_T)\propto (\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{1}{2\sigma^2}(y-\tau)^T(y-\tau)\right)$$
+
+The likelihood is combined with the joint prior distribution of $\tau$ and $\sigma^2$ to derive the joint posterior distribution of $\tau$ and $\sigma^2$. It is derived as follows: 
+
+$$
+p(\tau, \sigma^2 |y) = \frac{p(\tau, \sigma^2, y)}{p(y)} \propto p(\tau, \sigma^2, y) = p(y | \tau, \sigma^2)p(\tau, \sigma^2) =p(y | \tau, \sigma^2)p(\tau|\sigma^2)p(\sigma^2)
+$$
+
+This expression is proportional to
+\begin{align}
+&\propto (\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{(y-\tau)^T(y-\tau)}{2\sigma^2}\right) \times 
+(\sigma^2)^{-\frac{T}{2}}\exp\left(-\frac{\tau^TH^T H\tau}{2c\sigma^2}\right)\\
+&\qquad\times(\sigma^2)^{-\frac{\nu_{prior}+2}{2}} \exp(-\frac{s_{prior}}{2\sigma^2})\\
+&\propto \exp(-\frac{y^Ty - 2\tau^T y + \tau^T\tau + c^{-1}\tau^TH^T H\tau}{2\sigma^2})\\ &\qquad\times \exp(-\frac{s_{prior}}{2\sigma^2})\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}}\\
+&= \exp(-\frac{\tau^T(c^{-1}H^T H + I_T)\tau - 2\tau^Ty}{2\sigma^2})\\ 
+&\qquad\times\exp(-\frac{y^Ty + s_{prior}}{2\sigma^2})\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}}
+\end{align}
+
+Let $\bar{\Sigma} = (c^{-1}H^T H + I_T)^{-1}$, then
+\begin{align}
+p(\tau, \sigma^2 |y) &\propto \exp(-\frac{\tau^T\bar{\Sigma}^{-1}\tau - 2\tau^Ty + y^T\bar{\Sigma}y}{2\sigma^2})\exp(-\frac{y^Ty + s_{prior}-y^T\bar{\Sigma}y}{2\sigma^2})\\
+&\qquad\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}}
+\end{align}
+
+In the expression above, we recognise the kernel of the $T$-variate normal inverted gamma 2 distribution. Therefore, the joint posterior of the parameters of the model is given by:
+\begin{align}
+\tau, \Sigma |y &\sim \mathcal{NIG2}(\bar{\tau}, \bar{\Sigma}, \bar{\nu}, \bar{s})\\[2ex]
+\bar{\Sigma} &= (c^{-1}H^T H + I_T)^{-1}\\
+\bar{\tau} &= \bar{\Sigma}y\\
+\bar{\nu} &= 2T+\nu_{prior}\\
+\bar{s} &= s_{prior}+y^Ty-y^T\bar{\Sigma}y
+\end{align}
+
+The function below implements the sampler from this joint distribution.
+
+```{r joint_sampler}
+UC.local.tau.sigma.Gibbs.sampler    = function(S, starting.values, priors){
+  
+  aux     = starting.values
+  T       = nrow(aux$Y)
+
+  posteriors    = list(
+    tau     = matrix(NA,T,S),
+    sigma   = rep(NA,S)
+  )
+
+  for (s in 1:S){
+    
+    V.tau.bar.inv = priors$c^(-1)*t(aux$H)%*%aux$H + diag(T)
+    V.tau.bar.inv = 0.5*(V.tau.bar.inv + t(V.tau.bar.inv))
+    
+    # Sampling sigma
+    ###########################
+    sigma.s   = as.numeric(priors$sigma.s + t(aux$Y)%*%aux$Y - t(aux$tau)%*%V.tau.bar.inv%*%aux$tau)
+    sigma.nu  = priors$sigma.nu + 2*T
+    sigma.draw= sigma.s/rchisq(1,sigma.nu)
+    aux$sigma     = sigma.draw
+
+    # Sampling tau
+    ###########################
+    b.tau         = aux$Y
+    precision.L   = t(bandchol(V.tau.bar.inv))
+    epsilon       = rnorm(T)
+    b.tau.tmp     = forwardsolve(precision.L, b.tau)
+    tau.draw      = backsolve(t(precision.L), b.tau.tmp + epsilon)
+    aux$tau       = tau.draw
+
+    posteriors$tau[,s]     = aux$tau
+    posteriors$sigma[,s]   = aux$sigma
+  }
+
+  output      = list(
+    posterior = posteriors,
+    last.draw = aux
+  )
+  return(output)
+}
+```
 
 # Hierarchical modeling
 
