@@ -14,9 +14,11 @@ author:
   - name: Rui Liu
     url: https://github.com/rruiliu1005
     orcid: 0009-0008-9348-8581
+  - name: Yansong Yang
+    url: https://github.com/russellyang728
   - name: Yuqiao Yang
     url: https://github.com/JimmyYang917
-
+    
     execute:
   #echo: false
 citation: 
@@ -674,6 +676,55 @@ s.sampler = function(sigma2, prior){
 
 
 ## Estimating the initial condition prior scale
+
+In the univariate local-level model, the initial state $\tau_0$ and the
+variance $s^2$ are key parameters determining the behavior of the
+stochastic process. For the initial state $\tau_0$, a prior is specified
+as a univariate normal distribution, denoted by
+
+$$\tau_0\mid s^2 \sim \text{N}(\underline\tau_0, s^2)$$
+
+reflecting our belief
+about the distribution of $\tau_0$ before observing the data. While, for
+the variance $s^2$, which controls the fluctuation of the process, we
+use inverse gamma 2 distribution,
+$$s^2 \sim \text{IG2}(\underline{s}, \underline{\nu})$$
+
+The full posterior of $s^2$ is derived below: 
+
+\begin{align}
+p(s^2|y,\sigma,\tau,\tau_0,\sigma_{\eta}, \underline{s}, \underline{\nu}) &\propto
+p(y|\tau,\sigma)p(\tau|\tau_0,\sigma_{\eta}^2)p(\tau_0|s^2)p(s^2) \\
+&\propto p(\tau_0|s^2)p(s^2|\underline{s}, \underline{\nu}) \\
+&= (s^2)^{-\frac{1}{2}}\exp\left\{-\frac{1}{2}(\tau_0-\underline{\tau_0})'(s^2)^{-1}(\tau_0-\underline{\tau_0})\right\}\\
+&\qquad\times (s^2)^{-\frac{\underline{\nu}+2}{2}}\exp\left\{-\frac{1}{2}\frac{\underline{s}}{s^2}\right\} \\
+&= (s^2)^{-\frac{1+\underline{\nu}+2}{2}}
+\exp \left\{-\frac{1}{2}\frac{(\tau_0-\underline{\tau_0})^2+\underline{s}}{s^2}\right\}
+\end{align}
+
+Hence, full conditional posterior of $s^2$ in a form of inverse
+gamma 2 distribution, where
+
+\begin{align}
+s^2\mid \mathbf{y}, \mathbf{\tau}, \tau_0 &\sim\mathcal{IG}2(\overline{s}, \overline{\nu})\\
+\overline{\nu} &= 1+\underline{\nu} \\
+\overline{s} &= (\tau_0-\underline{\tau_0})^2+\underline{s}
+\end{align}
+
+This R code below implements a sampler from the full-conditional posterior distribution of $s^2$:
+
+```{r}
+s2_sampler <- function(tau_0, tau_0_prior, s_prior, nu_prior) {
+    
+    nu_posterior <- nu_prior + 1
+    s_posterior <- (tau_0 - tau_0_prior)^2 + s_prior
+      
+    s2 <- s_posterior / rchisq(1, nu_posterior)
+    
+    return(s2)
+}
+```
+
 
 ## Student-t prior for the trend component
 
