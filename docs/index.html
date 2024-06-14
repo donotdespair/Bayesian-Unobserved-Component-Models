@@ -2,12 +2,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.551">
+<meta name="generator" content="quarto-1.3.361">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Tomasz Woźniak">
-<meta name="author" content="Ben Gussen">
+<meta name="author" content="Inhye Kang">
+<meta name="author" content="Zheyuan Li">
+<meta name="author" content="Rui Liu">
+<meta name="author" content="Yuqiao Yang">
 
 <title>Macroeconometrics Students Present - Bayesian Unobserved Component Models</title>
 <style>
@@ -24,7 +27,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -81,13 +84,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 50,
-  "keyboard-shortcut": [
-    "f",
-    "/",
-    "s"
-  ],
-  "show-item-context": false,
+  "limit": 20,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -96,7 +93,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
-    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -106,33 +102,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
-
 <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -140,9 +109,9 @@ window.Quarto = {
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container mx-auto">
+      <div class="navbar-brand-container">
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">Macroeconometrics Students Present</span>
     </a>
@@ -154,14 +123,14 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/donotdespair/Bayesian-Unobserved-Component-Models"> <i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/donotdespair/Bayesian-Unobserved-Component-Models" rel="" target=""><i class="bi bi-github" role="img">
 </i> 
-<span class="menu-text"></span></a>
+ <span class="menu-text"></span></a>
   </li>  
 </ul>
-          </div> <!-- /navcollapse -->
-          <div class="quarto-navbar-tools">
+            <div class="quarto-navbar-tools">
 </div>
+          </div> <!-- /navcollapse -->
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -183,9 +152,17 @@ window.Quarto = {
   </ul></li>
   <li><a href="#bayesian-estimation" id="toc-bayesian-estimation" class="nav-link" data-scroll-target="#bayesian-estimation">Bayesian estimation</a>
   <ul class="collapse">
+  <li><a href="#derivation-of-full-conditional-posterior-distributions" id="toc-derivation-of-full-conditional-posterior-distributions" class="nav-link" data-scroll-target="#derivation-of-full-conditional-posterior-distributions">Derivation of full conditional posterior distributions</a></li>
   <li><a href="#gibbs-sampler" id="toc-gibbs-sampler" class="nav-link" data-scroll-target="#gibbs-sampler">Gibbs sampler</a></li>
-  <li><a href="#simulation-smoother-and-precision-sampler" id="toc-simulation-smoother-and-precision-sampler" class="nav-link" data-scroll-target="#simulation-smoother-and-precision-sampler">Simulation smoother and precision sampler</a></li>
-  <li><a href="#analytical-solution-for-a-joint-posterior" id="toc-analytical-solution-for-a-joint-posterior" class="nav-link" data-scroll-target="#analytical-solution-for-a-joint-posterior">Analytical solution for a joint posterior</a></li>
+  <li><a href="#simulation-smoother-and-precision-sampler" id="toc-simulation-smoother-and-precision-sampler" class="nav-link" data-scroll-target="#simulation-smoother-and-precision-sampler">Simulation smoother and precision sampler</a>
+  <ul class="collapse">
+  <li><a href="#simulation-smoother-algorithm-in-r" id="toc-simulation-smoother-algorithm-in-r" class="nav-link" data-scroll-target="#simulation-smoother-algorithm-in-r">Simulation smoother algorithm in R</a></li>
+  </ul></li>
+  <li><a href="#analytical-solution-for-a-joint-posterior-distribution" id="toc-analytical-solution-for-a-joint-posterior-distribution" class="nav-link" data-scroll-target="#analytical-solution-for-a-joint-posterior-distribution">Analytical solution for a joint posterior distribution</a>
+  <ul class="collapse">
+  <li><a href="#prior-distributions-1" id="toc-prior-distributions-1" class="nav-link" data-scroll-target="#prior-distributions-1">Prior distributions</a></li>
+  <li><a href="#the-joint-posterior-distribution" id="toc-the-joint-posterior-distribution" class="nav-link" data-scroll-target="#the-joint-posterior-distribution">The Joint Posterior Distribution</a></li>
+  </ul></li>
   </ul></li>
   <li><a href="#hierarchical-modeling" id="toc-hierarchical-modeling" class="nav-link" data-scroll-target="#hierarchical-modeling">Hierarchical modeling</a>
   <ul class="collapse">
@@ -193,17 +170,12 @@ window.Quarto = {
   <li><a href="#estimating-inverted-gamma-2-error-term-variance-prior-scale" id="toc-estimating-inverted-gamma-2-error-term-variance-prior-scale" class="nav-link" data-scroll-target="#estimating-inverted-gamma-2-error-term-variance-prior-scale">Estimating inverted-gamma 2 error term variance prior scale</a></li>
   <li><a href="#estimating-the-initial-condition-prior-scale" id="toc-estimating-the-initial-condition-prior-scale" class="nav-link" data-scroll-target="#estimating-the-initial-condition-prior-scale">Estimating the initial condition prior scale</a></li>
   <li><a href="#student-t-prior-for-the-trend-component" id="toc-student-t-prior-for-the-trend-component" class="nav-link" data-scroll-target="#student-t-prior-for-the-trend-component">Student-t prior for the trend component</a></li>
-  <li><a href="#estimating-student-t-degrees-of-freedom-parameter" id="toc-estimating-student-t-degrees-of-freedom-parameter" class="nav-link" data-scroll-target="#estimating-student-t-degrees-of-freedom-parameter">Estimating Student-t degrees of freedom parameter</a>
-  <ul class="collapse">
-  <li><a href="#derivation-of-full-conditional-posteriors" id="toc-derivation-of-full-conditional-posteriors" class="nav-link" data-scroll-target="#derivation-of-full-conditional-posteriors">Derivation of Full Conditional Posteriors</a></li>
-  <li><a href="#r-function-for-gibbs-sampler" id="toc-r-function-for-gibbs-sampler" class="nav-link" data-scroll-target="#r-function-for-gibbs-sampler">R Function for Gibbs Sampler</a></li>
-  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
-  </ul></li>
+  <li><a href="#estimating-student-t-degrees-of-freedom-parameter" id="toc-estimating-student-t-degrees-of-freedom-parameter" class="nav-link" data-scroll-target="#estimating-student-t-degrees-of-freedom-parameter">Estimating Student-t degrees of freedom parameter</a></li>
   <li><a href="#laplace-prior-for-the-trend-component" id="toc-laplace-prior-for-the-trend-component" class="nav-link" data-scroll-target="#laplace-prior-for-the-trend-component">Laplace prior for the trend component</a></li>
   </ul></li>
   <li><a href="#model-extensions" id="toc-model-extensions" class="nav-link" data-scroll-target="#model-extensions">Model extensions</a>
   <ul class="collapse">
+  <li><a href="#estimation-of-autoregressive-parameters-for-cycle-component" id="toc-estimation-of-autoregressive-parameters-for-cycle-component" class="nav-link" data-scroll-target="#estimation-of-autoregressive-parameters-for-cycle-component">Estimation of autoregressive parameters for cycle component</a></li>
   <li><a href="#autoregressive-cycle-component" id="toc-autoregressive-cycle-component" class="nav-link" data-scroll-target="#autoregressive-cycle-component">Autoregressive cycle component</a></li>
   <li><a href="#random-walk-with-time-varying-drift-parameter" id="toc-random-walk-with-time-varying-drift-parameter" class="nav-link" data-scroll-target="#random-walk-with-time-varying-drift-parameter">Random walk with time-varying drift parameter</a></li>
   <li><a href="#student-t-error-terms" id="toc-student-t-error-terms" class="nav-link" data-scroll-target="#student-t-error-terms">Student-t error terms</a></li>
@@ -213,8 +185,7 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#predictive-density" id="toc-predictive-density" class="nav-link" data-scroll-target="#predictive-density">Predictive density</a></li>
   <li><a href="#sampling-from-the-predictive-density" id="toc-sampling-from-the-predictive-density" class="nav-link" data-scroll-target="#sampling-from-the-predictive-density">Sampling from the predictive density</a></li>
-  <li><a href="#missing-observations" id="toc-missing-observations" class="nav-link" data-scroll-target="#missing-observations">Missing observations</a></li>
-  <li><a href="#references-1" id="toc-references-1" class="nav-link" data-scroll-target="#references-1">References</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -235,7 +206,10 @@ window.Quarto = {
     <div class="quarto-title-meta-heading">Authors</div>
     <div class="quarto-title-meta-contents">
              <p><a href="https://github.com/donotdespair">Tomasz Woźniak</a> <a href="https://orcid.org/0000-0003-2212-2378" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
-             <p><a href="https://github.com/bgussen">Ben Gussen</a> <a href="https://orcid.org/0000-0003-4406-4076" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+             <p><a href="https://github.com/inhyekang-au">Inhye Kang</a> <a href="https://orcid.org/0009-0007-8544-4952" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+             <p><a href="https://github.com/lzyzero3">Zheyuan Li</a> </p>
+             <p><a href="https://github.com/rruiliu1005">Rui Liu</a> <a href="https://orcid.org/0009-0008-9348-8581" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+             <p><a href="https://github.com/JimmyYang917">Yuqiao Yang</a> </p>
           </div>
   </div>
     
@@ -244,9 +218,7 @@ window.Quarto = {
   </div>
   
 
-
 </header>
-
 
 <blockquote class="blockquote">
 <p><strong>Abstract.</strong> We present the basics of Bayesian estimation and inference for unobserved component models on the example of a local-level model. The range of topics includes the conjugate prior analysis using normal-inverted-gamma 2 distribution and its extensions focusing on hierarchical modelling, conditional heteroskedasticity, and Student-t error terms. We scrutinise Bayesian forecasting and sampling from the predictive density.</p>
@@ -304,24 +276,411 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 </section>
 <section id="prior-distributions" class="level2">
 <h2 class="anchored" data-anchor-id="prior-distributions">Prior distributions</h2>
+<p>The state equation for <span class="math inline">\(\boldsymbol\tau\)</span> can be rewritten as follows: <span class="math display">\[
+\begin{gather}
+\boldsymbol\tau = \mathbf{H}^{-1} \mathbf{i} \tau_0+\mathbf{H}^{-1}\boldsymbol\eta \\
+\boldsymbol\eta \sim \mathcal{N}(\mathbf{0}_T, \sigma_\eta^2 \mathbf{I}_T) \\
+\mathbf{H}^{-1} \boldsymbol\eta \sim \mathcal{N}(\mathbf{0}_T, \sigma_\eta^2\left(\mathbf{H}^{\prime} \mathbf{H}\right)^{-1})
+\end{gather}
+\]</span> Using the state equation for <span class="math inline">\(\boldsymbol\tau\)</span> above, we can derive the prior distribution of <span class="math inline">\(\boldsymbol\tau\)</span> as: <span class="math display">\[
+\begin{align}
+\boldsymbol\tau | \tau_0, \sigma_\eta^2 &amp;\sim \mathcal{N}_T(\mathbf{H}^{-1} \mathbf{i} \tau_0, \sigma_\eta^2(\mathbf{H}^{\prime} \mathbf{H})^{-1})
+\\ &amp;\propto \exp \left\{-\frac{1}{2} \frac{1}{\sigma_\eta^2}\left(\boldsymbol\tau-\mathbf{H}^{-1} \mathbf{i} \tau_0\right)^{\prime}\left(\mathbf{H}^{\prime} \mathbf{H}\right)\left(\boldsymbol\tau-\mathbf{H}^{-1} \mathbf{i} \tau_0\right)\right\}
+\end{align}
+\]</span> Next, the prior distribution of <span class="math inline">\(\tau_0\)</span> is defined as uni-variate normal: <span class="math display">\[
+\begin{align}
+\tau_0 &amp;\sim \mathcal{N}(\underline{\tau_0}, \underline{V_{\tau_{0}}})
+\\ &amp;\propto \exp \left\{-\frac{1}{2}(\tau_0-\underline{\tau_0})^{\prime} \underline{V_{\tau_{0}}}^{-1}(\tau_0-\underline{\tau_0})\right\}
+\end{align}
+\]</span> and the prior distribution of <span class="math inline">\(\sigma_\eta^2\)</span> is inverted gamma 2: <span class="math display">\[
+\begin{align}
+\sigma_\eta^2 &amp;\sim \mathcal{IG}2(\underline{s_\eta}, \underline{v_\eta}) \\
+&amp;\propto (\sigma_\eta^2)^{-\frac{\underline{v}+2}{2}} \exp \left\{-\frac{1}{2} \frac{s}{\sigma_\eta^2}\right\}
+\end{align}
+\]</span></p>
+<p>The prior distribution of <span class="math inline">\(\sigma^2\)</span> is the following: <span class="math display">\[
+\begin{align}
+\sigma^2 &amp;\sim \mathcal{IG}2(\underline{s}, \underline{v}) \\
+&amp;\propto (\sigma^2)^{-\frac{\underline{v}+2}{2}} \exp \left\{-\frac{1}{2} \frac{s}{\sigma^2}\right\}
+\end{align}
+\]</span></p>
+<p>The Joint prior distribution of the parameters of the model <span class="math inline">\(\boldsymbol\tau\)</span>, <span class="math inline">\(\tau_0\)</span>, <span class="math inline">\(\sigma^2_{\eta}\)</span>, and <span class="math inline">\(\sigma^2\)</span> is then given by: <span class="math display">\[
+\begin{aligned}
+p(\boldsymbol\tau,\tau_{0},\sigma_{\eta}^{2},\sigma^{2}) = p(\boldsymbol\tau|\tau_{0},\sigma_{\eta}^{2}) \space p(\tau_{0}) \space p(\sigma_{\eta}^{2}) \space p(\sigma^{2})
+\end{aligned}
+\]</span> where the individual distributions on the RHS are as specified above.</p>
+<p>Finally, given that <span class="math inline">\(\boldsymbol\epsilon\)</span> follows normal distribution, <span class="math display">\[
+\begin{align}
+\boldsymbol\epsilon\mid\sigma^2 &amp;\sim \mathcal{N}(\mathbf{0}_T, \sigma^2 \mathbf{I}_T)
+\end{align}
+\]</span> the prior distribution of <span class="math inline">\(\boldsymbol\epsilon\)</span> given <span class="math inline">\(\sigma^2\)</span> is proportional to: <span class="math display">\[
+\begin{align}
+\boldsymbol\epsilon | \sigma^2 &amp;\propto \exp \left\{-\frac{1}{2} \frac{1}{\sigma^2} \boldsymbol\epsilon^{\prime}\boldsymbol\epsilon\right\}
+\end{align}
+\]</span></p>
 </section>
 </section>
 <section id="bayesian-estimation" class="level1">
 <h1>Bayesian estimation</h1>
+<section id="derivation-of-full-conditional-posterior-distributions" class="level2">
+<h2 class="anchored" data-anchor-id="derivation-of-full-conditional-posterior-distributions">Derivation of full conditional posterior distributions</h2>
+<p>Full conditional posterior distribution could be estimated basing on Bayes’ theorem and priors shown above. Therefore, the full conditional posterior distribution is proportional to the product of likelihood functions and priors. <span class="math display">\[
+\begin{aligned}
+p(\tau,\tau_{0},\sigma^{2},\sigma_{\eta}^{2}|\mathbf{y}) &amp; \propto p(\mathbf{y}|\tau,\tau_{0},\sigma^{2},\sigma_{\eta}^{2}) \space p(\tau,\tau_{0},\sigma^{2},\sigma_{\eta}^{2})
+\end{aligned}
+\]</span> The joint prior is as specified in the section above.</p>
+<p>Two Conditional likelihood functions to derive the <strong>full Conditional posterior distribution</strong> of <span class="math inline">\(\tau,\tau_{0},\sigma^{2},\sigma_{\eta}^{2}\)</span> is as follows: <span class="math display">\[
+\begin{align}
+L(\boldsymbol\tau,\sigma^{2}|\mathbf{y},\tau_{0},\sigma_{\eta}^{2}) \propto \left( \sigma^{2} \right)^{-\frac{T}{2}} \times\exp\left\{ -\frac{1}{2}\sigma^{-2}\left( \mathbf{y}-\boldsymbol\tau \right)'\left( \mathbf{y}-\boldsymbol\tau \right) \right\}
+\end{align}
+\]</span> and <span class="math display">\[
+\begin{align}
+L(\tau_{0},\sigma_{\eta}^{2}|\mathbf{y},\boldsymbol\tau,\sigma^{2}) \propto \left( \sigma_{\eta}^{2} \right)^{-\frac{T}{2}} \times\exp\left\{-\frac{1}{2}\sigma_{\eta}^{-2}\left(\mathbf{H}\boldsymbol\tau -\mathbf{i}\tau_{0}\right)'\left(\mathbf{H}\boldsymbol\tau-\mathbf{i}\tau_{0}\right)\right\}
+\end{align}
+\]</span></p>
+<p>The full Conditional posterior distribution of <span class="math inline">\(\boldsymbol\tau\)</span> is derived as follows: <span class="math display">\[
+\begin{align}
+P(\boldsymbol\tau|\mathbf{y},\tau_{0},\sigma^{2},\sigma_{\eta}^{2})&amp;\propto L(\boldsymbol\tau,\sigma^{2}|\mathbf{y},\tau_{0},\sigma_{\eta}^{2}) \space P(\boldsymbol\tau|\tau_{0},\sigma_{\eta}^{2})\\
+\\&amp;\propto \exp\left\{ -\frac{1}{2}\sigma^{-2}\left( \mathbf{y}-\boldsymbol\tau \right)'\left( \mathbf{y}-\boldsymbol\tau \right) \right\}\\
+&amp;\qquad\times \exp\left\{ -\frac{1}{2}\sigma_{\eta}^{-2}\left(\boldsymbol\tau-\mathbf{H}^{-1} \mathbf{i}\tau_{0}\right)'\mathbf{H}'\mathbf{H}\left( \boldsymbol\tau-\mathbf{H}^{-1} \mathbf{i}\tau_{0} \right) \right\}
+\end{align}
+\]</span> that after completing th squares results in a multivariate normal full conditional posterior distribution: <span class="math display">\[
+\begin{align}
+P(\boldsymbol\tau &amp;|\mathbf{y},\tau_{0},\sigma^{2},\sigma_{\eta}^{2}) \sim \mathcal{N}(\overline{\boldsymbol\tau},\overline{V_{\boldsymbol\tau}}) \\
+\\ \overline{V_{\boldsymbol\tau}} &amp;= \left[ \sigma^{-2}\mathbf{I}_T +\sigma_{\eta}^{-2}\mathbf{H}'\mathbf{H}\right]^{-1}\\
+\overline{\boldsymbol\tau} &amp;= \overline{V_{\tau}}\left[\sigma^{-2}\mathbf{y} + \sigma_{\eta}^{-2}\mathbf{H}'\mathbf{i}\tau_{0} \right]
+\end{align}
+\]</span> The full conditional posterior distribution of <span class="math inline">\(\tau_{0}\)</span> is the following: <span class="math display">\[
+\begin{align}
+P(\tau_{0}|\mathbf{y},\boldsymbol\tau,\sigma^{2},\sigma_{\eta}^{2}) &amp;\propto L(\tau_{0}|\mathbf{y},\boldsymbol\tau,\sigma^{2},\sigma_{\eta}^{2}) \space P(\tau_{0}|\sigma_{\eta}^{2}) \\
+\\ &amp;\propto \exp\left\{ -\frac{1}{2}\sigma_{\eta}^{-2}\left(\mathbf{H}\boldsymbol\tau -\mathbf{i}\tau_{0}\right)'\left(\mathbf{H}\boldsymbol\tau-\mathbf{i}\tau_{0}\right)\right\}\\
+&amp;\times \exp\left\{ -\frac{1}{2}\left(\tau_{0}-  \underline{\tau_0}\right)'\underline{V_{\tau_{0}}}^{-1}\left(\tau_{0}-  \underline{\tau_0}\right) \right\}
+\end{align}
+\]</span> and is given by a uni-variate normal distribution: <span class="math display">\[
+\begin{align}
+P(\tau_{0} &amp;|\mathbf{y},\boldsymbol\tau,\sigma^{2},\sigma_{\eta}^{2}) \sim N(\overline{\tau_{0}},\overline{V_{\tau_{0}}}) \\
+\\ \overline{V_{\tau_{0}}}&amp;=\left[ \sigma_{\eta}^{-2}\mathbf{i}'\mathbf{i} +\underline{V_{\tau_{0}}}^{-1}\right]^{-1} =\left[ \sigma_{\eta}^{-2} +\underline{V_{\tau_{0}}}^{-1}\right]^{-1} \\
+\overline{\tau_{0}}&amp;=\overline{V_{\tau_{0}}}\left[ \sigma_{\eta}^{-2} \mathbf{i}'\mathbf{H}\boldsymbol\tau +\underline{V_{\tau_{0}}}^{-1}\underline{\tau_{0}}\right]\\
+&amp;= \overline{V_{\tau_{0}}}\left[ \sigma_{\eta}^{-2} \tau_1 +\underline{V_{\tau_{0}}}^{-1}\underline{\tau_{0}}\right]
+\end{align}
+\]</span> The full conditional posterior distribution of <span class="math inline">\(\sigma_{\eta}^{2}\)</span> is derived as: <span class="math display">\[
+\begin{align}
+P(\sigma_{\eta}^{2}|\mathbf{y},\boldsymbol\tau,\tau_{0},\sigma^{2}) &amp;\propto L(\sigma_{\eta}^{2}|\mathbf{y},\boldsymbol\tau,\tau_{0},\sigma^{2}) \space P(\sigma_{\eta}^{2}) \\
+\\ &amp;\propto \left( \sigma_{\eta}^{2} \right)^{-\frac{T}{2}} \exp\left\{ -\frac{1}{2}\sigma_{\eta}^{-2}\left(\mathbf{H}\boldsymbol\tau -\mathbf{i}\tau_{0}\right)'\left(\mathbf{H}\boldsymbol\tau -\mathbf{i}\tau_{0}\right)\right\}
+\\ &amp;\times \left( \sigma_{\eta}^{2} \right)^{-\frac{\underline{\upsilon}+2}{2}} \exp\left\{ -\frac{1}{2}\frac{\underline{s}}{\sigma_{\eta}^{2}}\right\}
+\end{align}
+\]</span> where <span class="math display">\[
+\begin{align}
+P(\sigma_{\eta}^{2}&amp;|\mathbf{y},\boldsymbol\tau,\tau_{0},\sigma^{2}) \sim \mathcal{IG}2(\overline{s_{\eta}},\overline{\upsilon_{\eta}}) \\
+\\ \overline{s_{\eta}}&amp;=\underline{s} + \left(\mathbf{H}\boldsymbol\tau -\mathbf{i}\tau_{0}\right)'\left(\mathbf{H}\boldsymbol\tau -\mathbf{i}\tau_{0}\right) \\
+\overline{\upsilon_{\eta}}&amp;= \underline{\upsilon}+T
+\end{align}
+\]</span> Finally, the full conditional posterior distribution of <span class="math inline">\(\sigma^{2}\)</span> is the following: <span class="math display">\[
+\begin{align}
+P(\sigma^{2}|\mathbf{y},\boldsymbol\tau,\tau_{0},\sigma_{\eta}^{2})&amp;=L(\sigma^{2}|\mathbf{y},\boldsymbol\tau,\tau_{0},\sigma_{\eta}^{2}) \space P(\sigma^{2}) \\
+\\ &amp;\propto \left( \sigma^{2} \right)^{-\frac{T}{2}} \exp\left\{ -\frac{1}{2}\sigma^{-2}\left(\mathbf{y}-\boldsymbol\tau\right)'\left(\mathbf{y}-\boldsymbol\tau\right)\right\}
+\\ &amp;\times \left( \sigma^{2} \right)^{-\frac{\underline{\upsilon}+2}{2}} \exp\left\{ -\frac{1}{2}\frac{\underline{s}}{\sigma^{2}}\right\}
+\end{align}
+\]</span> where <span class="math display">\[
+\begin{align}
+P(\sigma^{2}|&amp;\mathbf{y},\boldsymbol\tau,\tau_{0},\sigma_{\eta}^{2}) \sim \mathcal{IG}2(\overline{s},\overline{\upsilon}) \\
+\\ \overline{s}&amp;=\underline{s} + \left(\mathbf{y}-\boldsymbol\tau\right)'\left(\mathbf{y}-\boldsymbol\tau\right) \\
+\overline{\upsilon}&amp;= \underline{\upsilon}+T
+\end{align}
+\]</span></p>
+</section>
 <section id="gibbs-sampler" class="level2">
 <h2 class="anchored" data-anchor-id="gibbs-sampler">Gibbs sampler</h2>
+<p>A <strong>Gibbs Sampler</strong> can be applied using the following steps:</p>
+<p>At each iteration <span class="math inline">\(s\)</span> where <span class="math inline">\(s\)</span> goes from 1 to <span class="math inline">\(S\)</span>,</p>
+<p>&nbsp;&nbsp;&nbsp;Step 1. Draw <span class="math inline">\(\tau_0^{(s)}\)</span> from the <span class="math inline">\(N({\tau_{0}}, {V_{\tau_{0}}})\)</span> distribution and collect <span class="math inline">\(\tau_0\)</span>.<br>
+&nbsp;&nbsp;&nbsp;Step 2. Draw <span class="math inline">\({\sigma^2_{\eta}}^{(s)}\)</span> from the <span class="math inline">\(\mathcal{IG}2({S_\eta}, {v_\eta})\)</span> distribution and collect <span class="math inline">\(\sigma_\eta^2\)</span>.<br>
+&nbsp;&nbsp;&nbsp;Step 3. Draw <span class="math inline">\({\sigma^2}^{(s)}\)</span> from the <span class="math inline">\(\mathcal{IG}2(S, v)\)</span> distribution and collect <span class="math inline">\(\sigma^2\)</span>.<br>
+&nbsp;&nbsp;&nbsp;Step 4. Draw <span class="math inline">\(\boldsymbol\tau^{(s)}\)</span> from the <span class="math inline">\(\mathcal{N}({\boldsymbol\tau},{V_{\tau}})\)</span> distribution and collect <span class="math inline">\(\boldsymbol\tau\)</span>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Gibbs sampler for a simple UC model using simulation smoother</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="do">############################################################</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>UC.Gibbs.sampler    <span class="ot">=</span> <span class="cf">function</span>(S, starting.values, priors){</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Initialize the data </span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  aux     <span class="ot">=</span> starting.values</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  T       <span class="ot">=</span> <span class="fu">nrow</span>(aux<span class="sc">$</span>Y)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  i_matrix <span class="ot">&lt;-</span> <span class="fu">diag</span>(T)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  i <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, T, <span class="dv">1</span>)  </span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  i[<span class="dv">1</span>, <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">1</span> </span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Posteriors list</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  posteriors    <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">tau     =</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,T,S),</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">tau_0   =</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="dv">1</span>,S),</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">sigma   =</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,<span class="dv">2</span>,S)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  HH <span class="ot">=</span> <span class="fu">crossprod</span>(priors<span class="sc">$</span>H)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>S){</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sampling tau_0</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="do">###########################</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    tau_0.v.inv    <span class="ot">=</span> <span class="dv">1</span><span class="sc">/</span>priors<span class="sc">$</span>tau_0.v</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    V.tau_0.bar    <span class="ot">=</span> <span class="dv">1</span><span class="sc">/</span>((<span class="dv">1</span><span class="sc">/</span>aux<span class="sc">$</span>sigma[<span class="dv">1</span>]) <span class="sc">+</span> tau_0.v.inv )</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    tau_0.bar      <span class="ot">=</span> V.tau_0.bar <span class="sc">%*%</span> ( (<span class="dv">1</span><span class="sc">/</span>aux<span class="sc">$</span>sigma[<span class="dv">1</span>])<span class="sc">*</span>aux<span class="sc">$</span>tau[<span class="dv">1</span>] <span class="sc">+</span> tau_0.v.inv<span class="sc">*</span>priors<span class="sc">$</span>tau_0 )</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    tau_0.draw     <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1</span>,<span class="fu">as.vector</span>(tau_0.bar),<span class="fu">sqrt</span>(V.tau_0.bar))</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    aux<span class="sc">$</span>tau_0      <span class="ot">=</span> tau_0.draw</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sampling sigma</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>    <span class="do">###########################</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># sigma of tau (sigma_eta)</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    sigma.eta.s   <span class="ot">=</span> <span class="fu">as.numeric</span>(priors<span class="sc">$</span>sigma.s <span class="sc">+</span> <span class="fu">crossprod</span>(priors<span class="sc">$</span>H<span class="sc">%*%</span>aux<span class="sc">$</span>tau <span class="sc">-</span> i<span class="sc">%*%</span>priors<span class="sc">$</span>tau_0))</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    sigma.eta.nu  <span class="ot">=</span> priors<span class="sc">$</span>sigma.nu <span class="sc">+</span> T</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    sigma.eta.draw <span class="ot">=</span> sigma.eta.s<span class="sc">/</span><span class="fu">rchisq</span>(<span class="dv">1</span>,sigma.eta.nu)</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>    <span class="co"># sigma of errors (sigma)</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>    sigma.e.s     <span class="ot">=</span> <span class="fu">as.numeric</span>(priors<span class="sc">$</span>sigma.s <span class="sc">+</span> <span class="fu">crossprod</span>(aux<span class="sc">$</span>Y <span class="sc">-</span> aux<span class="sc">$</span>tau))</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    sigma.e.nu    <span class="ot">=</span> priors<span class="sc">$</span>sigma.nu <span class="sc">+</span> T</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    sigma.e.draw  <span class="ot">=</span> sigma.e.s<span class="sc">/</span><span class="fu">rchisq</span>(<span class="dv">1</span>,sigma.e.nu)</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    aux<span class="sc">$</span>sigma     <span class="ot">=</span> <span class="fu">c</span>(sigma.eta.draw,sigma.e.draw)</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sampling tau</span></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    <span class="do">###########################</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    V.tau.inv     <span class="ot">=</span> (<span class="dv">1</span><span class="sc">/</span>aux<span class="sc">$</span>sigma[<span class="dv">2</span>])<span class="sc">*</span>i_matrix <span class="sc">+</span> (<span class="dv">1</span><span class="sc">/</span>aux<span class="sc">$</span>sigma[<span class="dv">1</span>])<span class="sc">*</span>HH</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>    V.tau.inv     <span class="ot">=</span> <span class="fl">0.5</span><span class="sc">*</span>(V.tau.inv <span class="sc">+</span> <span class="fu">t</span>(V.tau.inv))</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>    b.tau         <span class="ot">=</span> (<span class="dv">1</span><span class="sc">/</span>aux<span class="sc">$</span>sigma[<span class="dv">2</span>])<span class="sc">*</span>aux<span class="sc">$</span>Y <span class="sc">+</span> (<span class="dv">1</span><span class="sc">/</span>aux<span class="sc">$</span>sigma[<span class="dv">1</span>])<span class="sc">*</span><span class="fu">t</span>(priors<span class="sc">$</span>H)<span class="sc">%*%</span>i<span class="sc">*</span>priors<span class="sc">$</span>tau_0</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>    precision.L   <span class="ot">=</span> <span class="fu">t</span>(<span class="fu">bandchol</span>(V.tau.inv))</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    epsilon       <span class="ot">=</span> <span class="fu">rnorm</span>(T)</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    b.tau.tmp     <span class="ot">=</span> <span class="fu">forwardsolve</span>(precision.L, b.tau)</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    tau.draw      <span class="ot">=</span> <span class="fu">backsolve</span>(<span class="fu">t</span>(precision.L), b.tau.tmp <span class="sc">+</span> epsilon)</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    aux<span class="sc">$</span>tau       <span class="ot">=</span> tau.draw</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    posteriors<span class="sc">$</span>tau[,s]     <span class="ot">=</span> aux<span class="sc">$</span>tau</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>    posteriors<span class="sc">$</span>tau_0[,s]   <span class="ot">=</span> aux<span class="sc">$</span>tau_0</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>    posteriors<span class="sc">$</span>sigma[,s]   <span class="ot">=</span> aux<span class="sc">$</span>sigma</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (s<span class="sc">%%</span><span class="dv">1000</span><span class="sc">==</span><span class="dv">0</span>){<span class="fu">cat</span>(<span class="st">" "</span>,s)}</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>  output      <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>    <span class="at">posterior =</span> posteriors,</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>    <span class="at">last.draw =</span> aux</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(output)</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="simulation-smoother-and-precision-sampler" class="level2">
 <h2 class="anchored" data-anchor-id="simulation-smoother-and-precision-sampler">Simulation smoother and precision sampler</h2>
+<p>Simulation Smoother is used when drawing state variables in discrete time state-space models from their conditional distribution. This tool greatly improved Bayesian estimation process in conditional linear Gaussian state-space models. The benefit of using this method comes from the fact that one does not rely on an iterative procedure of forward filtering and backward smoothing. Instead, this step is performed all without a loop.</p>
+<p>Consider sampling random draws from a multivariate normal distribution presented as:</p>
+<p><span class="math display">\[
+N_{T}(D^{-1}b,D^{-1})
+\]</span></p>
+<p>where: <span class="math inline">\(D\)</span> is a <span class="math inline">\(T \times T\)</span> precision matrix of covariance matrix <span class="math inline">\(\Sigma\)</span>, such that <span class="math inline">\(D = \Sigma^{-1}\)</span>, and <span class="math inline">\(b\)</span> is an <span class="math inline">\(T\times1\)</span> restriction vector to specify the <strong>Mean</strong> of multivariate normal distribution, where <span class="math inline">\(M = \Sigma b\)</span>.</p>
+<p>This parameterisation is particularly useful as matrices <span class="math inline">\(D\)</span> and <span class="math inline">\(b\)</span> can be computed easily. Additionally, matrix <span class="math inline">\(D\)</span> that in the simulation smoother for state-space models is a band matrix and often a tridiagonal matrix. The latter case arises for a one-lag autoregressive state-space process. Therefore, the computation time is much shorter if dedicated numerical algorithms are employed. For tridiagnal matrix <span class="math inline">\(D\)</span> in state space model, let <span class="math inline">\(L\)</span> be a lower-triangular matrix obtained by Cholesky decomposition, where <span class="math inline">\(D = LL'\)</span> (Assume that <span class="math inline">\(L^{-1}\)</span> can be compute efficiently).</p>
+<p>Therefore, the mean of the normal distribution above can be presented as:</p>
+<p><span class="math display">\[
+M = D^{-1}b = (LL')^{-1}b = L'^{-1}L^{-1}b
+\]</span></p>
+<p>Let a <span class="math inline">\(T \times 1\)</span> vector x contain <span class="math inline">\(T\)</span> independent random draws from a standard normal distribution, <span class="math inline">\(X\sim N_{T} ( 0_{T}, I_{T})\)</span>. Therefore, the target distribution, <span class="math inline">\(Y\sim N_{T}(D^{-1}b,D^{-1})\)</span>, can be treated as:</p>
+<p><span class="math display">\[
+Y = D^{-1}b + \sqrt{D^{-1}} X = L'^{-1}L^{-1}b + L'^{-1} X
+\]</span></p>
+<p>Therefor a draw form the target distribution, <span class="math inline">\(N_{T}(D^{-1}b,D^{-1})\)</span>, it’s equivalent to:</p>
+<p><span class="math display">\[
+L'^{-1}L^{-1}b + L'^{-1}x = L'^{-1}(L^{-1}b + x)
+\]</span></p>
+<p>Following algorithm base on solving a linear equation by back-substitution rather than computation of the inverse matrix:</p>
+<ol type="1">
+<li><strong>Compute</strong> <span class="math inline">\(L = chol(D)\)</span> such that <span class="math inline">\(D = LL'\)</span></li>
+<li><strong>Sample</strong> <span class="math inline">\(x\sim N_{T} ( 0_{T}, I_{T})\)</span></li>
+<li><strong>Compute</strong> a draw from the distribution via the affine transformation: <span class="math inline">\(L '\smallsetminus (L \smallsetminus b + x)\)</span></li>
+</ol>
+<p>Note: Let <span class="math inline">\(L \smallsetminus b\)</span> denote the unique solution to the triangular system Lx = b obtained by forward (backward) substitution, that is, <span class="math inline">\(L \smallsetminus b = L^{−1}b\)</span>.</p>
+<section id="simulation-smoother-algorithm-in-r" class="level3">
+<h3 class="anchored" data-anchor-id="simulation-smoother-algorithm-in-r">Simulation smoother algorithm in R</h3>
+<p>Compare the computational speed of generating random numbers from a multivariate normal distribution using dedicated numerical algorithms in function <code>rmvnorm.tridiag.precision</code> and function <code>solve</code> for the matrix inversion ignoring the tridiagonality of the precision matrix in function <code>rmvnorm.usual</code>:</p>
+<div class="cell" data-hash="index_cache/html/Simulation smoother in R comparison_6c3ec8e9c6cd1bd2476076d12d37efce">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mgcv)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>rmvnorm.tridiag.precision <span class="ot">=</span> <span class="cf">function</span>(n, D, b){</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  N           <span class="ot">=</span> <span class="fu">dim</span>(D)[<span class="dv">1</span>]</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  lead.diag   <span class="ot">=</span> <span class="fu">diag</span>(D)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  sub.diag    <span class="ot">=</span> <span class="fu">sdiag</span>(D, <span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  D.chol      <span class="ot">=</span> <span class="fu">trichol</span>(<span class="at">ld =</span> lead.diag, <span class="at">sd=</span>sub.diag)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  D.L         <span class="ot">=</span> <span class="fu">diag</span>(D.chol<span class="sc">$</span>ld)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sdiag</span>(D.L,<span class="sc">-</span><span class="dv">1</span>) <span class="ot">=</span> D.chol<span class="sc">$</span>sd</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  x           <span class="ot">=</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n<span class="sc">*</span>N), <span class="at">ncol=</span>n)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  a           <span class="ot">=</span> <span class="fu">forwardsolve</span>(D.L, b)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  draw        <span class="ot">=</span> <span class="fu">backsolve</span>(<span class="fu">t</span>(D.L), <span class="fu">matrix</span>(<span class="fu">rep</span>(a,n), <span class="at">ncol=</span>n) <span class="sc">+</span> x)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(draw)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Function of normal method</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>rmvnorm.usual <span class="ot">=</span> <span class="cf">function</span>(n, D, b){</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  N           <span class="ot">=</span> <span class="fu">dim</span>(D)[<span class="dv">1</span>]</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  D.chol      <span class="ot">=</span> <span class="fu">t</span>(<span class="fu">chol</span>(D))</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  variance.chol <span class="ot">=</span> <span class="fu">solve</span>(D.chol)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  x           <span class="ot">=</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(n<span class="sc">*</span>N), <span class="at">ncol=</span>n)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  draw        <span class="ot">=</span> <span class="fu">t</span>(variance.chol) <span class="sc">%*%</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>           (<span class="fu">matrix</span>(<span class="fu">rep</span>(variance.chol<span class="sc">%*%</span>b,n), <span class="at">ncol=</span>n) <span class="sc">+</span> x)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(draw)</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Comparison</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>T <span class="ot">=</span> <span class="dv">300</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>md <span class="ot">=</span> <span class="fu">rgamma</span>(T, <span class="at">shape=</span><span class="dv">10</span>, <span class="at">scale=</span><span class="dv">10</span>) </span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>od <span class="ot">=</span> <span class="fu">rgamma</span>(T<span class="dv">-1</span>, <span class="at">shape=</span><span class="dv">10</span>, <span class="at">scale=</span><span class="dv">1</span>) </span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>D <span class="ot">=</span> <span class="dv">2</span><span class="sc">*</span><span class="fu">diag</span>(md)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="fu">sdiag</span>(D, <span class="dv">1</span>) <span class="ot">=</span> <span class="sc">-</span>od</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="fu">sdiag</span>(D, <span class="sc">-</span><span class="dv">1</span>) <span class="ot">=</span> <span class="sc">-</span>od</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>b <span class="ot">=</span> <span class="fu">as.matrix</span>(<span class="fu">rnorm</span>(T))</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="fu">microbenchmark</span>(</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>  <span class="at">trid  =</span> <span class="fu">rmvnorm.tridiag.precision</span>(<span class="at">n=</span><span class="dv">100</span>, <span class="at">D=</span>D, <span class="at">b=</span>b),</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>  <span class="at">usual =</span> <span class="fu">rmvnorm.usual</span>(<span class="at">n=</span><span class="dv">100</span>, <span class="at">D=</span>D, <span class="at">b=</span>b),</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>  <span class="at">check =</span> <span class="st">"equal"</span>, <span class="at">setup=</span><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in microbenchmark(trid = rmvnorm.tridiag.precision(n = 100, D = D, :
+less accurate nanosecond times to avoid potential integer overflows</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Unit: milliseconds
+  expr       min        lq      mean    median        uq      max neval
+  trid  3.099969  3.207758  4.792219  3.252038  3.286868 53.63788   100
+ usual 22.485384 22.684173 23.063725 22.761212 22.950755 25.30709   100</code></pre>
+</div>
+</div>
+<p>Therefore, we could clearly see that the computational time drops substatially due to simulation smoothing method.</p>
 </section>
-<section id="analytical-solution-for-a-joint-posterior" class="level2">
-<h2 class="anchored" data-anchor-id="analytical-solution-for-a-joint-posterior">Analytical solution for a joint posterior</h2>
+</section>
+<section id="analytical-solution-for-a-joint-posterior-distribution" class="level2">
+<h2 class="anchored" data-anchor-id="analytical-solution-for-a-joint-posterior-distribution">Analytical solution for a joint posterior distribution</h2>
+<p>Consider a simplified model with a fixed signal-to-noise ratio <span class="math inline">\(c\)</span> given by</p>
+<p><span class="math display">\[\begin{align}
+\text{measurement equation} &amp;&amp; y &amp;= \tau + \epsilon\\
+\text{state equation} &amp;&amp; \mathbf{H}\tau &amp;= \eta\\
+\text{error term} &amp;&amp; \epsilon\mid\tau &amp;\sim \mathcal{N}_T(\mathbf{0}_T, \sigma^2\mathbf{I}_T)\\
+\text{innovation} &amp;&amp; \eta &amp;\sim \mathcal{N}_T(\mathbf{0}_T, c\sigma^2\mathbf{I}_T)
+\end{align}\]</span> where <span class="math inline">\(c\)</span> is a constant, and <span class="math inline">\(\tau_0 = 0\)</span>.</p>
+<p>In this model the state equation for <span class="math inline">\(\tau\)</span> is given by a Gaussian random ralk presented as:</p>
+<p><span class="math display">\[\begin{pmatrix}
+1 &amp; 0 &amp; \cdots &amp; 0 \\
+-1 &amp; 1 &amp; \cdots &amp; 0 \\
+\vdots &amp; \ddots &amp; \ddots &amp; \vdots \\
+0 &amp; 0 &amp; -1 &amp; 1
+\end{pmatrix} \begin{pmatrix} \tau_1 \\ \tau_2 \\ \vdots \\ \tau_T \end{pmatrix}  = \begin{pmatrix} \tau_1 \\ \tau_2-\tau_1 \\ \vdots \\ \tau_T - \tau_{T-1} \end{pmatrix} = \eta\]</span></p>
+<p>The parameters to be estimated are: <span class="math inline">\(\mathbf{\color{purple}{\tau, \sigma^2}}\)</span></p>
+<section id="prior-distributions-1" class="level3">
+<h3 class="anchored" data-anchor-id="prior-distributions-1">Prior distributions</h3>
+<section id="prior-distribution-for-tau" class="level4">
+<h4 class="anchored" data-anchor-id="prior-distribution-for-tau">Prior distribution for <span class="math inline">\(\tau\)</span></h4>
+<p>Rewrite the state equation as <span class="math display">\[\tau =  H^{-1}\eta\]</span> Then the prior distribution of <span class="math inline">\(\tau\)</span> is formed using <span class="math display">\[\mathbf{\color{purple}{\eta \sim \mathcal{N}(0_T, c \sigma^2 I_T) \implies H^{-1}\eta \sim \mathcal{N}(0_T, c\sigma^2(H^T H)^{-1})}}\]</span> since <span class="math inline">\(Var(H^{-1}\eta) = H^{-1}Var(\eta)(H^{-1})^T =c\sigma^2(H^TH)^{-1}\)</span></p>
+<p>Then, the prior distribution of <span class="math inline">\(\tau|\sigma^2\)</span> is <span class="math display">\[\tau|\sigma^2 \sim \mathcal{N}(0_T, c\sigma^2(H^TH)^{-1}) \\ \propto (c\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{\tau^TH^T H\tau}{2c\sigma^2}\right)
+\]</span></p>
+</section>
+<section id="prior-assumptions-for-sigma2" class="level4">
+<h4 class="anchored" data-anchor-id="prior-assumptions-for-sigma2">Prior assumptions for <span class="math inline">\(\sigma^2\)</span></h4>
+<p><span class="math display">\[\sigma^2 \sim \mathcal{IG2}(s_{prior}, \nu_{prior}) \propto (\sigma^2)^\frac{-\nu_{prior}+2}{2}exp\left(-\frac{s_{prior}}{2\sigma^2}\right)\]</span></p>
+</section>
+</section>
+<section id="the-joint-posterior-distribution" class="level3">
+<h3 class="anchored" data-anchor-id="the-joint-posterior-distribution">The Joint Posterior Distribution</h3>
+<p>The likelihood function is constructed using the the measurement equation: <span class="math display">\[y = \tau + \epsilon\]</span> and the distributional assumption on its error term <span class="math display">\[\epsilon \sim \mathcal{N}(0_T, \sigma^2I_T)\]</span> which results in the likelihood function: <span class="math display">\[y|\tau, \sigma^2 \sim \mathcal{N}(\tau, \sigma^2I_T)\propto (\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{1}{2\sigma^2}(y-\tau)^T(y-\tau)\right)\]</span></p>
+<p>The likelihood is combined with the joint prior distribution of <span class="math inline">\(\tau\)</span> and <span class="math inline">\(\sigma^2\)</span> to derive the joint posterior distribution of <span class="math inline">\(\tau\)</span> and <span class="math inline">\(\sigma^2\)</span>. It is derived as follows:</p>
+<p><span class="math display">\[
+p(\tau, \sigma^2 |y) = \frac{p(\tau, \sigma^2, y)}{p(y)} \propto p(\tau, \sigma^2, y) = p(y | \tau, \sigma^2)p(\tau, \sigma^2) =p(y | \tau, \sigma^2)p(\tau|\sigma^2)p(\sigma^2)
+\]</span></p>
+<p>This expression is proportional to <span class="math display">\[\begin{align}
+&amp;\propto (\sigma^2)^{-\frac{T}{2}}exp\left(-\frac{(y-\tau)^T(y-\tau)}{2\sigma^2}\right) \times
+(\sigma^2)^{-\frac{T}{2}}\exp\left(-\frac{\tau^TH^T H\tau}{2c\sigma^2}\right)\\
+&amp;\qquad\times(\sigma^2)^{-\frac{\nu_{prior}+2}{2}} \exp(-\frac{s_{prior}}{2\sigma^2})\\
+&amp;\propto \exp(-\frac{y^Ty - 2\tau^T y + \tau^T\tau + c^{-1}\tau^TH^T H\tau}{2\sigma^2})\\ &amp;\qquad\times \exp(-\frac{s_{prior}}{2\sigma^2})\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}}\\
+&amp;= \exp(-\frac{\tau^T(c^{-1}H^T H + I_T)\tau - 2\tau^Ty}{2\sigma^2})\\
+&amp;\qquad\times\exp(-\frac{y^Ty + s_{prior}}{2\sigma^2})\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}}
+\end{align}\]</span></p>
+<p>Let <span class="math inline">\(\bar{\Sigma} = (c^{-1}H^T H + I_T)^{-1}\)</span>, then <span class="math display">\[\begin{align}
+p(\tau, \sigma^2 |y) &amp;\propto \exp(-\frac{\tau^T\bar{\Sigma}^{-1}\tau - 2\tau^Ty + y^T\bar{\Sigma}y}{2\sigma^2})\exp(-\frac{y^Ty + s_{prior}-y^T\bar{\Sigma}y}{2\sigma^2})\\
+&amp;\qquad\times(\sigma^2)^{-\frac{2T+\nu_{prior}+2}{2}}
+\end{align}\]</span></p>
+<p>In the expression above, we recognise the kernel of the <span class="math inline">\(T\)</span>-variate normal inverted gamma 2 distribution. Therefore, the joint posterior of the parameters of the model is given by: <span class="math display">\[\begin{align}
+\tau, \Sigma |y &amp;\sim \mathcal{NIG2}(\bar{\tau}, \bar{\Sigma}, \bar{\nu}, \bar{s})\\[2ex]
+\bar{\Sigma} &amp;= (c^{-1}H^T H + I_T)^{-1}\\
+\bar{\tau} &amp;= \bar{\Sigma}y\\
+\bar{\nu} &amp;= 2T+\nu_{prior}\\
+\bar{s} &amp;= s_{prior}+y^Ty-y^T\bar{\Sigma}y
+\end{align}\]</span></p>
+<p>The function below implements the sampler from this joint distribution.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>UC.local.tau.sigma.Gibbs.sampler    <span class="ot">=</span> <span class="cf">function</span>(S, starting.values, priors){</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  aux     <span class="ot">=</span> starting.values</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  T       <span class="ot">=</span> <span class="fu">nrow</span>(aux<span class="sc">$</span>Y)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  posteriors    <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">tau     =</span> <span class="fu">matrix</span>(<span class="cn">NA</span>,T,S),</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">sigma   =</span> <span class="fu">rep</span>(<span class="cn">NA</span>,S)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>S){</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    V.tau.bar.inv <span class="ot">=</span> priors<span class="sc">$</span>c<span class="sc">^</span>(<span class="sc">-</span><span class="dv">1</span>)<span class="sc">*</span><span class="fu">t</span>(aux<span class="sc">$</span>H)<span class="sc">%*%</span>aux<span class="sc">$</span>H <span class="sc">+</span> <span class="fu">diag</span>(T)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    V.tau.bar.inv <span class="ot">=</span> <span class="fl">0.5</span><span class="sc">*</span>(V.tau.bar.inv <span class="sc">+</span> <span class="fu">t</span>(V.tau.bar.inv))</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sampling sigma</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="do">###########################</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    sigma.s   <span class="ot">=</span> <span class="fu">as.numeric</span>(priors<span class="sc">$</span>sigma.s <span class="sc">+</span> <span class="fu">t</span>(aux<span class="sc">$</span>Y)<span class="sc">%*%</span>aux<span class="sc">$</span>Y <span class="sc">-</span> <span class="fu">t</span>(aux<span class="sc">$</span>tau)<span class="sc">%*%</span>V.tau.bar.inv<span class="sc">%*%</span>aux<span class="sc">$</span>tau)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    sigma.nu  <span class="ot">=</span> priors<span class="sc">$</span>sigma.nu <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span>T</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    sigma.draw<span class="ot">=</span> sigma.s<span class="sc">/</span><span class="fu">rchisq</span>(<span class="dv">1</span>,sigma.nu)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    aux<span class="sc">$</span>sigma     <span class="ot">=</span> sigma.draw</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sampling tau</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="do">###########################</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    b.tau         <span class="ot">=</span> aux<span class="sc">$</span>Y</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>    precision.L   <span class="ot">=</span> <span class="fu">t</span>(<span class="fu">bandchol</span>(V.tau.bar.inv))</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    epsilon       <span class="ot">=</span> <span class="fu">rnorm</span>(T)</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    b.tau.tmp     <span class="ot">=</span> <span class="fu">forwardsolve</span>(precision.L, b.tau)</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    tau.draw      <span class="ot">=</span> <span class="fu">backsolve</span>(<span class="fu">t</span>(precision.L), b.tau.tmp <span class="sc">+</span> epsilon)</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>    aux<span class="sc">$</span>tau       <span class="ot">=</span> tau.draw</span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    posteriors<span class="sc">$</span>tau[,s]     <span class="ot">=</span> aux<span class="sc">$</span>tau</span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    posteriors<span class="sc">$</span>sigma[,s]   <span class="ot">=</span> aux<span class="sc">$</span>sigma</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>  output      <span class="ot">=</span> <span class="fu">list</span>(</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">posterior =</span> posteriors,</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">last.draw =</span> aux</span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(output)</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
 </section>
 </section>
 <section id="hierarchical-modeling" class="level1">
 <h1>Hierarchical modeling</h1>
 <section id="estimating-gamma-error-term-variance-prior-scale" class="level2">
 <h2 class="anchored" data-anchor-id="estimating-gamma-error-term-variance-prior-scale">Estimating gamma error term variance prior scale</h2>
+<p>To estimate the scale of inverted gamma 2 error term variance, we need to firstly put a prior on the prior scale of and present its full conditional posterior distribution.</p>
+<p>The hirercical prior structure is below:</p>
+<span class="math display">\[\begin{align*}
+\sigma^2 \mid s &amp;\sim \text{IG2}(s, \nu) \\
+s &amp;\sim \mathcal{G}(s_s, a)
+\end{align*}\]</span>
+<p>The full conditional posterior distribution of the prior scale <span class="math inline">\(s\)</span> is based on the prior <span class="math inline">\(p(\sigma^2 \mid s)\)</span>: <span class="math display">\[\begin{align}
+p(\sigma^2 \mid s) \propto s^{\frac{\nu}{2}}(\sigma^2)^{-\frac{\nu+2}{2}} \exp \left( -\frac{1}{2}\frac{s}{\sigma^2} \right)
+\end{align}\]</span> and that for <span class="math inline">\(s\)</span>: <span class="math display">\[\begin{align}
+s \sim \mathcal{G}(s_s, a) \propto s^{a-1} \exp(-\frac{s}{s_s})
+\end{align}\]</span> which results in the following full conditional posterior distribution: <span class="math display">\[\begin{align}
+p(s \mid \mathbf{y}, \mathbf{\tau}, \sigma^2) &amp;= \mathcal{G}(\bar{s}_s,\bar{a})\\
+\bar{s}_s &amp;= \left(s_s^{-1} + (2\sigma^2)^{-1}\right)^{-1}\\
+\bar{a} &amp;= a + \frac{\nu}{2}
+\end{align}\]</span></p>
+<p>The code below implements the sampler from the full conditional posterior for <span class="math inline">\(s\)</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>sample_s <span class="ot">=</span> <span class="cf">function</span>(sigma2, s_s, a, nu) {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  shape_s <span class="ot">=</span> a <span class="sc">+</span> nu<span class="sc">/</span><span class="dv">2</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  scale_s <span class="ot">=</span> <span class="dv">1</span><span class="sc">/</span>((<span class="dv">1</span><span class="sc">/</span>s_s) <span class="sc">+</span> <span class="dv">1</span><span class="sc">/</span>(<span class="dv">2</span><span class="sc">*</span>sigma2))</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  s <span class="ot">=</span> <span class="fu">rgamma</span>(<span class="dv">1</span>, <span class="at">shape =</span> shape_s, <span class="at">scale =</span> scale_s)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(s)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="estimating-inverted-gamma-2-error-term-variance-prior-scale" class="level2">
 <h2 class="anchored" data-anchor-id="estimating-inverted-gamma-2-error-term-variance-prior-scale">Estimating inverted-gamma 2 error term variance prior scale</h2>
@@ -334,208 +693,6 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 </section>
 <section id="estimating-student-t-degrees-of-freedom-parameter" class="level2">
 <h2 class="anchored" data-anchor-id="estimating-student-t-degrees-of-freedom-parameter">Estimating Student-t degrees of freedom parameter</h2>
-<p>The Student-t distribution is commonly used in statistical modeling to handle data with heavier tails than the normal distribution. An essential parameter of the Student-t distribution is the degrees of freedom <span class="math inline">\(\nu\)</span>, which controls the tail heaviness. In this note, we present the Bayesian estimation of the degrees of freedom parameter for an N-variate Student-t distribution using the Inverted-Gamma 2 (IG2) scale mixture of normals.</p>
-<p>The N-variate Student-t distribution can be represented as a scale mixture of normals:</p>
-<p><span class="math display">\[
-\mathbf{y} \mid \mathbf{\mu}, \lambda \sim \mathcal{N}(\mathbf{\mu}, \lambda \mathbf{I}_N)
-\]</span></p>
-<p><span class="math display">\[
-\lambda \mid \nu \sim \mathcal{IG2}(\nu, \nu)
-\]</span></p>
-<p>where:</p>
-<ul>
-<li><span class="math inline">\(\mathbf{y}\)</span> is the <span class="math inline">\(N\)</span>-dimensional observation vector.</li>
-<li><span class="math inline">\(\mathbf{\mu}\)</span> is the mean vector.</li>
-<li><span class="math inline">\(\lambda\)</span> is the latent scale variable.</li>
-<li><span class="math inline">\(\nu\)</span> is the degrees of freedom parameter.</li>
-</ul>
-<section id="derivation-of-full-conditional-posteriors" class="level3">
-<h3 class="anchored" data-anchor-id="derivation-of-full-conditional-posteriors">Derivation of Full Conditional Posteriors</h3>
-<section id="full-conditional-posterior-of-lambda" class="level4">
-<h4 class="anchored" data-anchor-id="full-conditional-posterior-of-lambda">Full Conditional Posterior of <span class="math inline">\(\lambda\)</span></h4>
-<p>Given the prior distribution:</p>
-<p><span class="math display">\[
-\lambda \mid \nu \sim \mathcal{IG2}(\nu, \nu)
-\]</span></p>
-<p>The likelihood of the data given <span class="math inline">\(\lambda\)</span> is:</p>
-<p><span class="math display">\[
-\mathbf{y} \mid \mathbf{\mu}, \lambda \sim \mathcal{N}(\mathbf{\mu}, \lambda \mathbf{I}_N)
-\]</span></p>
-<p>The full conditional posterior of <span class="math inline">\(\lambda\)</span> can be derived as follows:</p>
-<ol type="1">
-<li><p><strong>Likelihood of <span class="math inline">\(\mathbf{y}\)</span> given <span class="math inline">\(\mathbf{\mu}\)</span> and <span class="math inline">\(\lambda\)</span></strong>:</p>
-<p><span class="math display">\[
-p(\mathbf{y} \mid \mathbf{\mu}, \lambda) \propto \lambda^{-\frac{N}{2}} \exp\left(-\frac{(\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})}{2\lambda}\right)
-\]</span></p></li>
-<li><p><strong>Prior for <span class="math inline">\(\lambda\)</span> given <span class="math inline">\(\nu\)</span></strong>:</p>
-<p><span class="math display">\[
-p(\lambda \mid \nu) \propto \lambda^{-\nu - 1} \exp\left(-\frac{\nu}{\lambda}\right)
-\]</span></p></li>
-<li><p><strong>Joint distribution</strong>:</p>
-<p><span class="math display">\[
-p(\mathbf{y}, \lambda \mid \mathbf{\mu}, \nu) = p(\mathbf{y} \mid \mathbf{\mu}, \lambda) p(\lambda \mid \nu)
-\]</span></p></li>
-<li><p><strong>Full conditional posterior</strong>:</p>
-<p><span class="math display">\[
-p(\lambda \mid \mathbf{y}, \mathbf{\mu}, \nu) \propto \lambda^{-\frac{N}{2}} \exp\left(-\frac{(\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})}{2\lambda}\right) \lambda^{-\nu - 1} \exp\left(-\frac{\nu}{\lambda}\right)
-\]</span></p>
-<p>Combining terms:</p>
-<p><span class="math display">\[
-p(\lambda \mid \mathbf{y}, \mathbf{\mu}, \nu) \propto \lambda^{-\left(\nu + \frac{N}{2} + 1\right)} \exp\left(-\frac{\nu + \frac{(\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})}{2}}{\lambda}\right)
-\]</span></p>
-<p>This is recognized as the kernel of an Inverted-Gamma 2 distribution:</p>
-<p><span class="math display">\[
-\lambda \mid \mathbf{y}, \mathbf{\mu}, \nu \sim \mathcal{IG2}\left(\nu + N, \nu + (\mathbf{y} - \mathbf{\mu})'(\mathbf{y} - \mathbf{\mu})\right)
-\]</span></p></li>
-</ol>
-</section>
-<section id="full-conditional-posterior-of-nu" class="level4">
-<h4 class="anchored" data-anchor-id="full-conditional-posterior-of-nu">Full Conditional Posterior of <span class="math inline">\(\nu\)</span></h4>
-<p>To estimate <span class="math inline">\(\nu\)</span>, we use the Metropolis-Hastings algorithm due to its non-standard form. The steps for deriving the full conditional posterior of <span class="math inline">\(\nu\)</span> are as follows:</p>
-<ol type="1">
-<li><p><strong>Likelihood of <span class="math inline">\(\lambda\)</span> given <span class="math inline">\(\nu\)</span></strong>:</p>
-<p><span class="math display">\[
-p(\lambda \mid \nu) = \frac{\left(\frac{\nu}{2}\right)^{\nu/2}}{\Gamma(\nu/2)} \lambda^{-\left(\nu/2 + 1\right)} \exp\left(-\frac{\nu}{2\lambda}\right)
-\]</span></p></li>
-<li><p><strong>Log-likelihood for <span class="math inline">\(\nu\)</span> given <span class="math inline">\(\lambda\)</span></strong>:</p>
-<p><span class="math display">\[
-\log p(\lambda \mid \nu) = \frac{\nu}{2} \log\left(\frac{\nu}{2}\right) - \log\Gamma\left(\frac{\nu}{2}\right) - \left(\frac{\nu}{2} + 1\right) \log \lambda - \frac{\nu}{2\lambda}
-\]</span></p></li>
-<li><p><strong>Log-prior for <span class="math inline">\(\nu\)</span> (assuming a non-informative prior)</strong>:</p>
-<p><span class="math display">\[
-\log p(\nu) = \text{constant}
-\]</span></p></li>
-<li><p><strong>Full conditional posterior</strong>:</p>
-<p>The full conditional posterior for <span class="math inline">\(\nu\)</span> is proportional to the product of the likelihood and the prior:</p>
-<p><span class="math display">\[
-p(\nu \mid \lambda) \propto p(\lambda \mid \nu) p(\nu)
-\]</span></p>
-<p>Since <span class="math inline">\(p(\nu)\)</span> is constant, we focus on <span class="math inline">\(p(\lambda \mid \nu)\)</span>:</p>
-<p><span class="math display">\[
-\log p(\nu \mid \lambda) = \frac{\nu}{2} \log\left(\frac{\nu}{2}\right) - \log\Gamma\left(\frac{\nu}{2}\right) - \left(\frac{\nu}{2} + 1\right) \log \lambda - \frac{\nu}{2\lambda}
-\]</span></p>
-<p>This expression does not have a closed form, so we use the Metropolis-Hastings algorithm to sample from this posterior.</p></li>
-</ol>
-</section>
-</section>
-<section id="r-function-for-gibbs-sampler" class="level3">
-<h3 class="anchored" data-anchor-id="r-function-for-gibbs-sampler">R Function for Gibbs Sampler</h3>
-<p>Below is the R function implementing the Gibbs sampler for estimating <span class="math inline">\(\nu\)</span> using the IG2-scale mixture of normals representation.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>metropolis_hastings_nu <span class="ot">&lt;-</span> <span class="cf">function</span>(y, mu, n_iter, init_nu, proposal_sd) {</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Initialize parameter</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  nu <span class="ot">&lt;-</span> init_nu</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  N <span class="ot">&lt;-</span> <span class="fu">length</span>(y)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Storage for samples</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  nu_samples <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n_iter)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Log-likelihood function</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  log_likelihood <span class="ot">&lt;-</span> <span class="cf">function</span>(nu, y, mu) {</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sum</span>(<span class="fu">dt</span>((y <span class="sc">-</span> mu) <span class="sc">/</span> <span class="fu">sqrt</span>(nu), <span class="at">df =</span> nu, <span class="at">log =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_iter) {</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Propose new value for nu</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    nu_proposal <span class="ot">&lt;-</span> nu <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, proposal_sd)</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (nu_proposal <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Calculate log acceptance ratio</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>      log_acceptance_ratio <span class="ot">&lt;-</span> <span class="fu">log_likelihood</span>(nu_proposal, y, mu) <span class="sc">-</span> <span class="fu">log_likelihood</span>(nu, y, mu)</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>      </span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Accept or reject the proposal</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="fu">log</span>(<span class="fu">runif</span>(<span class="dv">1</span>)) <span class="sc">&lt;</span> log_acceptance_ratio) {</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        nu <span class="ot">&lt;-</span> nu_proposal</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Store the sample</span></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    nu_samples[i] <span class="ot">&lt;-</span> nu</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(nu_samples)</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>gibbs_sampler_t <span class="ot">&lt;-</span> <span class="cf">function</span>(y, n_iter, init_values) {</span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Initialize parameters</span></span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  nu <span class="ot">&lt;-</span> init_values<span class="sc">$</span>nu</span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>  mu <span class="ot">&lt;-</span> init_values<span class="sc">$</span>mu</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  N <span class="ot">&lt;-</span> <span class="fu">length</span>(y)</span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Storage for samples</span></span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  nu_samples <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n_iter)</span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>  mu_samples <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n_iter)</span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  lambda_samples <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n_iter)</span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n_iter) {</span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sample lambda</span></span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>    shape_lambda <span class="ot">&lt;-</span> nu <span class="sc">+</span> N</span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>    rate_lambda <span class="ot">&lt;-</span> nu <span class="sc">+</span> <span class="fu">sum</span>((y <span class="sc">-</span> mu)<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    lambda <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> <span class="fu">rgamma</span>(<span class="dv">1</span>, <span class="at">shape =</span> shape_lambda, <span class="at">rate =</span> rate_lambda)</span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sample mu</span></span>
-<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>    mu <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="at">mean =</span> <span class="fu">mean</span>(y), <span class="at">sd =</span> <span class="fu">sqrt</span>(lambda <span class="sc">/</span> N))</span>
-<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Sample nu using Metropolis-Hastings</span></span>
-<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>    log_likelihood <span class="ot">&lt;-</span> <span class="cf">function</span>(nu, y, mu) {</span>
-<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>      <span class="fu">sum</span>(<span class="fu">dt</span>((y <span class="sc">-</span> mu) <span class="sc">/</span> <span class="fu">sqrt</span>(nu), <span class="at">df =</span> nu, <span class="at">log =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>    proposal_nu <span class="ot">&lt;-</span> nu <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="fl">0.1</span>) <span class="co"># proposal distribution: normal random walk</span></span>
-<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (proposal_nu <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
-<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>      log_acceptance_ratio <span class="ot">&lt;-</span> <span class="fu">log_likelihood</span>(proposal_nu, y, mu) <span class="sc">-</span> <span class="fu">log_likelihood</span>(nu, y, mu)</span>
-<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> (<span class="fu">log</span>(<span class="fu">runif</span>(<span class="dv">1</span>)) <span class="sc">&lt;</span> log_acceptance_ratio</span>
-<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>) {</span>
-<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>        nu <span class="ot">&lt;-</span> proposal_nu</span>
-<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Store samples</span></span>
-<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a>    nu_samples[i] <span class="ot">&lt;-</span> nu</span>
-<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a>    mu_samples[i] <span class="ot">&lt;-</span> mu</span>
-<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>    lambda_samples[i] <span class="ot">&lt;-</span> lambda</span>
-<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(<span class="at">nu =</span> nu_samples, <span class="at">mu =</span> mu_samples, <span class="at">lambda =</span> lambda_samples))</span>
-<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a><span class="co"># Example usage</span></span>
-<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>)</span>
-<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a>init_values <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">nu =</span> <span class="dv">5</span>, <span class="at">mu =</span> <span class="fu">mean</span>(y))</span>
-<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a>n_iter <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
-<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">gibbs_sampler_t</span>(y, n_iter, init_values)</span>
-<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a><span class="co"># Display the results</span></span>
-<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">summary</span>(result<span class="sc">$</span>nu))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-  5.118   6.414   6.947   7.398   7.888  10.821 </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">summary</span>(result<span class="sc">$</span>mu))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>    Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
--0.19910  0.02664  0.08867  0.08544  0.14827  0.34116 </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">summary</span>(result<span class="sc">$</span>lambda))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.6030  0.7907  0.8465  0.8537  0.9095  1.1743 </code></pre>
-</div>
-</div>
-</section>
-<section id="conclusion" class="level3">
-<h3 class="anchored" data-anchor-id="conclusion">Conclusion</h3>
-<p>This note provided a step-by-step algebraic derivation and a sampler for estimating the degrees of freedom parameter <span class="math inline">\(\nu\)</span> for an N-variate Student-t distribution using an IG2-scale mixture of normals approach within a Bayesian framework. By using the Metropolis-Hastings algorithm, we avoid the need to assume a prior distribution for <span class="math inline">\(\nu\)</span>, simplifying the estimation process. This approach allows for flexible modeling of heavy-tailed data, which is often encountered in practice.</p>
-</section>
-<section id="references" class="level3">
-<h3 class="anchored" data-anchor-id="references">References</h3>
-<ul>
-<li>Geweke, J. (1993). Bayesian treatment of the independent Student-t linear model. <em>Journal of Applied Econometrics</em>, 8(S1), S19-S40.</li>
-<li>Chib, S., &amp; Greenberg, E. (1995). Understanding the Metropolis-Hastings Algorithm. <em>The American Statistician</em>, 49(4), 327-335.</li>
-</ul>
-</section>
 </section>
 <section id="laplace-prior-for-the-trend-component" class="level2">
 <h2 class="anchored" data-anchor-id="laplace-prior-for-the-trend-component">Laplace prior for the trend component</h2>
@@ -543,6 +700,9 @@ p(\nu \mid \lambda) \propto p(\lambda \mid \nu) p(\nu)
 </section>
 <section id="model-extensions" class="level1">
 <h1>Model extensions</h1>
+<section id="estimation-of-autoregressive-parameters-for-cycle-component" class="level2">
+<h2 class="anchored" data-anchor-id="estimation-of-autoregressive-parameters-for-cycle-component">Estimation of autoregressive parameters for cycle component</h2>
+</section>
 <section id="autoregressive-cycle-component" class="level2">
 <h2 class="anchored" data-anchor-id="autoregressive-cycle-component">Autoregressive cycle component</h2>
 </section>
@@ -564,18 +724,16 @@ p(\nu \mid \lambda) \propto p(\lambda \mid \nu) p(\nu)
 <section id="sampling-from-the-predictive-density" class="level2">
 <h2 class="anchored" data-anchor-id="sampling-from-the-predictive-density">Sampling from the predictive density</h2>
 </section>
-<section id="missing-observations" class="level2">
-<h2 class="anchored" data-anchor-id="missing-observations">Missing observations</h2>
-</section>
-<section id="references-1" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="references-1">References</h2>
+<section id="references" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
 
 
 </section>
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-citation"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{woźniak2024,
-  author = {Woźniak, Tomasz and Gussen, Ben},
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">Citation</h2><div><div class="quarto-appendix-secondary-label">BibTeX citation:</div><pre class="sourceCode code-with-copy quarto-appendix-bibtex"><code class="sourceCode bibtex">@online{woźniak2024,
+  author = {Woźniak, Tomasz and Kang, Inhye and Li, Zheyuan and Liu, Rui
+    and Yang, Yuqiao},
   title = {Bayesian {Unobserved} {Component} {Models}},
   date = {2024-05-01},
   url = {https://donotdespair.github.io/Bayesian-Unobserved-Component-Models/},
@@ -583,8 +741,8 @@ p(\nu \mid \lambda) \propto p(\lambda \mid \nu) p(\nu)
   langid = {en}
 }
 </code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre><div class="quarto-appendix-secondary-label">For attribution, please cite this work as:</div><div id="ref-woźniak2024" class="csl-entry quarto-appendix-citeas" role="listitem">
-Woźniak, Tomasz, and Ben Gussen. 2024. <span>“Bayesian Unobserved
-Component Models.”</span> May 1, 2024. <a href="https://doi.org/10.26188/25814617">https://doi.org/10.26188/25814617</a>.
+Woźniak, Tomasz, Inhye Kang, Zheyuan Li, Rui Liu, and Yuqiao Yang. 2024.
+<span>“Bayesian Unobserved Component Models.”</span> May 1, 2024. <a href="https://doi.org/10.26188/25814617">https://doi.org/10.26188/25814617</a>.
 </div></div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
@@ -665,27 +823,10 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-    var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp('/' + window.location.host + '/');
-    var isInternal = (href) => {
-        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-    }
-    // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
-    for (var i=0; i<links.length; i++) {
-      const link = links[i];
-      if (!isInternal(link.href)) {
-        // undo the damage that might have been done by quarto-nav.js in the case of
-        // links that we want to consider external
-        if (link.dataset.originalHref !== undefined) {
-          link.href = link.dataset.originalHref;
-        }
-      }
-    }
-  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+  function tippyHover(el, contentFn) {
     const config = {
       allowHTML: true,
+      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -695,17 +836,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start',
+      placement: 'bottom-start'
     };
-    if (contentFn) {
-      config.content = contentFn;
-    }
-    if (onTriggerFn) {
-      config.onTrigger = onTriggerFn;
-    }
-    if (onUntriggerFn) {
-      config.onUntrigger = onUntriggerFn;
-    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -717,130 +849,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      if (note) {
-        return note.innerHTML;
-      } else {
-        return "";
-      }
-    });
-  }
-  const xrefs = window.document.querySelectorAll('a.quarto-xref');
-  const processXRef = (id, note) => {
-    // Strip column container classes
-    const stripColumnClz = (el) => {
-      el.classList.remove("page-full", "page-columns");
-      if (el.children) {
-        for (const child of el.children) {
-          stripColumnClz(child);
-        }
-      }
-    }
-    stripColumnClz(note)
-    if (id === null || id.startsWith('sec-')) {
-      // Special case sections, only their first couple elements
-      const container = document.createElement("div");
-      if (note.children && note.children.length > 2) {
-        container.appendChild(note.children[0].cloneNode(true));
-        for (let i = 1; i < note.children.length; i++) {
-          const child = note.children[i];
-          if (child.tagName === "P" && child.innerText === "") {
-            continue;
-          } else {
-            container.appendChild(child.cloneNode(true));
-            break;
-          }
-        }
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(container);
-        }
-        return container.innerHTML
-      } else {
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(note);
-        }
-        return note.innerHTML;
-      }
-    } else {
-      // Remove any anchor links if they are present
-      const anchorLink = note.querySelector('a.anchorjs-link');
-      if (anchorLink) {
-        anchorLink.remove();
-      }
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(note);
-      }
-      // TODO in 1.5, we should make sure this works without a callout special case
-      if (note.classList.contains("callout")) {
-        return note.outerHTML;
-      } else {
-        return note.innerHTML;
-      }
-    }
-  }
-  for (var i=0; i<xrefs.length; i++) {
-    const xref = xrefs[i];
-    tippyHover(xref, undefined, function(instance) {
-      instance.disable();
-      let url = xref.getAttribute('href');
-      let hash = undefined; 
-      if (url.startsWith('#')) {
-        hash = url;
-      } else {
-        try { hash = new URL(url).hash; } catch {}
-      }
-      if (hash) {
-        const id = hash.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note !== null) {
-          try {
-            const html = processXRef(id, note.cloneNode(true));
-            instance.setContent(html);
-          } finally {
-            instance.enable();
-            instance.show();
-          }
-        } else {
-          // See if we can fetch this
-          fetch(url.split('#')[0])
-          .then(res => res.text())
-          .then(html => {
-            const parser = new DOMParser();
-            const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.getElementById(id);
-            if (note !== null) {
-              const html = processXRef(id, note);
-              instance.setContent(html);
-            } 
-          }).finally(() => {
-            instance.enable();
-            instance.show();
-          });
-        }
-      } else {
-        // See if we can fetch a full url (with no hash to target)
-        // This is a special case and we should probably do some content thinning / targeting
-        fetch(url)
-        .then(res => res.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const htmlDoc = parser.parseFromString(html, "text/html");
-          const note = htmlDoc.querySelector('main.content');
-          if (note !== null) {
-            // This should only happen for chapter cross references
-            // (since there is no id in the URL)
-            // remove the first header
-            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-              note.children[0].remove();
-            }
-            const html = processXRef(null, note);
-            instance.setContent(html);
-          } 
-        }).finally(() => {
-          instance.enable();
-          instance.show();
-        });
-      }
-    }, function(instance) {
+      return note.innerHTML;
     });
   }
       let selectedAnnoteEl;
@@ -884,7 +893,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
-            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -910,32 +918,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
-        // Handle positioning of the toggle
-    window.addEventListener(
-      "resize",
-      throttle(() => {
-        elRect = undefined;
-        if (selectedAnnoteEl) {
-          selectCodeLines(selectedAnnoteEl);
-        }
-      }, 10)
-    );
-    function throttle(fn, ms) {
-    let throttle = false;
-    let timer;
-      return (...args) => {
-        if(!throttle) { // first call gets through
-            fn.apply(this, args);
-            throttle = true;
-        } else { // all the others get throttled
-            if(timer) clearTimeout(timer); // cancel #2
-            timer = setTimeout(() => {
-              fn.apply(this, args);
-              timer = throttle = false;
-            }, ms);
-        }
-      };
-    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -996,7 +978,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
-
 
 
 
