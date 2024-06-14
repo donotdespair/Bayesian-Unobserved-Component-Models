@@ -7,6 +7,8 @@ author:
   - name: Inhye Kang
     url: https://github.com/inhyekang-au
     orcid: 0009-0007-8544-4952
+  - name: Zheyuan Li
+    url: https://github.com/lzyzero3
   - name: Rui Liu
     url: https://github.com/rruiliu1005
     orcid: 0009-0008-9348-8581
@@ -569,6 +571,66 @@ UC.local.tau.sigma.Gibbs.sampler    = function(S, starting.values, priors){
 # Hierarchical modeling
 
 ## Estimating gamma error term variance prior scale
+
+To estimate the  scale of inverted gamma 2 error term variance, we need to firstly put a prior on the prior scale of and present its full conditional posterior distribution.
+
+The hirercical prior structure is below:
+
+```{=tex}
+\begin{align*}
+\sigma^2 \mid s &\sim \text{IG2}(s, \nu) \\
+s &\sim \mathcal{G}(s_s, a)
+\end{align*}
+```
+
+The kernel of the full conditional distribution of the error term variance $\sigma^2$ is based on the likelihood:
+
+```{=tex}
+\begin{align}
+\mathbf{y} \mid \boldsymbol{\tau}, \sigma^2 &\sim \mathcal{N}_T(\boldsymbol{\tau}, \sigma^2 I_T)\\
+&= (2\pi\sigma^2)^{-T/2} \exp \left( -\frac{1}{2\sigma^2} (\mathbf{y} - \boldsymbol{\tau})' (\mathbf{y} - \boldsymbol{\tau}) \right)
+\end{align}
+```
+and the prior distribution:
+```{=tex}
+\begin{align}
+p(\sigma^2 \mid s) \propto s^{\frac{\nu}{2}}(\sigma^2)^{-\frac{\nu+2}{2}} \exp \left( -\frac{1}{2}\frac{s}{\sigma^2} \right)
+\end{align}
+```
+
+The resulting full conditional posterior distribution is:
+
+```{=tex}
+\begin{align}
+p(\sigma^2 \mid \mathbf{y}, \boldsymbol{\tau}, s) &\sim\mathcal{IG}2(\bar{s}, \bar{\nu})\\
+\bar{s} &= s + (\mathbf{y} - \boldsymbol{\tau})'(\mathbf{y} - \boldsymbol{\tau})\\
+\bar{\nu} &= T + \nu
+\end{align}
+```
+The full conditional posterior distribution of the prior scale $s$ is based on the prior $p(\sigma^2 \mid s)$ and that for $s$:
+\begin{align}
+s \sim \mathcal{G}(s_s, a) \propto s^{a-1} \exp(-\frac{s}{s_s})
+\end{align}
+which results in the following full conditional posterior distribution:
+\begin{align}
+p(s \mid \mathbf{y}, \mathbf{\tau}, \sigma^2) &= \mathcal{G}(\bar{s}_s,\bar{a})\\
+\bar{s}_s &= \left(s_s^{-1} + (2\sigma^2)^{-1}\right)^{-1}
+\bar{a} &= a + \frac{\nu}{2}
+\end{align}
+
+The code below implements the sampler from the full conditional posterior for $s$
+
+
+```{r}
+sample_s = function(sigma2, s_s, a, nu) {
+  shape_s = a + nu/2
+  scale_s = 1/((1/s_s) + 1/(2*sigma2))
+  s = rgamma(1, shape = shape_s, scale = scale_s)
+  return(s)
+}
+
+```
+
 
 
 ## Estimating inverted-gamma 2 error term variance prior scale
