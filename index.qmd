@@ -4,6 +4,8 @@ author:
   - name: Tomasz Woźniak
     url: https://github.com/donotdespair
     orcid: 0000-0003-2212-2378
+  - name: Gezhi Chen
+    url: https://github.com/cora1ine
   - name: Inhye Kang
     url: https://github.com/inhyekang-au
     orcid: 0009-0007-8544-4952
@@ -14,7 +16,7 @@ author:
     orcid: 0009-0008-9348-8581
   - name: Yuqiao Yang
     url: https://github.com/JimmyYang917
-  
+
     execute:
   #echo: false
 citation: 
@@ -614,6 +616,62 @@ sample_s = function(sigma2, s_s, a, nu) {
 
 
 ## Estimating inverted-gamma 2 error term variance prior scale
+
+In this section, we estimate the error term variance prior scale $s$ that follows a Inverted-gamma 2 distribution with scale $\underline{s}$ and shape $\underline{\mu}$: $s\sim\mathcal{IG2}(\underline{s},\underline{\mu})$. The probability density function equal to: 
+
+$$
+p\left(s\right) = \Gamma(\frac{\underline{\mu}}{2})^{-1} (\frac{\underline{s}}{2})^{\frac{\underline{\mu}}{2}} s^{-\frac{\underline{\mu}+2}{2}}exp\{ -\frac{1}{2}\frac{\underline{s}}{s}\}
+$$
+
+As we assume $\sigma^2|s \sim \mathcal{IG2} (s,\underline{\nu})$
+
+$$
+p\left(\sigma^2|s\right) = \Gamma(\frac{\underline{\nu}}{2})^{-1} (\frac{s}{2})^{\frac{\underline{\nu}}{2}} \sigma^2{^{-\frac{\underline{\nu}+2}{2}}}exp\{-\frac{1}{2}\frac{s}{\sigma^2}\}
+$$
+
+In order to find full conditional posterior of $s$ write out its kernel as:
+
+$$
+\begin{aligned}
+p(s|\tau, \sigma^2) &\propto L(\tau, \sigma^2|y) \cdot p(\epsilon|\sigma^2) \cdot p(\sigma^2|s) \cdot p(s) \\
+&\propto p(\sigma^2|s) \cdot p(s) \\
+&\propto (\frac{s}{2})^{\frac{\underline{\nu}}{2}} exp\{ -\frac{1}{2}\frac{s}{\sigma^2}\} \cdot s^{-\frac{\underline{\mu}+2}{2}}exp\{-\frac{1}{2}\frac{\underline{s}}{s}\} \\
+&\propto (\frac{s}{2})^{\frac{\underline{\nu}}{2}} \cdot s^{-\frac{\underline{\mu}+2}{2}} \cdot exp \{-\frac{1}{2}(\frac{\underline{s}}{s} + \frac{s}{\sigma^2} )\}  \\
+&\propto (\frac{1}{2}^{\frac{\underline{\nu}}{2}}) \cdot s^{\frac{\underline{\nu}}{2}} \cdot s^{-\frac{\underline{\mu}+2}{2}} \cdot exp \{-\frac{1}{2}(\frac{\underline{s}}{s} + \frac{s}{\sigma^2} )\}  \\
+&\propto s^{\frac{\underline{\nu}-\underline{\mu}-2}{2}} exp\{ -\frac{\frac{1}{\sigma^2}s +\frac{s}{\underline{s}}}{2}\}
+\end{aligned}
+$$
+
+from which we recognize a Generalized inverse Gaussian distribution: $\mathcal{GIG}(\overline{p}, \overline{a}, \overline{b})$ with parameters:
+
+\begin{align}
+\overline{p} &= \frac{\underline{\nu} - \underline{\mu}}{2}\\
+\overline{a} &= \frac{1}{\sigma^2 }\\
+\overline{b} &= \underline{s }
+\end{align}
+
+The following script illustrates sampling from the full conditional posterior distribution of $s$ and the function `s.sampler`:
+
+```{r}
+s.sampler = function(sigma2, prior){ 
+  # sigma2 - the current draw
+  # prior is a list containing:
+  #   s.prior - a positive scalar
+  #   mu.prior - a scalar
+  #   nu.prior - a scalar
+  
+  a.bar.s      = 1/sigma2
+  b.bar.s      = (prior$nu.prior - prior$mu.prior)/2
+  p.bar.s      = prior$s.prior
+
+  s    = GIGrvg::rgig(n = 1, lambda = p.bar.s, chi = b.bar.s, psi = a.bar.s)
+
+    return(s)
+}
+```
+
+
+
 
 ## Estimating the initial condition prior scale
 
