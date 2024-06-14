@@ -9,6 +9,9 @@ author:
     orcid: 0009-0004-8443-1453
   - name: Gezhi Chen
     url: https://github.com/cora1ine
+  - name: Ben Gussen
+    url: https://github.com/bgussen
+    orcid: 0000-0003-4406-4076
   - name: Inhye Kang
     url: https://github.com/inhyekang-au
     orcid: 0009-0007-8544-4952
@@ -350,7 +353,6 @@ UC.Gibbs.sampler    = function(S, starting.values, priors){
 
 library(mgcv) 
 library(microbenchmark)
-library(knitr)
 
 ```
 
@@ -732,6 +734,60 @@ s2_sampler <- function(tau_0, tau_0_prior, s_prior, nu_prior) {
 ## Student-t prior for the trend component
 
 ## Estimating Student-t degrees of freedom parameter
+
+
+
+The Student-t distribution is commonly used in statistical modeling to handle data with heavier tails than the normal distribution. An essential parameter of the Student-t distribution is the degrees of freedom $\nu$, which controls the tail heaviness. In this note, we present the Bayesian estimation of the degrees of freedom parameter for a $T$-variate Student-t distribution represented as an inverted gamma 2 scale mixture of normals:
+
+\begin{align}
+\mathbf{y} \mid \boldsymbol\tau, \boldsymbol\lambda, \sigma^2 &\sim \mathcal{N}_T(\boldsymbol\tau, \sigma^2diag(\boldsymbol\lambda))\\
+\boldsymbol\lambda &= (\lambda_1, \dots, \lambda_T)'\\
+\lambda_t \mid \nu &\sim \mathcal{IG2}(\nu - 2, \nu)
+\end{align}
+
+Therefore the joint prior for vector $\boldsymbol\lambda$ is proportional to:
+$$
+\Gamma\left(\frac{\nu}{2}\right)^{-T}\left(\frac{\nu-2}{2}\right)^{\frac{T\nu}{2}}\left(\prod_{t=1}^T\lambda_t\right)^{-\frac{\nu+2}{2}}\exp\left\{-\frac{\nu-2}{2}\sum_{t=1^T}\lambda_t^{-1}\right\}
+$$
+Assume the following Gamma prior for $\nu$:
+$$
+p(\nu) \sim \text{Gamma}(a, b) \propto \nu^{a-1}\exp\{-b\nu\}
+$$
+
+Therefore the kernel of the full conditional posterior of $\nu$ is defined by:
+$$
+p(\nu\mid\mathbf{y},\boldsymbol\tau,\boldsymbol\lambda,\sigma^2, \nu) \propto p(,\boldsymbol\lambda\mid\nu)p(\nu)
+$$
+
+This expression does not lead to a full conditional posterior distribution of a known typ, so we use the Metropolis-Hastings algorithm to sample from this posterior. We employ a random walk proposal distribution with a truncated normal distribution centred at the current value of $\nu$ with a fixed standard deviation.
+
+
+```{r}
+log_kernel_nu <- function(nu, lambda, a, b) {
+  
+  T = length(lambda)  
+  log_c = -T * lgamma(nu / 2) + (T * nu / 2) * log((nu - 2) / 2) 
+  log_k = -((nu + 2) / 2) * sum(log(lambda)) - ((nu - 2) / 2) * sum(1 / lambda)
+  log_nu = (a - 1) * log(nu) - b * nu
+  return(log_c + log_k + log_nu)
+}
+
+sample_nu <- function(nu, lambda, a, b, proposal_sd) {
+  
+  T               = length(lambda)  
+  nu_proposal     = RcppTN::rtn(nu, proposal_sd, 0, Inf)
+  kernel_ratio    = exp(log_kernel_nu(nu_proposal, lambda, a, b) - log_kernel_nu(nu, lambda, a, b))
+  candidate_ratio = RcppTN::dtn(nu_proposal, nu, proposal_sd, 0, Inf) / RcppTN::dtn(nu, nu_proposal, proposal_sd, 0, Inf)
+  accept_ratio    = kernel_ratio * candidate_ratio
+  
+  if (runif(1) < accept_ratio) {
+    nu <- nu_proposal
+  }
+
+  return(nu)
+}
+
+```
 
 ## Laplace prior for the trend component
 
