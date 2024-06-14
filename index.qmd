@@ -151,7 +151,6 @@ $$\tau = H^{-1}i\tau_0 + H^{-1} \eta $$
 
 $$\tau|\eta,\lambda \sim \mathcal{N}(H^{-1}i\tau_0, \sigma_\eta^2 H^{-1}\Omega(H^{-1})') $$
 
-$${\eta|\lambda \sim N(0_T, \sigma_\eta^2\Omega)}$$
 
 $$\lambda_t \sim exp({\frac{1}{\alpha}})$$
 
@@ -167,8 +166,9 @@ $$L(\tau|y,\sigma^2) = exp({-\frac{1}{2}\frac{1}{\sigma^2}(\mathbf{y} - \boldsym
 The **prior distribution** of $\tau$is:
 
 $$p(\tau|\tau_0,\sigma_\eta^2,\Omega) \propto exp(-\frac{1}{2}\frac{1}{\sigma_\eta^2}(\tau - H^{-1}i\tau_0)'H'\Omega^{-1}H(\tau - H^{-1}i\tau_0))$$
+
 **Full-conditional posterior distribution** of ${\tau}|y,\sigma_\eta^2,\Omega$:
-```{=tex}
+
 \begin{align}
 P(\tau|y,\tau_0,\sigma^2,\Omega) &\propto L(\tau|y,\sigma^2)\times p(\tau|\tau_0,\sigma_\eta^2,\Omega)\\
 
@@ -177,29 +177,31 @@ P(\tau|y,\tau_0,\sigma^2,\Omega) &\propto L(\tau|y,\sigma^2)\times p(\tau|\tau_0
 
 &\propto exp({-\frac{1}{2}}\sigma^{-2}\sigma_\eta^{-2}[\tau'(\sigma_\eta^2+\sigma^2H'\Omega^{-1}H)\tau-2\tau'(\sigma_\eta^2y+\sigma^2H'\Omega^{-1}H(H^{-1}i\tau_0))])\\
 
-&= exp({-\frac{1}{2}}(\tau'(\sigma^{-2}+\sigma_\eta^{-2}H'\Omega^{-1}H\tau-2\tau'(\sigma^{-2}y+\sigma_\eta^{-2}H'\Omega^{-1}H(H^{-1}i\tau_0))\\
-
-&\sim N(\bar{V_\tau},\bar{\tau})\\
-
-&\bar{V_\tau} = (\sigma^{-2}+\sigma_\eta^{-2}H'\Omega^{-1}H)^{-1}\\
-&\bar{\tau} =\bar{V_\tau} (\sigma^{-2}y+\sigma_\eta^{-2}H'\Omega^{-1}i\tau_0)
-
+&= exp({-\frac{1}{2}}(\tau'(\sigma^{-2}+\sigma_\eta^{-2}H'\Omega^{-1}H\tau-2\tau'(\sigma^{-2}y+\sigma_\eta^{-2}H'\Omega^{-1}H(H^{-1}i\tau_0))
 \end{align}
-```
+
+
+which results in 
+
+\begin{align}
+\tau|y,\tau_0,\sigma^2,\Omega&\sim N(\bar{V_\tau},\bar{\tau})\\[1ex]
+\bar{V_\tau} &= (\sigma^{-2}+\sigma_\eta^{-2}H'\Omega^{-1}H)^{-1}\\
+\bar{\tau} &=\bar{V_\tau} (\sigma^{-2}y+\sigma_\eta^{-2}H'\Omega^{-1}i\tau_0)
+\end{align}
 
 
 ### Full-conditional posterior distribution for $\lambda_t|y,\tau,\sigma_\eta^2$
 
 **Conditional Likelihood:** 
 
-$$H\tau - i\tau_o=\eta$$
-```{=tex}
+Define: $H\tau - i\tau_o=\eta$
+
 \begin{align}
-L(\lambda_t|y,\tau_0,\tau,\sigma_\eta^2)&\propto  (\prod^{T}_{i = 1} \lambda_t^{-\frac{N}{2}}) exp({-\frac{1}{2}\frac{1}{\sigma^2_\eta}(i\tau_0-H\tau)'\Omega^{-1}(i\tau_0-H\tau)})\\
-&= (\prod^{T}_{i = 1} \lambda_t^{-\frac{N}{2}}exp({-\frac{1}{2}\frac{1}{\sigma^2_\eta}\frac{1}{\lambda_t}\eta_t'\eta_t}))                
+L(\lambda_t|y,\tau_0,\tau,\sigma_\eta^2)&\propto  (\prod^{T}_{i = 1} \lambda_t^{-\frac{1}{2}}) exp({-\frac{1}{2}\frac{1}{\sigma^2_\eta}(i\tau_0-H\tau)'\Omega^{-1}(i\tau_0-H\tau)})\\
+&= (\prod^{T}_{i = 1} \lambda_t^{-\frac{1}{2}}exp({-\frac{1}{2}\frac{1}{\sigma^2_\eta}\frac{1}{\lambda_t}\eta_t'\eta_t}))                
 
 \end{align}
-```
+
 
 The **prior distribution** of $\lambda_t$ is:
 
@@ -210,43 +212,36 @@ $$
 
 **Full-conditional posterior distribution** of $\lambda_t$is:
 
-```{=tex}
 \begin{align}
-P(\lambda_t|y,\tau,\sigma_\eta^2) &\propto \lambda_t^{-\frac{N}{2}+1-1}exp(-\frac{1}{2}({\frac{\eta_t'\sigma_\eta^{-2}\eta_t}{\lambda_t}+{\frac{2}{\alpha}}\lambda_t)}) \\
+P(\lambda_t|y,\tau,\sigma_\eta^2) &\propto \lambda_t^{-\frac{1}{2}+1-1}exp(-\frac{1}{2}({\frac{\eta_t'\sigma_\eta^{-2}\eta_t}{\lambda_t}+{\frac{2}{\alpha}}\lambda_t)}) \\
 \end{align}
-```
 
 
 The above expression can be rearranged in the form of a Generalized inverse Gaussian distribution kernel as follows:
 
-```{=tex}
 \begin{align}
 \lambda_t|Y,A,\Sigma &\sim GIG(a,b,p) \\
 \\
 a &=\frac{2}{\alpha} \\
 b &= \eta_t'\sigma_\eta^{-2}\eta_t \\
-p &= -\frac{N}{2}+1
+p &= -\frac{1}{2}+1
 \end{align}
 
-```
 
-### R Function for Gibbs Sample
+### R Function for Gibbs Sampler
 
 ```{r}
 UC.AR.Gibbs.sampler    = function(S, starting.values, priors){
   aux     = starting.values
   p       = length(aux$alpha)
   T       = nrow(aux$Y)
-#  i_matrix <- diag(T)
   i <- matrix(0, T, 1)  
   i[1, 1] <- 1 
   posteriors    = list(
     tau     = matrix(NA,T,S),
     epsilon = matrix(NA,T,S),
     tau_0   = matrix(NA,1,S),
-    sigma   = matrix(NA,2,S),
-    
-    non.stationary.iterations = rep(NA,S)
+    sigma   = matrix(NA,2,S)
   )
   
   alpha <- 2
@@ -278,18 +273,18 @@ UC.AR.Gibbs.sampler    = function(S, starting.values, priors){
     
     # Sampling tau_0
     ###########################
-    tau_0.v.inv    = diag(1/diag(priors$tau_0.v))
-    V.tau_0.bar    = solve((1/aux$sigma[1])*crossprod(i,Omega.inv%*%i) + tau_0.v.inv)
-    tau_0.bar      = V.tau_0.bar %*% ( (1/aux$sigma[1])%*%t(i)%*%Omega.inv%*%H%*%aux$tau + tau_0.v.inv%*%priors$tau_0.m )
-    tau_0.draw     = rmvnorm(1,as.vector(tau_0.bar),V.tau_0.bar)
+    tau_0.v.inv    = diag(1/priors$tau_0.v)
+    V.tau_0.bar    = 1/((1/aux$sigma[1])*crossprod(i,Omega.inv%*%i) + tau_0.v.inv)
+    tau_0.bar      = V.tau_0.bar %*% ( (1/aux$sigma[1])%*%t(i)%*%Omega.inv%*%H%*%aux$tau + tau_0.v.inv * priors$tau_0.m )
+    tau_0.draw     = rnorm(1,as.numeric(tau_0.bar), sqrt(V.tau_0.bar))
     aux$tau_0      = as.vector(tau_0.draw)
     
-    # Sampling sigma_eta
+    # Sampling sigma_epsilon
     ###########################
     sigma.eta.s   = as.numeric(priors$sigma.s + crossprod((c(aux$tau_0[1],diff(aux$tau_0)) - i%*%aux$tau_0),(priors$H%*%aux$tau - i%*%aux$tau_0)))
     sigma.eta.nu  = priors$sigma.nu + T
     sigma.eta.draw= sigma.eta.s/rchisq(1,sigma.eta.nu)
-    sigma.eta.draw.inv=solve(sigma.eta.draw)
+    sigma.eta.draw.inv=1/(sigma.eta.draw)
     
     sigma.e.s     = as.numeric(priors$sigma.s + crossprod(aux$tau-aux$Y))
     sigma.e.nu    = priors$sigma.nu + T
@@ -300,7 +295,7 @@ UC.AR.Gibbs.sampler    = function(S, starting.values, priors){
     ###########################
     u.t = H%*%aux$tau[,,s]-i%*%aux$tau_0[,,s]
     #    ---- loop lambda posterior ----   #
-    c                      = -N/2 + 1         
+    c                      = -1/2 + 1         
     a                      = 2 / lambda.priors$alpha
     for (x in 1:T){
       b                  = t((u.t)[x,])%*%(1/aux$sigma[1][,,s])%*%(u.t)[x,]
@@ -313,8 +308,7 @@ UC.AR.Gibbs.sampler    = function(S, starting.values, priors){
     posteriors$tau[,s]     = aux$tau
     posteriors$tau_0[,s]   = aux$tau_0
     posteriors$lambda[,s]  = aux$lambda
-    # posteriors$non.stationary.iterations[s] = ns.i
-    if (s%%1000==0){cat(" ",s)}
+    posteriors$sigma[,s]   = aux$sigma
   }
   
   output      = list(
