@@ -1044,14 +1044,7 @@ Where $\alpha\in A$ denotes the set of parameters for $\alpha$ in which stationa
 0 & \text{otherwise}
 \end{cases}
 \end{align}
-
-and:
-
-\begin{align}
-\sigma_{\alpha}^{2}\sim IG2\left(s_{\alpha},\nu_{\alpha}\right)
-\end{align}
-
-
+This condition is not implemented in the code though.
 
 Using from the simple unobserved component model:
 
