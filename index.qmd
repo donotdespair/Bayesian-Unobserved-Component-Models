@@ -131,28 +131,15 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 
 ## Autoregressive cycle component
 
-In this section, we will modify the error component $\epsilon_{t}$ from the simple local-level model to take the form of an autoregressive (AR) expression as follows.
-$$
-\alpha_{p}(L)\epsilon_{t} = e_{t} \\ 
-$$
-$$
-e_{t}\sim \mathcal{N}(0,\sigma_{e}^{2})
-$$
+In this section, we will modify the error component $\epsilon_{t}$ from the simple local-level model to take the form of an autoregressive (AR) expression as follows
+\begin{align}
+\epsilon_{t} &= \alpha_{1}\epsilon_{t-1} + \alpha_{2}\epsilon_{t-2} + \cdots  + \alpha_{p}\epsilon_{t-p} + e_{t},\\
+e_{t}&\sim \mathcal{N}(0,\sigma_{e}^{2}).
+\end{align}
 
-where $\alpha_{p}(L)$ is a lag polynomial, which can be represented as
+Collect vector of autoregressive parametersin a $p$-vector $\boldsymbol\alpha = (\alpha_{1},\alpha_{2}, \cdots, \alpha_{p})'$, where $\boldsymbol\alpha \in A$, with the stationarity restriction being required to hold.
 
-$$
-\alpha_{p}(L) = 1- \alpha_{1}L - \alpha_{2}L^{2} - \cdots  - \alpha_{p}L^{p}
-$$
-
-Then, the error component will be obtained in the form of an autoregressive model, represented as 
-
-$$
-\epsilon_{t} = \alpha_{1}\epsilon_{t-1} + \alpha_{2}\epsilon_{t-2} + \cdots  + \alpha_{p}\epsilon_{t-p} + e_{t}
-$$
-And a vector of autoregressive parameters, denoted as $\boldsymbol\alpha = (\alpha_{1},\alpha_{2}, \cdots, \alpha_{p})'$. Where $\boldsymbol\alpha \in A$, with the stationarity restriction being required to hold.
-
-By modeling the error component in an autoregressive form, we enable our model to capture the cyclical component, which may deviate in the short run from the long-term stochastic trend ($\tau_{t}$).
+By modelling the error component in an autoregressive form, we enable our model to capture the cyclical component, capturing its negative autocorrelations, and allowing the series to deviate from the long-term stochastic trend ($\tau_{t}$) in the short run.
 
 **The matrix notation can be represented as:**
 
@@ -180,7 +167,7 @@ $$
  \vdots  &\vdots  &\vdots  &\vdots  &\cdots  &\ddots  &-\alpha_{1}  &1  &0  &0 \\
  0  &0  &0  &0  &\cdots  &\cdots   &-\alpha_{2}   &-\alpha_{1} &1 &0 \\
  0  &0  & 0 &0  &\cdots  &\cdots  &-\alpha_{3}  &-\alpha_{2}  &-\alpha_{1} &1 
-\end{bmatrix}_{TXT} 
+\end{bmatrix}_{T\times T} 
 $$
 
 ```{=tex}
@@ -191,16 +178,15 @@ $$
 \epsilon_{2}\\
 \vdots\\
 \epsilon_{T}\\
-\end{bmatrix}_{TX1} 
-
-\;\;\;\;\;\;\;\;\;\;\; and \;\;\;\;\;\;\;\;\;\;\;
+\end{bmatrix}_{T\times 1} 
+\qquad and \qquad
 \mathbf{e} =
 \begin{bmatrix}
 e_{1} \\
 e_{2}\\
 \vdots\\
 e_{T}\\
-\end{bmatrix}_{TX1} 
+\end{bmatrix}_{T\times 1} 
 
 \end{align}
 ```
@@ -208,9 +194,7 @@ e_{T}\\
 
 <br>
 
-Typically, in most cases, we set the initial value ($\boldsymbol\epsilon_{0}$) to zero since it aligns with the well-defined stationarity assumption. However, in this instance, the author will also estimate $\boldsymbol\epsilon_{0}$ from an autoregressive model, following a normal prior distribution: $\boldsymbol\epsilon_{0} \sim \mathcal{N}_{p}(\mathbf{0}_{P},\sigma_{0}^{2}\mathbf{I}_{P})$. It is also assumed that $\mathbf{e}_{0} \sim \mathcal{N}_{P}(\mathbf{0}_{P},\sigma_{e}^{2}\mathbf{I}_{P})$.
-
-Which can be represented in matrix form as:
+Typically, in most cases, we set the initial value ($\boldsymbol\epsilon_{0}$) to zero since it aligns with the well-defined stationarity assumption. However, in this note, these values are estimated $\boldsymbol\epsilon_{0}$ from an autoregressive model, which is facilitated by assuming a normal prior distribution: $\boldsymbol\epsilon_{0} \sim \mathcal{N}_{p}(\mathbf{0}_{p},\sigma_{0}^{2}\mathbf{I}_{p})$ and  that $\mathbf{e}_{0} \sim \mathcal{N}_{p}(\mathbf{0}_{p},\sigma_{e}^{2}\mathbf{I}_{p})$. Define:
 
 ```{=tex}
 \begin{align}
@@ -220,16 +204,15 @@ Which can be represented in matrix form as:
 \epsilon_{-p+2}   \\
 \vdots\\
 \epsilon_{0} 
-\end{bmatrix}_{PX1} 
-
-\;\;\;\;\;\;\;\;\;\;\; and \;\;\;\;\;\;\;\;\;\;\;
+\end{bmatrix}_{p\times 1},
+\qquad and \qquad
 \mathbf{e}_{0} = 
 \begin{bmatrix}
 e_{-p+1}   \\
 e_{-p+2}   \\
 \vdots\\
 e_{0} 
-\end{bmatrix}_{PX1} 
+\end{bmatrix}_{p\times 1} 
 
 \end{align}
 ```
@@ -237,7 +220,7 @@ e_{0}
 
 Then, the author will combine $\boldsymbol\epsilon$ and $\boldsymbol\epsilon_{0}$ together. This can be represented using the notations $\mathbf{H}_{\alpha}^{*}$, $\boldsymbol\epsilon^{*}$, and $\mathbf{e}^{*}$.
 
-$\mathbf{H}_{\alpha}^{*}$ is constructed in the same way as $\mathbf{H}_{\alpha}$, but the dimension increases to $(T+P)X(T+P)$.
+$\mathbf{H}_{\alpha}^{*}$ is constructed in the same way as $\mathbf{H}_{\alpha}$, but the dimension increases to $(T+p)\times (T+p)$.
 
 ```{=tex}
 \begin{align}
@@ -245,11 +228,7 @@ $\mathbf{H}_{\alpha}^{*}$ is constructed in the same way as $\mathbf{H}_{\alpha}
 \begin{bmatrix}
 \epsilon_{0}   \\
 \epsilon
-\end{bmatrix}_{(T+P)X1} 
-
-\;\;\;
-
- =  \;\;\;
+\end{bmatrix}_{(T+p)\times 1}  =
 \begin{bmatrix}
 \epsilon_{-p+1}   \\
 \epsilon_{-p+2}   \\
@@ -258,19 +237,14 @@ $\mathbf{H}_{\alpha}^{*}$ is constructed in the same way as $\mathbf{H}_{\alpha}
 \epsilon_{2} \\
 \vdots\\
 \epsilon_{T}
-\end{bmatrix}_{(T+P)X1}
-
-\;\;\;\; and \;\;\;\;
-
+\end{bmatrix}_{(T+p)\times 1}
+\qquad and \qquad
 \mathbf{e}^{*} =
 \begin{bmatrix}
 e_{0}   \\
 e
-\end{bmatrix}_{(T+P)X1} 
-
-\;\;\;
-
- =  \;\;\;
+\end{bmatrix}_{(T+p)\times 1} 
+=
 \begin{bmatrix}
 e_{-p+1}   \\
 e_{-p+2}   \\
@@ -279,8 +253,7 @@ e_{1} \\
 e_{2} \\
 \vdots\\
 e_{T}
-\end{bmatrix}_{(T+P)X1}
-
+\end{bmatrix}_{(T+p)\times 1}
 \end{align}
 ```
 
@@ -290,7 +263,7 @@ e_{T}
 \mathbf{H}_{\alpha}^{*} \boldsymbol\epsilon^{*} &=\mathbf{e}^{*} \\
 \boldsymbol\epsilon^{*} &= \mathbf{H}^{*-1}_{\alpha}\mathbf{e}^{*} \\
 
-\mathbf{e}^{*} &\sim \mathcal{N}_{T+P}(\mathbf{0}_{T+P},\sigma_{e*}^{2}\mathbf{I}_{T+P})
+\mathbf{e}^{*} &\sim \mathcal{N}_{T+p}(\mathbf{0}_{T+p},\sigma_{e*}^{2}\mathbf{I}_{T+p})
 \end{align}
 ```
 
@@ -298,7 +271,7 @@ Then
 ```{=tex}
 \begin{align}
 
-\boldsymbol\epsilon^{*}|\boldsymbol\alpha,\sigma_{e}^2 &\sim \mathcal{N}_{T+P}(\mathbf{0}_{T+P},\underbrace{\sigma_{e*}^2(\mathbf{H}_{\alpha}^{*'}\mathbf{H}_{\alpha}^{*})^{-1}}_{{\boldsymbol\Omega}})
+\boldsymbol\epsilon^{*}|\boldsymbol\alpha,\sigma_{e}^2 &\sim \mathcal{N}_{T+p}(\mathbf{0}_{T+p},\underbrace{\sigma_{e*}^2(\mathbf{H}_{\alpha}^{*'}\mathbf{H}_{\alpha}^{*})^{-1}}_{{\boldsymbol\Omega}})
 \end{align}
 ```
 
@@ -311,12 +284,12 @@ Then
 \end{bmatrix} \\
 \end{align}
 
-\text{ with dimension}
+\text{ with dimensions}
 
  \begin{bmatrix}
- PXP&PXT\\
- TXP&TXT
-\end{bmatrix}_{(T+P)X(T+P)} \\
+ pXP&pXT\\
+ TXp&TXT
+\end{bmatrix}_{(T+p)X(T+p)} \\
 
 ```
 
@@ -399,11 +372,11 @@ p(\boldsymbol\epsilon_{0}|\epsilon,\mathbf{y},\boldsymbol\tau,\tau_0, \sigma_{\e
 
 &\propto p(\boldsymbol\epsilon_{0}) \; p(\boldsymbol\epsilon_{0}|\boldsymbol\epsilon,\boldsymbol\alpha,\sigma_{e*}^2) \\
 
-&= \mathcal{N}_{P}(\bar{\boldsymbol\epsilon_{0}},\bar{\mathbf{V}}_{\epsilon_{0}}) \\
+&= \mathcal{N}_{p}(\bar{\boldsymbol\epsilon_{0}},\bar{\mathbf{V}}_{\epsilon_{0}}) \\
 
 \\
 
-\bar{\mathbf{V}}_{\epsilon_{0}} &= \left[\underline{\mathbf{V}}^{-1}_{\epsilon_{0}} + \sigma_{0}^{-2} \mathbf{I}_{P}\right]^{-1} \\
+\bar{\mathbf{V}}_{\epsilon_{0}} &= \left[\underline{\mathbf{V}}^{-1}_{\epsilon_{0}} + \sigma_{0}^{-2} \mathbf{I}_{p}\right]^{-1} \\
 \bar{\boldsymbol\epsilon_{0}} &= \bar{\mathbf{V}}_{\epsilon_{0}} \; \underline{\boldsymbol\epsilon_{0}} 
 
 \end{align}
@@ -430,7 +403,11 @@ Sampling.epsilon.epsilonzero    = function(starting.values, priors){
   aux            = starting.values
   p              = length(aux$alpha)
   T              = nrow(aux$Y)
-  
+  Ha             = diag(T + p)
+  for (i in 1:p) {
+    mgcv::sdiag(Ha, -i) <- - aux$alpha[i]
+  }
+  HaHa           = crossprod(Ha)
     
     # Start calculating (and updating parameters)
     ###########################
@@ -438,7 +415,7 @@ Sampling.epsilon.epsilonzero    = function(starting.values, priors){
     epsilon.star        = rbind(aux$epsilon.zero, aux$epsilon)
     omega               = sigma.e.star%*%solve(HaHa)
     omega_11            = omega[1:p, 1:p]
-    omega_12            = omega[1:P, (p+1):(p+T)]
+    omega_12            = omega[1:p, (p+1):(p+T)]
     omega_21            = omega[(p+1):(p+T), 1:p]
     omega_22            = omega[(p+1):(p+T), (p+1):(p+T)]
     epsilon             = omega_21%*%solve(omega_11)%*%aux$epsilon.zero
@@ -450,7 +427,7 @@ Sampling.epsilon.epsilonzero    = function(starting.values, priors){
     ###########################
     V.epsilon.post.inv     = solve(V.epsilon) + (1/aux$sigma.eta)*HH
     b.epsilon              = (1/aux$sigma.eta)*HH%*%(aux$Y- cumsum(i%*%priors$tau_0)) + 
-                             solve(V.epsilon)%*%epsilon
+                             solve(V.epsilon)%*%aux$epsilon
     precision.L            = t(chol(V.epsilon.post.inv))
     epsilon.n              = rnorm(T)
     b.epsilon.tmp          = solve(precision.L, b.epsilon)
