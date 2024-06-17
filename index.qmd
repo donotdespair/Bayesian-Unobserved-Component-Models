@@ -32,6 +32,8 @@ author:
     url: https://github.com/russellyang728
   - name: Yuqiao Yang
     url: https://github.com/JimmyYang917
+  - name: Adam Wang
+    url: https://github.com/adamwang15
   - name: Yufei Wu
     url: https://github.com/yufeimichelle
     orcid: 0009-0002-3521-2751
@@ -1634,11 +1636,74 @@ tau_hetero.sampler = function(y, aux){
 
 # Bayesian forecasting
 
+Bayesian forecasting is a coherent way of predicting the future probabilistically, the forecast is summarized by a predictive density, which is the probability distribution of future data condition only on observed data.
+
 ## Predictive density
+
+The predictive density is derived by writing down the joint distribution of future data and parameters condition on observed data, then integrating out the parameters. By integrating out the posterior distribution of parameters, the predictive density accurately accounts for estimation uncertainty.
+
+The h-period ahead predictive density is given by:
+
+$$
+\begin{aligned}
+p(y_{T+h}, \dots, y_{T+1} | \mathbf y)
+= \int\int
+&p(y_{T+h} | \tau_{T+h}, \sigma^{2}) 
+p(\tau_{T+h} | \tau_{T+h-1}, \sigma^{2}_\eta)\\
+&\dots\\
+&\times p(y_{T+1} | \tau_{T+1}, \sigma^{2}) 
+p(\tau_{T+1} | \tau_{T}, \sigma^{2}_\eta)\\
+& \times p(\tau_{T}, \sigma^{2}, \sigma^{2}_\eta | \mathbf y)
+\ d\left(\tau_{T+h},\dots,\tau_{T+1}\right) d\left(\tau_{T}, \sigma^2,\sigma^2_\eta\right) \\
+\end{aligned}
+$$
 
 ## Sampling from the predictive density
 
+The form of the predictive density above suggests the following general algorithm for a h-periods ahead forecast.
 
+**For each** posterior draw $\left\{ \tau_T^{(s)}, \sigma^{2(s)}, \sigma^{2(s)}_\eta \right\}$:
 
+&emsp; **For** $i=1,\cdots,h:$
+ 
+&emsp;&emsp; Sample $\tau_{T+i}^{(s)} \sim \mathcal N(\tau_{T+i-1}^{(s)}, \sigma^{2(s)}_\eta)$
+
+&emsp;&emsp; Sample $y_{T+i}^{(s)} \sim \mathcal N(\tau_{T+i}^{(s)}, \sigma^{2(s)})$
+
+**Return** $\left\{ y_{T+1}^{(s)},\cdots,y_{T+h}^{(s)} \right\}_{s=1}^S$
+
+Here is an implementation in ``R``:
+
+```{r echo=TRUE}
+#' @title h-step ahead Bayesian forecasting of the local-level model
+#' 
+#' @param h                   Number of periods ahead
+#' @param posterior.tauT      Sx1 vector of trend component at time T
+#' @param posterior.sigma2    Sx1 vector of observation equation error variance
+#' @param posterior.sigma2eta Sx1 vector of state equation error variance
+#'
+#' @return hxS matrix of forecast values
+forecast = function(h, 
+                    posterior.tauT, 
+                    posterior.sigma2, 
+                    posterior.sigma2eta) {
+  
+  S = length(posterior.tauT)
+  y = matrix(NA, nrow = h, ncol = S)
+  
+  for (s in 1:S) {
+    tauT      = posterior.tauT[s]
+    sigma2    = posterior.sigma2[s]
+    sigma2eta = posterior.sigma2eta[s]
+    
+    for (t in 1:h) {
+      tauT1   = rnorm(1, tauT,  sqrt(sigma2eta))
+      y[t, s] = rnorm(1, tauT1, sqrt(sigma2))
+    }
+  }
+  
+  return(y)
+}
+```
 
 ## References {.unnumbered}
