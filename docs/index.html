@@ -19,6 +19,7 @@
 <meta name="author" content="Pun Suparattanapinan">
 <meta name="author" content="Yansong Yang">
 <meta name="author" content="Yuqiao Yang">
+<meta name="author" content="Adam Wang">
 <meta name="author" content="Yufei Wu">
 
 <title>Macroeconometrics Students Present - Bayesian Unobserved Component Models</title>
@@ -242,6 +243,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
              <p><a href="https://github.com/Punzbd">Pun Suparattanapinan</a> </p>
              <p><a href="https://github.com/russellyang728">Yansong Yang</a> </p>
              <p><a href="https://github.com/JimmyYang917">Yuqiao Yang</a> </p>
+             <p><a href="https://github.com/adamwang15">Adam Wang</a> </p>
              <p><a href="https://github.com/yufeimichelle">Yufei Wu</a> <a href="https://orcid.org/0009-0002-3521-2751" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
           </div>
   </div>
@@ -1501,11 +1503,65 @@ p(\boldsymbol\tau \mid \mathbf{y},  \tau_{0}, \sigma_\eta^2, \sigma^2) &amp;\pro
 </section>
 <section id="bayesian-forecasting" class="level1">
 <h1>Bayesian forecasting</h1>
+<p>Bayesian forecasting is a coherent way of predicting the future probabilistically, the forecast is summarized by a predictive density, which is the probability distribution of future data condition only on observed data.</p>
 <section id="predictive-density" class="level2">
 <h2 class="anchored" data-anchor-id="predictive-density">Predictive density</h2>
+<p>The predictive density is derived by writing down the joint distribution of future data and parameters condition on observed data, then integrating out the parameters. By integrating out the posterior distribution of parameters, the predictive density accurately accounts for estimation uncertainty.</p>
+<p>The h-period ahead predictive density is given by:</p>
+<p><span class="math display">\[
+\begin{aligned}
+p(y_{T+h}, \dots, y_{T+1} | \mathbf y)
+= \int\int
+&amp;p(y_{T+h} | \tau_{T+h}, \sigma^{2})
+p(\tau_{T+h} | \tau_{T+h-1}, \sigma^{2}_\eta)\\
+&amp;\dots\\
+&amp;\times p(y_{T+1} | \tau_{T+1}, \sigma^{2})
+p(\tau_{T+1} | \tau_{T}, \sigma^{2}_\eta)\\
+&amp; \times p(\tau_{T}, \sigma^{2}, \sigma^{2}_\eta | \mathbf y)
+\ d\left(\tau_{T+h},\dots,\tau_{T+1}\right) d\left(\tau_{T}, \sigma^2,\sigma^2_\eta\right) \\
+\end{aligned}
+\]</span></p>
 </section>
 <section id="sampling-from-the-predictive-density" class="level2">
 <h2 class="anchored" data-anchor-id="sampling-from-the-predictive-density">Sampling from the predictive density</h2>
+<p>The form of the predictive density above suggests the following general algorithm for a h-periods ahead forecast.</p>
+<p><strong>For each</strong> posterior draw <span class="math inline">\(\left\{ \tau_T^{(s)}, \sigma^{2(s)}, \sigma^{2(s)}_\eta \right\}\)</span>:</p>
+<p>  <strong>For</strong> <span class="math inline">\(i=1,\cdots,h:\)</span></p>
+<p>   Sample <span class="math inline">\(\tau_{T+i}^{(s)} \sim \mathcal N(\tau_{T+i-1}^{(s)}, \sigma^{2(s)}_\eta)\)</span></p>
+<p>   Sample <span class="math inline">\(y_{T+i}^{(s)} \sim \mathcal N(\tau_{T+i}^{(s)}, \sigma^{2(s)})\)</span></p>
+<p><strong>Return</strong> <span class="math inline">\(\left\{ y_{T+1}^{(s)},\cdots,y_{T+h}^{(s)} \right\}_{s=1}^S\)</span></p>
+<p>Here is an implementation in <code>R</code>:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#' @title h-step ahead Bayesian forecasting of the local-level model</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co">#' </span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param h                   Number of periods ahead</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param posterior.tauT      Sx1 vector of trend component at time T</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param posterior.sigma2    Sx1 vector of observation equation error variance</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co">#' @param posterior.sigma2eta Sx1 vector of state equation error variance</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="co">#'</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co">#' @return hxS matrix of forecast values</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>forecast <span class="ot">=</span> <span class="cf">function</span>(h, </span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>                    posterior.tauT, </span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>                    posterior.sigma2, </span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>                    posterior.sigma2eta) {</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  S <span class="ot">=</span> <span class="fu">length</span>(posterior.tauT)</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  y <span class="ot">=</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="at">nrow =</span> h, <span class="at">ncol =</span> S)</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>S) {</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    tauT      <span class="ot">=</span> posterior.tauT[s]</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>    sigma2    <span class="ot">=</span> posterior.sigma2[s]</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    sigma2eta <span class="ot">=</span> posterior.sigma2eta[s]</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>h) {</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>      tauT1   <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, tauT,  <span class="fu">sqrt</span>(sigma2eta))</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>      y[t, s] <span class="ot">=</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, tauT1, <span class="fu">sqrt</span>(sigma2))</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(y)</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 <section id="references" class="level2 unnumbered">
 <h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
@@ -1518,7 +1574,7 @@ p(\boldsymbol\tau \mid \mathbf{y},  \tau_{0}, \sigma_\eta^2, \sigma^2) &amp;\pro
   author = {Woźniak, Tomasz and Berke, Stephan and Buan, Carl and Chen,
     Gezhi and Gussen, Ben and Kang, Inhye and Li, Zheyuan and Liu, Rui
     and Pang, Qingqing and Pham, Nhu and Suparattanapinan, Pun and Yang,
-    Yansong and Yang, Yuqiao and Wu, Yufei},
+    Yansong and Yang, Yuqiao and Wang, Adam and Wu, Yufei},
   title = {Bayesian {Unobserved} {Component} {Models}},
   date = {2024-05-01},
   url = {https://donotdespair.github.io/Bayesian-Unobserved-Component-Models/},

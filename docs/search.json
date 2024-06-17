@@ -137,14 +137,14 @@
     "href": "index.html#predictive-density",
     "title": "Bayesian Unobserved Component Models",
     "section": "Predictive density",
-    "text": "Predictive density"
+    "text": "Predictive density\nThe predictive density is derived by writing down the joint distribution of future data and parameters condition on observed data, then integrating out the parameters. By integrating out the posterior distribution of parameters, the predictive density accurately accounts for estimation uncertainty.\nThe h-period ahead predictive density is given by:\n\\[\n\\begin{aligned}\np(y_{T+h}, \\dots, y_{T+1} | \\mathbf y)\n= \\int\\int\n&p(y_{T+h} | \\tau_{T+h}, \\sigma^{2})\np(\\tau_{T+h} | \\tau_{T+h-1}, \\sigma^{2}_\\eta)\\\\\n&\\dots\\\\\n&\\times p(y_{T+1} | \\tau_{T+1}, \\sigma^{2})\np(\\tau_{T+1} | \\tau_{T}, \\sigma^{2}_\\eta)\\\\\n& \\times p(\\tau_{T}, \\sigma^{2}, \\sigma^{2}_\\eta | \\mathbf y)\n\\ d\\left(\\tau_{T+h},\\dots,\\tau_{T+1}\\right) d\\left(\\tau_{T}, \\sigma^2,\\sigma^2_\\eta\\right) \\\\\n\\end{aligned}\n\\]"
   },
   {
     "objectID": "index.html#sampling-from-the-predictive-density",
     "href": "index.html#sampling-from-the-predictive-density",
     "title": "Bayesian Unobserved Component Models",
     "section": "Sampling from the predictive density",
-    "text": "Sampling from the predictive density"
+    "text": "Sampling from the predictive density\nThe form of the predictive density above suggests the following general algorithm for a h-periods ahead forecast.\nFor each posterior draw \\(\\left\\{ \\tau_T^{(s)}, \\sigma^{2(s)}, \\sigma^{2(s)}_\\eta \\right\\}\\):\n  For \\(i=1,\\cdots,h:\\)\n   Sample \\(\\tau_{T+i}^{(s)} \\sim \\mathcal N(\\tau_{T+i-1}^{(s)}, \\sigma^{2(s)}_\\eta)\\)\n   Sample \\(y_{T+i}^{(s)} \\sim \\mathcal N(\\tau_{T+i}^{(s)}, \\sigma^{2(s)})\\)\nReturn \\(\\left\\{ y_{T+1}^{(s)},\\cdots,y_{T+h}^{(s)} \\right\\}_{s=1}^S\\)\nHere is an implementation in R:\n\n#' @title h-step ahead Bayesian forecasting of the local-level model\n#' \n#' @param h                   Number of periods ahead\n#' @param posterior.tauT      Sx1 vector of trend component at time T\n#' @param posterior.sigma2    Sx1 vector of observation equation error variance\n#' @param posterior.sigma2eta Sx1 vector of state equation error variance\n#'\n#' @return hxS matrix of forecast values\nforecast = function(h, \n                    posterior.tauT, \n                    posterior.sigma2, \n                    posterior.sigma2eta) {\n  \n  S = length(posterior.tauT)\n  y = matrix(NA, nrow = h, ncol = S)\n  \n  for (s in 1:S) {\n    tauT      = posterior.tauT[s]\n    sigma2    = posterior.sigma2[s]\n    sigma2eta = posterior.sigma2eta[s]\n    \n    for (t in 1:h) {\n      tauT1   = rnorm(1, tauT,  sqrt(sigma2eta))\n      y[t, s] = rnorm(1, tauT1, sqrt(sigma2))\n    }\n  }\n  \n  return(y)\n}"
   },
   {
     "objectID": "index.html#references",
