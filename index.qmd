@@ -124,54 +124,19 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 ## Autoregressive cycle component
 
 ## Random walk with time-varying drift parameter
-A simple Unobserved Component model with drift
-$$\tau_{t} = \mu + \tau_{t-1} + \eta_t,\\$$
-$$\eta_t|Y_{t-1} ~ iid \sim\mathcal{N}(0, \sigma_{\eta}^2)\\$$
 
-Unobserved Component model with time-varying drift parameter
-$$\tau_{t} = \mu_{s_t} + \tau_{t-1} + \eta_t,\\$$
-$$\eta_t|Y_{t-1} ~ iid \sim\mathcal{N}(0, \sigma_{\eta}^2)\\$$
-
-$$\mu_{s_t} :\text{regime-dependent mean term}$$
-
-We assume there are two regime states, for example, before and after the exchange rate crisis in 1985.
-Therefore
-
-$$s_t = 1 \text{, for t < Tb}$$
-$$s_t = 2 \text{, for t} \geq Tb$$
+Consider a simple Unobserved Component model with  time-varying drift parameter
 \begin{align}
-\xi_{t} = \begin{bmatrix} 
-1 \\
-0 \\
-\end{bmatrix},  \quad \text{for } s_t = 1 \\
-\xi_t = \begin{bmatrix} 
-0 \\
-1 \\
-\end{bmatrix}, \quad \text{for } s_t = 2 \\
+\tau_{t} &= \mu_{s_t} + \tau_{t-1} + \eta_t,\\
+\eta_t &\sim \mathcal{N}(0, \sigma_{\eta}^2),
 \end{align}
+where $\mu_{s_t}$ is a regime-dependent mean term, and $s_t$ is a regime state variable. Assume there are two regimes, for example, before and after the exchange rate crisis in 1985. Define:
 
+$$s_t = \left\{\begin{array}{ll}1 &\text{ for }t < Tb \\  2 &\text{ for }t \geq Tb\end{array}\right.$$
 
-Matrix form
-$$
-H\tau = X_{\tau}\beta_{s}+\eta\\
-$$
-Prior distribution
-$$p(\beta) = exp\left(-\frac{1}{2}(\beta - \underline{\beta})'\underline{V}_\beta^{-1}(\beta - \underline{\beta})\right)$$
-
-Full conditional posterior distribution
-$$ p(\beta|y,\tau,\sigma_\eta^2) = L(\beta|y,\tau,\sigma_\eta^2)p(\beta) = N_2(\overline{\beta},\overline{V_\beta})\\$$ 
-$$ \overline{V_{\beta}} = [\sigma_{\eta}^{-2}X_\tau'X_\tau+ \underline{V}_\beta^{-1}]^{-1}\\$$ 
-$$ \bar{\beta} = \overline{V_{\beta}}[\sigma_{\eta}^{-2}X_\tau'H\tau + \underline{V}_\beta^{-1}\underline{\beta}]$$ 
-
-Since the drift is time varying, 
+To write a model in a matrix notation, define vector $\boldsymbol\beta = \begin{bmatrix}\tau_0 &\mu_1 &\mu_2\end{bmatrix}'$ and matrix:
 \begin{align}
-\beta = \begin{bmatrix}
-\tau_0 \\
-\mu_1 \\
-\mu_2
-\end{bmatrix}\\
-\\
-X_{\tau} = \begin{bmatrix}
+\mathbf{X}_{\tau} = \begin{bmatrix}
 1 & 1 & 0 \\
 0 & 1 & 0 \\
 0 & 1 & 0 \\
@@ -181,28 +146,42 @@ X_{\tau} = \begin{bmatrix}
 0 & 0 & 1 \\
 \vdots & \vdots & \vdots \\
 0 & 0 & 1
-\end{bmatrix}\\
+\end{bmatrix}
+\end{align}
+Then the model is written as
+$$
+\mathbf{H}\boldsymbol\tau = \mathbf{X}_{\tau}\boldsymbol\beta+\boldsymbol\eta\\
+$$
+Prior distribution
+$$p(\boldsymbol\beta) = exp\left(-\frac{1}{2}(\boldsymbol\beta - \underline{\boldsymbol\beta})'\mathbf{\underline{V}}_\beta^{-1}(\boldsymbol\beta - \underline{\boldsymbol\beta})\right)$$
+
+Full conditional posterior distribution
+\begin{align}
+p(\boldsymbol\beta|y,\boldsymbol\tau,\sigma_\eta^2) &= \mathcal{N}_3(\overline{\boldsymbol\beta},\mathbf{\overline{V}}_\beta)\\[1ex]
+\mathbf{\overline{V}}_{\beta} &= [\sigma_{\eta}^{-2}\mathbf{X}_\tau'\mathbf{X}_\tau+\mathbf{\underline{V}}_\beta^{-1}]^{-1}\\
+\bar{\boldsymbol\beta} &= \mathbf{\overline{V}}_{\beta}[\sigma_{\eta}^{-2}\mathbf{X}_\tau'\mathbf{H}\boldsymbol\tau + \mathbf{\underline{V}}_\beta^{-1}\underline{\boldsymbol\beta}]
 \end{align}
 
-```{r, eval=F, echo=T}
-# Define X_tau
-X_tau <- matrix(0, nrow = T, ncol = 3)
-X_tau[1, 1] <- 1  # Column for tau_0
-X_tau[1:(Tb-1), 2] <- 1  # Column for mu1 for t < Tb
-X_tau[Tb:T, 3] <- 1  # Column for mu2 for t >= Tb
-
-# Define H
-H <- diag(T)
-for (i in 2:T) {
-  H[i, i-1] <- -1
-}
-```
 
 ```{r, eval=F, echo=T}
 library(MASS)
 
 # function to draw beta
-draw_beta <- function(X_tau, H, tau, sigma_eta_sq, beta_prior, V_prior) {
+draw_beta <- function(Tb, tau, sigma_eta_sq, beta_prior, V_prior) {
+  
+  T = length(tau)
+  
+  X_tau <- matrix(0, nrow = T, ncol = 3)
+  X_tau[1, 1] <- 1  # Column for tau_0
+  X_tau[1:(Tb-1), 2] <- 1  # Column for mu1 for t < Tb
+  X_tau[Tb:T, 3] <- 1  # Column for mu2 for t >= Tb
+  
+  # Define H
+  H <- diag(T)
+  for (i in 2:T) {
+    H[i, i-1] <- -1
+  }
+  
   V_prior_inv <- solve(V_prior)
   
   V_bar_inv <- (1/sigma_eta_sq) * t(X_tau) %*% X_tau + V_prior_inv
