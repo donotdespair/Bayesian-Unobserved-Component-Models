@@ -136,22 +136,19 @@ Bayesian forecasting is a coherent way of predicting the future probabilisticall
 
 The predictive density is derived by writing down the joint distribution of future data and parameters condition on observed data, then integrating out the parameters. By integrating out the posterior distribution of parameters, the predictive density accurately accounts for estimation uncertainty.
 
-For example, the 1-period ahead predictive density is given by:
+The h-period ahead predictive density is given by:
 
 $$
 \begin{aligned}
-p(y_{T+1} | \mathbf y)
-= \int\int\int\int &p(y_{T+1}, \tau_{T+1}, \tau_{T}, \sigma^{2}, \sigma^{2}_\eta | \mathbf y)\ d\tau_{T+1} d\tau_{T} d\sigma^2 d\sigma^2_\eta \\
-= \int\int\int\int 
-&p(y_{T+1} | \mathbf y, \tau_{T+1}, \tau_T, \sigma^{2}, \sigma^{2}_\eta) 
-p(\tau_{T+1} | \mathbf y, \tau_{T}, \sigma^{2}, \sigma^{2}_\eta)\\
-& \times p(\tau_{T}, \sigma^{2}, \sigma^{2}_\eta | \mathbf y)
-\ d\tau_{T+1} d\tau_{T} d\sigma^2 d\sigma^2_\eta \\
-= \int\int\int\int 
-&p(y_{T+1} | \tau_{T+1}, \sigma^{2}) 
+p(y_{T+h}, \dots, y_{T+1} | \mathbf y)
+= \int\int
+&p(y_{T+h} | \tau_{T+h}, \sigma^{2}) 
+p(\tau_{T+h} | \tau_{T+h-1}, \sigma^{2}_\eta)\\
+&\dots\\
+&\times p(y_{T+1} | \tau_{T+1}, \sigma^{2}) 
 p(\tau_{T+1} | \tau_{T}, \sigma^{2}_\eta)\\
 & \times p(\tau_{T}, \sigma^{2}, \sigma^{2}_\eta | \mathbf y)
-\ d\tau_{T+1} d\tau_{T} d\sigma^2 d\sigma^2_\eta \\
+\ d\left(\tau_{T+h},\dots,\tau_{T+1}\right) d\left(\tau_{T}, \sigma^2,\sigma^2_\eta\right) \\
 \end{aligned}
 $$
 
@@ -161,11 +158,11 @@ The form of the predictive density above suggests the following general algorith
 
 **For each** posterior draw $\left\{ \tau_T^{(s)}, \sigma^{2(s)}, \sigma^{2(s)}_\eta \right\}$:
 
-&emsp; **For** $t=1,\cdots,h:$
+&emsp; **For** $i=1,\cdots,h:$
  
-&emsp;&emsp; Sample $\tau_{T+t}^{(s)} \sim \mathcal N(\tau_{T+t-1}^{(s)}, \sigma^{2(s)}_\eta)$
+&emsp;&emsp; Sample $\tau_{T+i}^{(s)} \sim \mathcal N(\tau_{T+i-1}^{(s)}, \sigma^{2(s)}_\eta)$
 
-&emsp;&emsp; Sample $y_{T+t}^{(s)} \sim \mathcal N(\tau_{T+t}^{(s)}, \sigma^{2(s)})$
+&emsp;&emsp; Sample $y_{T+i}^{(s)} \sim \mathcal N(\tau_{T+i}^{(s)}, \sigma^{2(s)})$
 
 **Return** $\left\{ y_{T+1}^{(s)},\cdots,y_{T+h}^{(s)} \right\}_{s=1}^S$
 
@@ -202,9 +199,6 @@ forecast = function(h,
   return(y)
 }
 ```
-
-
-## Missing observations
 
 
 ## References {.unnumbered}
