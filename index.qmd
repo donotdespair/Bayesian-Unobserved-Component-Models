@@ -1468,6 +1468,90 @@ lambda_t <- function(y_t,tau_t,sigma2, nu){
 
 ## Conditional heteroskedasticity
 
+
+Modelling Conditional heteroskedasticity includes the use of Stochastic Volatility models, which provides more flexibility in forecasting, enhancing its performance, improves in-sample fit of model and estimation precision.
+
+### Basic model
+
+Given that the shocks $\epsilon_t$ is heteroskedastic with conditional variances $\sigma_t^2$ the distribution of the shock becomes
+
+$$
+\boldsymbol \epsilon \mid \tau \sim \mathcal{N}_T \left( 0_T, \operatorname{diag}(\boldsymbol\sigma^2) \right)
+$$ 
+where $\boldsymbol\sigma^2 = \left(\sigma^2_1 , \ldots, \sigma^2_T \right)$ which follows a Stochastic Volatility process.
+
+The likelihood function is derived as:
+
+$$
+L(\boldsymbol\tau,\sigma^2|\mathbf{y}) = 
+(2\pi)^{-\frac{T}{2}}\left(\operatorname{diag}(\boldsymbol\sigma^2)\right)^{-\frac{1}{2}}\exp\left\{-\frac{1}{2}(\mathbf{y} - \boldsymbol\tau)'\operatorname{diag}(\boldsymbol\sigma^2)^{-1}(\mathbf{y} - \boldsymbol\tau)\right\}.
+$$
+
+The prior distribution for $\boldsymbol\tau$ is :
+
+\begin{align}
+ \boldsymbol\tau \mid \tau_{0}, \sigma_\eta^2 &\sim \mathcal{N}_T \left( \mathbf{H}^{-1} \mathbf{i}\tau_{0}, \sigma_\eta^2 (\mathbf{H'H})^{-1} \right)\\
+ &\propto \exp \left\{ -\frac{1}{2} \frac{1}{\sigma_\eta^2} \left( \tau - H^{-1} \mathbf{i}\tau_{0} \right)' H' H \left( \tau - H^{-1} \mathbf{i}\tau_{0}\right) \right\}
+\end{align}
+
+Then derive the Full Conditional Posterior for $\boldsymbol\tau$ is :
+
+\begin{align}
+p(\boldsymbol\tau \mid \mathbf{y},  \tau_{0}, \sigma_\eta^2, \sigma^2) &\propto L(\boldsymbol\tau,\sigma^2|\mathbf{y})p(\tau \mid \tau_{0}, \sigma_\eta^2)\\
+&\propto exp\left\{-\frac{1}{2}(\mathbf{y} - \boldsymbol\tau)'\operatorname{diag}(\boldsymbol\sigma^2)^{-1}(\mathbf{y} - \boldsymbol\tau)\right\} \\
+&\qquad\exp \left\{ -\frac{1}{2} \frac{1}{\sigma_\eta^2} \left( \boldsymbol\tau - \mathbf{H}^{-1} \mathbf{i}\tau_{0} \right)' \mathbf{H' H} \left( \boldsymbol\tau - \mathbf{H}^{-1} \mathbf{i}\tau_{0}\right) \right\}
+\end{align}
+
+The posterior parameters for $\tau$ follows a normal distribution 
+
+\begin{align}
+\boldsymbol\tau \mid \mathbf{y},  \tau_{0}, \sigma_\eta^2, \sigma^2&\mathcal{N}_T \left( \bar{\boldsymbol\tau}, \bar{\mathbf{V}}_\tau \right)\\
+\bar{\mathbf{V}}_\tau &= \left[ \operatorname{diag}(\boldsymbol\sigma^2)^{-1} + \sigma_\eta^{-2} \mathbf{H' H} \right]^{-1}\\
+\bar{\boldsymbol\tau} &= \bar{\mathbf{V}}_\tau \left[ \operatorname{diag}(\boldsymbol\sigma^2)^{-1} \mathbf{y} + \sigma_\eta^{-2} \mathbf{H}'\mathbf{i}\tau_{0} \right]
+\end{align}
+
+### Algorithm
+
+The sampler for posterior parameters for $\boldsymbol\tau$ is:
+
+```{r echo=TRUE}
+tau_hetero.sampler = function(y, aux){
+  #aux includes
+  # sigma2 = a diagonal matrix of sigma2 from Stochastic Volatility models
+  # tau0 = a scalar of initial value of tau
+  # sigma_eta2 = a scalar sigma_eta^2
+  
+  #y = data
+  T1 = nrow(y)
+  
+  # i_m = Tx1 matrix with 1 in the first row and 0 in all other rows
+  i_m = matrix(0, nrow = T1, ncol = 1)
+  i_m[1,] = 1
+  
+  H                    <-  diag(T1)
+  mgcv::sdiag(H,-1)    <-  -1
+ # H = TxT matrix with 1 in main diagonal and -1 under the diagonal elements
+  
+  sigma2 = aux$sigma2 
+  sigma2.inv = diag(1/diag(sigma2)) #get inverse 
+  tau0 = aux$tau0
+  sigma_eta2 = aux$sigma_eta2
+  sigma_eta2.inv = 1/sigma_eta2 #get inverse
+  
+  #compute the posterior parameters
+  V_post = solve(sigma2.inv + sigma_eta2.inv*t(H)%*%H)
+  tau_post = V_post%*%(sigma2.inv%*%y + sigma_eta2.inv * t(H)%*%(i_m*tau0))
+  
+  #sample tau from multivariate normal and return the sample tau
+  tau_draw <- mvtnorm::rmvnorm(T1, tau_post, V_post)
+
+  return (tau_draw)
+}
+
+```
+
+
+
 # Bayesian forecasting
 
 ## Predictive density
