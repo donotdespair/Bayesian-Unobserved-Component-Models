@@ -197,7 +197,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#random-walk-with-time-varying-drift-parameter" id="toc-random-walk-with-time-varying-drift-parameter" class="nav-link" data-scroll-target="#random-walk-with-time-varying-drift-parameter">Random walk with time-varying drift parameter</a></li>
   <li><a href="#student-t-error-terms" id="toc-student-t-error-terms" class="nav-link" data-scroll-target="#student-t-error-terms">Student-t error terms</a></li>
-  <li><a href="#conditional-heteroskedasticity" id="toc-conditional-heteroskedasticity" class="nav-link" data-scroll-target="#conditional-heteroskedasticity">Conditional heteroskedasticity</a></li>
+  <li><a href="#conditional-heteroskedasticity" id="toc-conditional-heteroskedasticity" class="nav-link" data-scroll-target="#conditional-heteroskedasticity">Conditional heteroskedasticity</a>
+  <ul class="collapse">
+  <li><a href="#basic-model" id="toc-basic-model" class="nav-link" data-scroll-target="#basic-model">Basic model</a></li>
+  <li><a href="#algorithm" id="toc-algorithm" class="nav-link" data-scroll-target="#algorithm">Algorithm</a></li>
+  </ul></li>
   </ul></li>
   <li><a href="#bayesian-forecasting" id="toc-bayesian-forecasting" class="nav-link" data-scroll-target="#bayesian-forecasting">Bayesian forecasting</a>
   <ul class="collapse">
@@ -1369,6 +1373,74 @@ p(\lambda_{t}|y,\tau,\sigma^{2})&amp;\propto L(\lambda_{t},\tau,\sigma^{2}|y)p(\
 </section>
 <section id="conditional-heteroskedasticity" class="level2">
 <h2 class="anchored" data-anchor-id="conditional-heteroskedasticity">Conditional heteroskedasticity</h2>
+<p>Modelling Conditional heteroskedasticity includes the use of Stochastic Volatility models, which provides more flexibility in forecasting, enhancing its performance, improves in-sample fit of model and estimation precision.</p>
+<section id="basic-model" class="level3">
+<h3 class="anchored" data-anchor-id="basic-model">Basic model</h3>
+<p>Given that the shocks <span class="math inline">\(\epsilon_t\)</span> is heteroskedastic with conditional variances <span class="math inline">\(\sigma_t^2\)</span> the distribution of the shock becomes</p>
+<p><span class="math display">\[
+\boldsymbol \epsilon \mid \tau \sim \mathcal{N}_T \left( 0_T, \operatorname{diag}(\boldsymbol\sigma^2) \right)
+\]</span> where <span class="math inline">\(\boldsymbol\sigma^2 = \left(\sigma^2_1 , \ldots, \sigma^2_T \right)\)</span> which follows a Stochastic Volatility process.</p>
+<p>The likelihood function is derived as:</p>
+<p><span class="math display">\[
+L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
+(2\pi)^{-\frac{T}{2}}\left(\operatorname{diag}(\boldsymbol\sigma^2)\right)^{-\frac{1}{2}}\exp\left\{-\frac{1}{2}(\mathbf{y} - \boldsymbol\tau)'\operatorname{diag}(\boldsymbol\sigma^2)^{-1}(\mathbf{y} - \boldsymbol\tau)\right\}.
+\]</span></p>
+<p>The prior distribution for <span class="math inline">\(\boldsymbol\tau\)</span> is :</p>
+<p><span class="math display">\[\begin{align}
+\boldsymbol\tau \mid \tau_{0}, \sigma_\eta^2 &amp;\sim \mathcal{N}_T \left( \mathbf{H}^{-1} \mathbf{i}\tau_{0}, \sigma_\eta^2 (\mathbf{H'H})^{-1} \right)\\
+&amp;\propto \exp \left\{ -\frac{1}{2} \frac{1}{\sigma_\eta^2} \left( \tau - H^{-1} \mathbf{i}\tau_{0} \right)' H' H \left( \tau - H^{-1} \mathbf{i}\tau_{0}\right) \right\}
+\end{align}\]</span></p>
+<p>Then derive the Full Conditional Posterior for <span class="math inline">\(\boldsymbol\tau\)</span> is :</p>
+<p><span class="math display">\[\begin{align}
+p(\boldsymbol\tau \mid \mathbf{y},  \tau_{0}, \sigma_\eta^2, \sigma^2) &amp;\propto L(\boldsymbol\tau,\sigma^2|\mathbf{y})p(\tau \mid \tau_{0}, \sigma_\eta^2)\\
+&amp;\propto exp\left\{-\frac{1}{2}(\mathbf{y} - \boldsymbol\tau)'\operatorname{diag}(\boldsymbol\sigma^2)^{-1}(\mathbf{y} - \boldsymbol\tau)\right\} \\
+&amp;\qquad\exp \left\{ -\frac{1}{2} \frac{1}{\sigma_\eta^2} \left( \boldsymbol\tau - \mathbf{H}^{-1} \mathbf{i}\tau_{0} \right)' \mathbf{H' H} \left( \boldsymbol\tau - \mathbf{H}^{-1} \mathbf{i}\tau_{0}\right) \right\}
+\end{align}\]</span></p>
+<p>The posterior parameters for <span class="math inline">\(\tau\)</span> follows a normal distribution</p>
+<p><span class="math display">\[\begin{align}
+\boldsymbol\tau \mid \mathbf{y},  \tau_{0}, \sigma_\eta^2, \sigma^2&amp;\mathcal{N}_T \left( \bar{\boldsymbol\tau}, \bar{\mathbf{V}}_\tau \right)\\
+\bar{\mathbf{V}}_\tau &amp;= \left[ \operatorname{diag}(\boldsymbol\sigma^2)^{-1} + \sigma_\eta^{-2} \mathbf{H' H} \right]^{-1}\\
+\bar{\boldsymbol\tau} &amp;= \bar{\mathbf{V}}_\tau \left[ \operatorname{diag}(\boldsymbol\sigma^2)^{-1} \mathbf{y} + \sigma_\eta^{-2} \mathbf{H}'\mathbf{i}\tau_{0} \right]
+\end{align}\]</span></p>
+</section>
+<section id="algorithm" class="level3">
+<h3 class="anchored" data-anchor-id="algorithm">Algorithm</h3>
+<p>The sampler for posterior parameters for <span class="math inline">\(\boldsymbol\tau\)</span> is:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>tau_hetero.sampler <span class="ot">=</span> <span class="cf">function</span>(y, aux){</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="co">#aux includes</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sigma2 = a diagonal matrix of sigma2 from Stochastic Volatility models</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># tau0 = a scalar of initial value of tau</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sigma_eta2 = a scalar sigma_eta^2</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">#y = data</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  T1 <span class="ot">=</span> <span class="fu">nrow</span>(y)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># i_m = Tx1 matrix with 1 in the first row and 0 in all other rows</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  i_m <span class="ot">=</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> T1, <span class="at">ncol =</span> <span class="dv">1</span>)</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  i_m[<span class="dv">1</span>,] <span class="ot">=</span> <span class="dv">1</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  H                    <span class="ot">&lt;-</span>  <span class="fu">diag</span>(T1)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  mgcv<span class="sc">::</span><span class="fu">sdiag</span>(H,<span class="sc">-</span><span class="dv">1</span>)    <span class="ot">&lt;-</span>  <span class="sc">-</span><span class="dv">1</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a> <span class="co"># H = TxT matrix with 1 in main diagonal and -1 under the diagonal elements</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  sigma2 <span class="ot">=</span> aux<span class="sc">$</span>sigma2 </span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  sigma2.inv <span class="ot">=</span> <span class="fu">diag</span>(<span class="dv">1</span><span class="sc">/</span><span class="fu">diag</span>(sigma2)) <span class="co">#get inverse </span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  tau0 <span class="ot">=</span> aux<span class="sc">$</span>tau0</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  sigma_eta2 <span class="ot">=</span> aux<span class="sc">$</span>sigma_eta2</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>  sigma_eta2.inv <span class="ot">=</span> <span class="dv">1</span><span class="sc">/</span>sigma_eta2 <span class="co">#get inverse</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>  <span class="co">#compute the posterior parameters</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  V_post <span class="ot">=</span> <span class="fu">solve</span>(sigma2.inv <span class="sc">+</span> sigma_eta2.inv<span class="sc">*</span><span class="fu">t</span>(H)<span class="sc">%*%</span>H)</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>  tau_post <span class="ot">=</span> V_post<span class="sc">%*%</span>(sigma2.inv<span class="sc">%*%</span>y <span class="sc">+</span> sigma_eta2.inv <span class="sc">*</span> <span class="fu">t</span>(H)<span class="sc">%*%</span>(i_m<span class="sc">*</span>tau0))</span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>  <span class="co">#sample tau from multivariate normal and return the sample tau</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>  tau_draw <span class="ot">&lt;-</span> mvtnorm<span class="sc">::</span><span class="fu">rmvnorm</span>(T1, tau_post, V_post)</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span> (tau_draw)</span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
 </section>
 </section>
 <section id="bayesian-forecasting" class="level1">
