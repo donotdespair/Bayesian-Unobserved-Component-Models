@@ -30,7 +30,10 @@ author:
     url: https://github.com/russellyang728
   - name: Yuqiao Yang
     url: https://github.com/JimmyYang917
-    
+  - name: Yufei Wu
+    url: https://github.com/yufeimichelle
+    orcid: 0009-0002-3521-2751
+
     execute:
   #echo: false
 citation: 
