@@ -22,6 +22,8 @@ author:
     orcid: 0009-0008-9348-8581
   - name: Qingqing Pang
     url: https://github.com/comeseemeintheocean
+  - name: Pun Suparattanapinan
+    url: https://github.com/Punzbd
   - name: Yansong Yang
     url: https://github.com/russellyang728
   - name: Yuqiao Yang
@@ -1010,6 +1012,328 @@ UC.AR.Gibbs.sampler    = function(S, starting.values, priors){
 ## Estimation of autoregressive parameters for cycle component
 
 ## Autoregressive cycle component
+
+In this section, we will modify the error component $\epsilon_{t}$ from the simple local-level model to take the form of an autoregressive (AR) expression as follows
+\begin{align}
+\epsilon_{t} &= \alpha_{1}\epsilon_{t-1} + \alpha_{2}\epsilon_{t-2} + \cdots  + \alpha_{p}\epsilon_{t-p} + e_{t},\\
+e_{t}&\sim \mathcal{N}(0,\sigma_{e}^{2}).
+\end{align}
+
+Collect vector of autoregressive parametersin a $p$-vector $\boldsymbol\alpha = (\alpha_{1},\alpha_{2}, \cdots, \alpha_{p})'$, where $\boldsymbol\alpha \in A$, with the stationarity restriction being required to hold.
+
+By modelling the error component in an autoregressive form, we enable our model to capture the cyclical component, capturing its negative autocorrelations, and allowing the series to deviate from the long-term stochastic trend ($\tau_{t}$) in the short run.
+
+**The matrix notation can be represented as:**
+
+```{=tex}
+\begin{align}
+\mathbf{H}_{\alpha} \boldsymbol\epsilon &= \mathbf{e} \\
+\boldsymbol\epsilon &= H_{\alpha}^{-1}\mathbf{e} \\
+\mathbf{e} &\sim \mathcal{N}_{T}(\mathbf{0}_{T},\sigma_{e}^{2} \mathbf{I}_{T})
+\end{align}
+```
+
+
+Where 
+
+$$ 
+\mathbf{H}_{\alpha} =
+\begin{bmatrix}
+ 1  &0  &0  &0  &0  &\cdots  &0  &0  &0  &0 \\
+ -\alpha_{1}  &1  &0  &0  &0  &\cdots  &0  &0  &0  &0 \\
+ -\alpha_{2}  &-\alpha_{1}  &1  &0  &0  &\cdots  &\vdots  &\vdots  &\vdots  &\vdots \\
+ -\alpha_{3}  &-\alpha_{2}  &-\alpha_{1}  &1  &0  &\ddots  &\vdots  &\vdots  &\vdots  &\vdots \\
+ \vdots   &\vdots  &\ddots  &\ddots  & \ddots &\ddots  &\vdots  &\vdots  &\vdots &\vdots \\
+ -\alpha_{p}  &-\alpha_{p-1}  &-\alpha_{p-2} &\ddots  &\ddots  &\ddots  &0  &0  &0  &0 \\
+ \vdots  &\vdots  &\vdots  &\vdots  &\ddots  &\ddots  &\ddots  &\vdots  &\vdots &\vdots  \\
+ \vdots  &\vdots  &\vdots  &\vdots  &\cdots  &\ddots  &-\alpha_{1}  &1  &0  &0 \\
+ 0  &0  &0  &0  &\cdots  &\cdots   &-\alpha_{2}   &-\alpha_{1} &1 &0 \\
+ 0  &0  & 0 &0  &\cdots  &\cdots  &-\alpha_{3}  &-\alpha_{2}  &-\alpha_{1} &1 
+\end{bmatrix}_{T\times T} 
+$$
+
+```{=tex}
+\begin{align}
+\boldsymbol\epsilon =
+\begin{bmatrix}
+\epsilon_{1} \\
+\epsilon_{2}\\
+\vdots\\
+\epsilon_{T}\\
+\end{bmatrix}_{T\times 1} 
+\qquad and \qquad
+\mathbf{e} =
+\begin{bmatrix}
+e_{1} \\
+e_{2}\\
+\vdots\\
+e_{T}\\
+\end{bmatrix}_{T\times 1} 
+
+\end{align}
+```
+
+
+<br>
+
+Typically, in most cases, we set the initial value ($\boldsymbol\epsilon_{0}$) to zero since it aligns with the well-defined stationarity assumption. However, in this note, these values are estimated $\boldsymbol\epsilon_{0}$ from an autoregressive model, which is facilitated by assuming a normal prior distribution: $\boldsymbol\epsilon_{0} \sim \mathcal{N}_{p}(\mathbf{0}_{p},\sigma_{0}^{2}\mathbf{I}_{p})$ and  that $\mathbf{e}_{0} \sim \mathcal{N}_{p}(\mathbf{0}_{p},\sigma_{e}^{2}\mathbf{I}_{p})$. Define:
+
+```{=tex}
+\begin{align}
+\boldsymbol\epsilon_{0} =
+\begin{bmatrix}
+\epsilon_{-p+1}   \\
+\epsilon_{-p+2}   \\
+\vdots\\
+\epsilon_{0} 
+\end{bmatrix}_{p\times 1},
+\qquad and \qquad
+\mathbf{e}_{0} = 
+\begin{bmatrix}
+e_{-p+1}   \\
+e_{-p+2}   \\
+\vdots\\
+e_{0} 
+\end{bmatrix}_{p\times 1} 
+
+\end{align}
+```
+
+
+Then, the author will combine $\boldsymbol\epsilon$ and $\boldsymbol\epsilon_{0}$ together. This can be represented using the notations $\mathbf{H}_{\alpha}^{*}$, $\boldsymbol\epsilon^{*}$, and $\mathbf{e}^{*}$.
+
+$\mathbf{H}_{\alpha}^{*}$ is constructed in the same way as $\mathbf{H}_{\alpha}$, but the dimension increases to $(T+p)\times (T+p)$.
+
+```{=tex}
+\begin{align}
+\boldsymbol\epsilon^{*} =
+\begin{bmatrix}
+\epsilon_{0}   \\
+\epsilon
+\end{bmatrix}_{(T+p)\times 1}  =
+\begin{bmatrix}
+\epsilon_{-p+1}   \\
+\epsilon_{-p+2}   \\
+\vdots\\
+\epsilon_{1} \\
+\epsilon_{2} \\
+\vdots\\
+\epsilon_{T}
+\end{bmatrix}_{(T+p)\times 1}
+\qquad and \qquad
+\mathbf{e}^{*} =
+\begin{bmatrix}
+e_{0}   \\
+e
+\end{bmatrix}_{(T+p)\times 1} 
+=
+\begin{bmatrix}
+e_{-p+1}   \\
+e_{-p+2}   \\
+\vdots\\
+e_{1} \\
+e_{2} \\
+\vdots\\
+e_{T}
+\end{bmatrix}_{(T+p)\times 1}
+\end{align}
+```
+
+**The matrix notation can be represented as:**
+```{=tex}
+\begin{align}
+\mathbf{H}_{\alpha}^{*} \boldsymbol\epsilon^{*} &=\mathbf{e}^{*} \\
+\boldsymbol\epsilon^{*} &= \mathbf{H}^{*-1}_{\alpha}\mathbf{e}^{*} \\
+
+\mathbf{e}^{*} &\sim \mathcal{N}_{T+p}(\mathbf{0}_{T+p},\sigma_{e*}^{2}\mathbf{I}_{T+p})
+\end{align}
+```
+
+Then
+```{=tex}
+\begin{align}
+
+\boldsymbol\epsilon^{*}|\boldsymbol\alpha,\sigma_{e}^2 &\sim \mathcal{N}_{T+p}(\mathbf{0}_{T+p},\underbrace{\sigma_{e*}^2(\mathbf{H}_{\alpha}^{*'}\mathbf{H}_{\alpha}^{*})^{-1}}_{{\boldsymbol\Omega}})
+\end{align}
+```
+
+
+```{=tex}
+\begin{align}
+\boldsymbol\Omega = \begin{bmatrix}
+ \boldsymbol\Omega_{11}& \boldsymbol\Omega_{12}\\
+ \boldsymbol\Omega_{21}& \boldsymbol\Omega_{21}
+\end{bmatrix} \\
+\end{align}
+
+\text{ with dimensions}
+
+ \begin{bmatrix}
+ pXP&pXT\\
+ TXp&TXT
+\end{bmatrix}_{(T+p)X(T+p)} \\
+
+```
+
+### The prior distribution
+
+Using knowledge from the conditional distributions of multivariate normal distribution, we can find the prior distribution of $\boldsymbol\epsilon \text{ and } \boldsymbol\epsilon_{0}$ as follows.
+
+1. The prior distribution of $\boldsymbol\epsilon$
+
+```{=tex}
+\begin{align}
+
+\boldsymbol\epsilon|\boldsymbol\epsilon_{0},\boldsymbol\alpha,\sigma_{e*}^2 &\sim \mathcal{N}_{T}(\underbrace{\boldsymbol\Omega_{21}\boldsymbol\Omega_{11}^{-1}\boldsymbol\epsilon_{0}}_{\underline{\boldsymbol\epsilon}},\underbrace{\boldsymbol\Omega_{22}-\boldsymbol\Omega_{21}\boldsymbol\Omega_{11}^{-1}\boldsymbol\Omega_{12}}_{\underline{\mathbf{V}}_{\epsilon}}) \\
+&\propto exp\left\{-\frac{1}{2} (\boldsymbol\epsilon-\underline{\boldsymbol\epsilon})' \underline{\mathbf{V}}_{\epsilon}^{-1} (\boldsymbol\epsilon-\underline{\boldsymbol\epsilon})\right\}
+
+
+\end{align}
+```
+
+2. The prior distribution of $\boldsymbol\epsilon_{0}$
+
+```{=tex}
+\begin{align}
+
+\boldsymbol\epsilon_{0}|\boldsymbol\epsilon,\boldsymbol\alpha,\sigma_{e*}^2 &\sim \mathcal{N}_{P}(\underbrace{\boldsymbol\Omega_{12}\boldsymbol\Omega_{22}^{-1}\boldsymbol\epsilon}_{\underline{\boldsymbol\epsilon}_{0}},\underbrace{\boldsymbol\Omega_{11}-\boldsymbol\Omega_{12}\boldsymbol\Omega_{22}^{-1}\boldsymbol\Omega_{21}}_{\underline{\mathbf{V}}_{\epsilon_{0}}}) \\
+
+&\propto exp\left\{-\frac{1}{2} (\boldsymbol\epsilon_{0}-\underline{\boldsymbol\epsilon}_{0})' \underline{\mathbf{V}}_{\epsilon_{0}}^{-1}  (\boldsymbol\epsilon_{0}-\underline{\boldsymbol\epsilon}_{0})\right\}
+
+
+\end{align}
+```
+
+
+### Likelihood
+From the simple local-level model we can write
+
+```{=tex}
+\begin{align}
+\mathbf{y} &= \boldsymbol\tau + \boldsymbol\epsilon,\\
+\mathbf{H}\boldsymbol\tau &= \mathbf{i} \tau_0 + \boldsymbol\eta,\\
+\boldsymbol\tau &= \mathbf{H}^{-1} \mathbf{i} \tau_0 + \mathbf{H}^{-1} \boldsymbol\eta
+\end{align}
+```
+
+
+Then,
+```{=tex}
+\begin{align}
+\boldsymbol\epsilon &= \mathbf{y} - \boldsymbol\tau \\
+\boldsymbol\epsilon &\sim N(\mathbf{y}-\mathbf{H}^{-1} \mathbf{i} \tau_0, \sigma_{\eta}^2 \mathbf{I}_{T} (\mathbf{H}'\mathbf{H})^{-1})\\
+L(\boldsymbol\epsilon|\mathbf{y},\boldsymbol\tau,\tau_0, \sigma_{\eta}^2)  &\propto exp\{-\frac{1}{2}\frac{1}{\sigma_{\eta}^2}(\boldsymbol\epsilon-(\mathbf{y}-\mathbf{H}^{-1} \mathbf{i} \tau_0))' \mathbf{H}'\mathbf{H} (\boldsymbol\epsilon-(\mathbf{y}-\mathbf{H}^{-1} \mathbf{i} \tau_0))
+\end{align}
+```
+
+### The full-conditional posterior distribution
+
+1. The full-conditional posterior distribution of $\boldsymbol\epsilon$
+
+```{=tex}
+\begin{align}
+p(\boldsymbol\epsilon|\boldsymbol\epsilon_{0},\mathbf{y},\boldsymbol\tau,\tau_0, \sigma_{\eta}^2, \underline{\mathbf{V}}_{\epsilon}) &\propto L(\boldsymbol\epsilon|\mathbf{y},\boldsymbol\tau,\tau_0,\sigma_{\eta}^2) \; p(\boldsymbol\epsilon|\boldsymbol\epsilon_{0},\boldsymbol\alpha,\sigma_{e*}^2) \\
+&= \mathcal{N}_{T}(\bar{\boldsymbol\epsilon},\bar{\mathbf{V}}_{\epsilon}) \\
+
+\\
+
+\bar{\mathbf{V}}_{\epsilon} &= \left[\underline{\mathbf{V}}^{-1}_{\epsilon} + \sigma_{\eta}^{-2}\mathbf{H}'\mathbf{H}\right]^{-1} \\
+\bar{\boldsymbol\epsilon} &= \bar{\mathbf{V}}_{\epsilon} \left[\sigma_{\eta}^{-2} \mathbf{H}'\mathbf{H} (\mathbf{y}-\mathbf{H}^{-1} \mathbf{i} \tau_0) + \underline{\mathbf{V}}^{-1}_{\epsilon}\; \underline{\boldsymbol\epsilon}\right]
+
+\end{align}
+```
+
+2. The full-conditional posterior distribution of $\boldsymbol\epsilon_{0}$
+
+
+```{=tex}
+\begin{align}
+
+p(\boldsymbol\epsilon_{0}|\epsilon,\mathbf{y},\boldsymbol\tau,\tau_0, \sigma_{\eta}^2,\underline{\mathbf{V}}_{\epsilon_{0}}) &\propto L(\boldsymbol\epsilon|\mathbf{y},\boldsymbol\tau,\tau_0,\sigma_{\eta}^2) \; p(\boldsymbol\epsilon_{0}) \; p(\boldsymbol\epsilon_{0}|\boldsymbol\epsilon,\boldsymbol\alpha,\sigma_{e*}^2) \\
+
+
+&\propto p(\boldsymbol\epsilon_{0}) \; p(\boldsymbol\epsilon_{0}|\boldsymbol\epsilon,\boldsymbol\alpha,\sigma_{e*}^2) \\
+
+&= \mathcal{N}_{p}(\bar{\boldsymbol\epsilon_{0}},\bar{\mathbf{V}}_{\epsilon_{0}}) \\
+
+\\
+
+\bar{\mathbf{V}}_{\epsilon_{0}} &= \left[\underline{\mathbf{V}}^{-1}_{\epsilon_{0}} + \sigma_{0}^{-2} \mathbf{I}_{p}\right]^{-1} \\
+\bar{\boldsymbol\epsilon_{0}} &= \bar{\mathbf{V}}_{\epsilon_{0}} \; \underline{\boldsymbol\epsilon_{0}} 
+
+\end{align}
+```
+
+
+
+### The Sampler function
+
+Given that we have priors and other sampling parameters from another function, and also some fixed matrices such as  $\mathbf{H}'\mathbf{H}$ and $\mathbf{H^{*}}_{\alpha}'\mathbf{H^{*}}_{\alpha}$.
+
+
+We can sampling each of $\epsilon$ and $\epsilon_{0}$ from the following function
+
+
+
+
+
+
+```{r}
+Sampling.epsilon.epsilonzero    = function(starting.values, priors){
+
+  
+  aux            = starting.values
+  p              = length(aux$alpha)
+  T              = nrow(aux$Y)
+  Ha             = diag(T + p)
+  for (i in 1:p) {
+    mgcv::sdiag(Ha, -i) <- - aux$alpha[i]
+  }
+  HaHa           = crossprod(Ha)
+    
+    # Start calculating (and updating parameters)
+    ###########################
+
+    epsilon.star        = rbind(aux$epsilon.zero, aux$epsilon)
+    omega               = sigma.e.star%*%solve(HaHa)
+    omega_11            = omega[1:p, 1:p]
+    omega_12            = omega[1:p, (p+1):(p+T)]
+    omega_21            = omega[(p+1):(p+T), 1:p]
+    omega_22            = omega[(p+1):(p+T), (p+1):(p+T)]
+    epsilon             = omega_21%*%solve(omega_11)%*%aux$epsilon.zero
+    epsilon.zero        = omega_12%*%solve(omega_22)%*%aux$epsilon
+    V.epsilon           = omega_22 - omega_21%*%solve(omega_11)%*%omega_12
+    V.epsilon.zero      = omega_11 - omega_12%*%solve(omega_22)%*%omega_21
+    
+    # Sampling epsilon
+    ###########################
+    V.epsilon.post.inv     = solve(V.epsilon) + (1/aux$sigma.eta)*HH
+    b.epsilon              = (1/aux$sigma.eta)*HH%*%(aux$Y- cumsum(i%*%priors$tau_0)) + 
+                             solve(V.epsilon)%*%aux$epsilon
+    precision.L            = t(chol(V.epsilon.post.inv))
+    epsilon.n              = rnorm(T)
+    b.epsilon.tmp          = solve(precision.L, b.epsilon)
+    epsilon.draw           = solve(t(precision.L), b.epsilon.tmp + epsilon.n)
+    aux$epsilon            = epsilon.draw
+    
+    # Sampling epsilon.zero
+    ###########################
+    V.epsilon.zero.post.inv     = solve(V.epsilon.zero) + (1/sigma.zero)*diag(p)
+    b.epsilon.zero              = epsilon.zero
+    precision.L                 = t(chol(V.epsilon.zero.post.inv))
+    epsilon.n                   = rnorm(p)
+    b.epsilon.zero.tmp          = solve(precision.L, b.epsilon.zero)
+    epsilon.zero.draw           = solve(t(precision.L), b.epsilon.zero.tmp + epsilon.n)
+    aux$epsilon.zero            = epsilon.zero.draw
+    
+    # The draw
+  output      = list(
+    epsilon_draw = epsilon.draw, # Drawn epsilon values
+    epsilon_zero_draw = epsilon.zero.draw # Drawn epsilon.zero values
+  )
+  return(output)
+}
+```
 
 ## Random walk with  time-varying drift parameter
 
