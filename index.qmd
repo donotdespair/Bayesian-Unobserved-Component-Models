@@ -22,6 +22,8 @@ author:
     orcid: 0009-0008-9348-8581
   - name: Qingqing Pang
     url: https://github.com/comeseemeintheocean
+  - name: Nhu Pham
+    url: https://github.com/NhuPham254 
   - name: Pun Suparattanapinan
     url: https://github.com/Punzbd
   - name: Yansong Yang
@@ -1336,6 +1338,79 @@ Sampling.epsilon.epsilonzero    = function(starting.values, priors){
 ```
 
 ## Random walk with  time-varying drift parameter
+
+
+Consider a simple Unobserved Component model with  time-varying drift parameter
+\begin{align}
+\tau_{t} &= \mu_{s_t} + \tau_{t-1} + \eta_t,\\
+\eta_t &\sim \mathcal{N}(0, \sigma_{\eta}^2),
+\end{align}
+where $\mu_{s_t}$ is a regime-dependent mean term, and $s_t$ is a regime state variable. Assume there are two regimes, for example, before and after the exchange rate crisis in 1985. Define:
+
+$$s_t = \left\{\begin{array}{ll}1 &\text{ for }t < Tb \\  2 &\text{ for }t \geq Tb\end{array}\right.$$
+
+To write a model in a matrix notation, define vector $\boldsymbol\beta = \begin{bmatrix}\tau_0 &\mu_1 &\mu_2\end{bmatrix}'$ and matrix:
+\begin{align}
+\mathbf{X}_{\tau} = \begin{bmatrix}
+1 & 1 & 0 \\
+0 & 1 & 0 \\
+0 & 1 & 0 \\
+\vdots & \vdots & \vdots \\
+0 & 1 & 0 \\
+0 & 0 & 1 \\
+0 & 0 & 1 \\
+\vdots & \vdots & \vdots \\
+0 & 0 & 1
+\end{bmatrix}
+\end{align}
+Then the model is written as
+$$
+\mathbf{H}\boldsymbol\tau = \mathbf{X}_{\tau}\boldsymbol\beta+\boldsymbol\eta\\
+$$
+Prior distribution
+$$p(\boldsymbol\beta) = exp\left(-\frac{1}{2}(\boldsymbol\beta - \underline{\boldsymbol\beta})'\mathbf{\underline{V}}_\beta^{-1}(\boldsymbol\beta - \underline{\boldsymbol\beta})\right)$$
+
+Full conditional posterior distribution
+\begin{align}
+p(\boldsymbol\beta|y,\boldsymbol\tau,\sigma_\eta^2) &= \mathcal{N}_3(\overline{\boldsymbol\beta},\mathbf{\overline{V}}_\beta)\\[1ex]
+\mathbf{\overline{V}}_{\beta} &= [\sigma_{\eta}^{-2}\mathbf{X}_\tau'\mathbf{X}_\tau+\mathbf{\underline{V}}_\beta^{-1}]^{-1}\\
+\bar{\boldsymbol\beta} &= \mathbf{\overline{V}}_{\beta}[\sigma_{\eta}^{-2}\mathbf{X}_\tau'\mathbf{H}\boldsymbol\tau + \mathbf{\underline{V}}_\beta^{-1}\underline{\boldsymbol\beta}]
+\end{align}
+
+
+```{r}
+
+# function to draw beta
+draw_beta <- function(Tb, tau, sigma_eta_sq, beta_prior, V_prior) {
+  
+  T = length(tau)
+  
+  X_tau <- matrix(0, nrow = T, ncol = 3)
+  X_tau[1, 1] <- 1  # Column for tau_0
+  X_tau[1:(Tb-1), 2] <- 1  # Column for mu1 for t < Tb
+  X_tau[Tb:T, 3] <- 1  # Column for mu2 for t >= Tb
+  
+  # Define H
+  H <- diag(T)
+  for (i in 2:T) {
+    H[i, i-1] <- -1
+  }
+  
+  V_prior_inv <- solve(V_prior)
+  
+  V_bar_inv <- (1/sigma_eta_sq) * t(X_tau) %*% X_tau + V_prior_inv
+  V_bar <- solve(V_bar_inv)
+  beta_bar <- V_bar %*% ((1/sigma_eta_sq) * t(X_tau) %*% (H %*% tau) 
+                         + V_prior_inv %*% beta_prior)
+  
+  # Draw a sample from the multivariate normal distribution
+  beta_posterior <- mvrnorm(1, beta_bar, V_bar)
+  
+  return(beta_posterior)
+}
+```
+
+
 
 ## Student-t error terms
 
