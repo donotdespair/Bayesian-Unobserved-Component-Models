@@ -127,31 +127,19 @@ L(\boldsymbol\tau,\sigma^2|\mathbf{y}) =
 We consider an extension of the model by a zero-mean autoregressive equation for $\epsilon_{t}$:
 
 \begin{align}
-\epsilon_{t}=\alpha_{1}\epsilon_{t-1}=...+\alpha_{p}\epsilon_{t-p}+e_{t}
+\epsilon_{t}=\alpha_{1}\epsilon_{t-1}+...+\alpha_{p}\epsilon_{t-p}+e_{t}
 \end{align}
 
 Where:
 
 \begin{align}
-e_{t}\sim\mathcal{N}\left(0,\sigma_{\alpha}^{2}\right)
+e_{t}\sim\mathcal{N}\left(0,\sigma_e^{2}\right)
 \end{align}
 
-Then the prior for the autoregressive parameter vector $\alpha=\left(\alpha_{1},...,\alpha_{p}\right)'$:
+Define the autoregressive parameter vector $\alpha=\left(\alpha_{1},...,\alpha_{p}\right)'$. The prior distribution for $\alpha$ is then:
 
 \begin{align}
-\alpha|\sigma_{\alpha}^{2}\sim\mathcal{N}_{p}\left(0_{p},\sigma_{\alpha}^{2}I_{p}\right)
-\end{align}
-
-and:
-
-\begin{align}
-\sigma_{\alpha}^{2}\sim IG2\left(s_{\alpha},\nu_{\alpha}\right)
-\end{align}
-
-The prior distribution for $\alpha$ is then:
-
-\begin{align}
-\alpha\sim\mathcal{N}_{p}\left(\underline{\alpha},\underline{V}_{\alpha}\right)\mathcal{I}\left(\alpha\in A\right)\propto\exp\left(-\frac{1}{2}\left(\alpha-\underline{\alpha}\right)'\underline{V}_{\alpha}^{-1}\left(\alpha-\underline{\alpha}\right)\right)\mathcal{I}\left(\alpha\in A\right)
+\alpha\sim\mathcal{N}_{p}\left(\underline{\alpha},\sigma_{\alpha}^{2}I_{p}\right)\mathcal{I}\left(\alpha\in A\right)\propto\exp\left(-\frac{1}{2}\frac{1}{\sigma_{\alpha}^{2}}\left(\alpha-\underline{\alpha}\right)'\left(\alpha-\underline{\alpha}\right)\right)\mathcal{I}\left(\alpha\in A\right)
 \end{align}
 
 Where $\alpha\in A$ denotes the set of parameters for $\alpha$ in which stationarity holds:
@@ -163,80 +151,57 @@ Where $\alpha\in A$ denotes the set of parameters for $\alpha$ in which stationa
 \end{cases}
 \end{align}
 
+and:
+
+\begin{align}
+\sigma_{\alpha}^{2}\sim IG2\left(s_{\alpha},\nu_{\alpha}\right)
+\end{align}
+
+
+
 Using from the simple unobserved component model:
 
 \begin{align}
 e=\epsilon-X_{\epsilon}\alpha
 \end{align}
+where $\epsilon$ and $X_{\epsilon}$ are $T\times 1$ and $T\times p$ matrices respectively collecting the terms from the autoregressive equation for all periods.
+
 
 Then we have the likelihood:
 \begin{align}
-L\left(\alpha|y,\epsilon,\sigma_{\alpha}^{2}\right)\propto\exp\left(-\frac{1}{2}\sigma_{\alpha}^{2}\left(X_{\epsilon}\alpha-\epsilon\right)'\underline{V}_{\alpha}^{-1}\left(X_{\epsilon}\alpha-\epsilon\right)\right)
+L\left(\alpha|\mathbf{y},\boldsymbol\epsilon,\sigma_{\alpha}^{2}\right)\propto\exp\left(-\frac{1}{2\sigma_e^{2}}\left(X_{\epsilon}\alpha-\epsilon\right)'\left(X_{\epsilon}\alpha-\epsilon\right)\right)
 \end{align}
 
 So the full-conditional posterior distribution for $\alpha$ is then given by:
 \begin{align}
-p\left(\alpha|y,\epsilon,\sigma_{\alpha}^{2}\right)&\propto L\left(\alpha|y,\epsilon,\sigma_{\alpha}^{2}\right)p\left(\alpha\right)\mathcal{I}\left(\alpha\in A\right)\\&=\exp\left(-\frac{1}{2}\sigma_{\alpha}^{2}\left(X_{\epsilon}\alpha-\epsilon\right)'\underline{V}_{\alpha}^{-1}\left(X_{\epsilon}\alpha-\epsilon\right)\right)\exp\left(-\frac{1}{2}\left(\alpha-\underline{\alpha}\right)'\underline{V}_{\alpha}^{-1}\left(\alpha-\underline{\alpha}\right)\right)\mathcal{I}\left(\alpha\in A\right)\\&=\exp\left(-\frac{1}{2}\left(\sigma_{\alpha}^{2}\left(X_{\epsilon}\alpha-\epsilon\right)'\underline{V}_{\alpha}^{-1}\left(X_{\epsilon}\alpha-\epsilon\right)+\left(\alpha-\underline{\alpha}\right)'\underline{V}_{\alpha}^{-1}\left(\alpha-\underline{\alpha}\right)\right)\right)\mathcal{I}\left(\alpha\in A\right)\\&=...\\&=\exp\left(-\frac{1}{2}\left(\alpha'\overline{V}_{\alpha}\alpha-2\alpha'\overline{V}_{\alpha}^{-1}\overline{\alpha}+...\right)\right)\mathcal{I}\left(\alpha\in A\right)
+p\left(\alpha|y,\epsilon,\sigma_{\alpha}^{2}\right)&\propto L\left(\alpha|y,\epsilon,\sigma_{\alpha}^{2}\right)p\left(\alpha\right)\mathcal{I}\left(\alpha\in A\right)\\
+&=\exp\left(-\frac{1}{2\sigma_e^{2}}\left(X_{\epsilon}\alpha-\epsilon\right)'\left(X_{\epsilon}\alpha-\epsilon\right)\right)\exp\left(-\frac{1}{2}\frac{1}{\sigma_{\alpha}^{2}}\left(\alpha-\underline{\alpha}\right)'\left(\alpha-\underline{\alpha}\right)\right)\mathcal{I}\left(\alpha\in A\right)\\
+&=\exp\left(-\frac{1}{2\sigma_{\alpha}^{2}}\left(X_{\epsilon}\alpha-\epsilon\right)'\left(X_{\epsilon}\alpha-\epsilon\right)+\frac{1}{\sigma_{\alpha}^{2}}\left(\alpha-\underline{\alpha}\right)'\left(\alpha-\underline{\alpha}\right)\right)\mathcal{I}\left(\alpha\in A\right)\\
+&=\exp\left(-\frac{1}{2}\left(\alpha'\overline{V}_{\alpha}\alpha-2\alpha'\overline{V}_{\alpha}^{-1}\overline{\alpha}+...\right)\right)\mathcal{I}\left(\alpha\in A\right)
 \end{align}
 
 Hence we have the full-conditional posterior as:
 
 \begin{align}
-p\left(\alpha|y,\epsilon,\sigma_{\alpha}^{2}\right)&=\mathcal{N}_{p}\left(\overline{\alpha},\overline{V}_{\alpha}\right)\mathcal{I}\left(\alpha\in A\right)\\\overline{V}_{\alpha}&=\left[\sigma_{\alpha}^{-2}X_{\epsilon}'X_{\epsilon}+\underline{V}_{\alpha}^{-1}\right]^{-1}\\\overline{\alpha}&=\overline{V}_{\alpha}\left[\sigma_{\alpha}^{-2}X_{\epsilon}'\epsilon+\underline{V}_{\alpha}^{-1}\underline{\alpha}\right]
-\end{align}
-
-Now doing the same for $\sigma_{\alpha}^{2}$, where the prior and likelihood distribution is then:
-
-\begin{align}
-p\left(\sigma_{\alpha}^{2}\right)&\propto\left(\sigma_{\alpha}^{2}\right)^{-\frac{\nu_{\alpha}+2}{2}}\exp\left(-\frac{1}{2}\frac{s_{\alpha}}{\sigma_{\alpha}^{2}}\right)\\L\left(\sigma_{\alpha}^{2}|y,\epsilon,\alpha\right)&\propto\left(\sigma_{\alpha}^{2}\right)^{-\frac{T}{2}}\exp\left(-\frac{1}{2}\sigma_{\alpha}^{-2}\left(X_{\epsilon}\alpha-\epsilon\right)'\left(X_{\epsilon}\alpha-\epsilon\right)\right)
-\end{align}
-
-So the full-conditional posterior distribution for $\sigma_{\alpha}^{2}$ is then given by:
-\begin{align}
-p\left(\sigma_{\alpha}^{2}|y,\epsilon,\alpha\right)&\propto L\left(\sigma_{\alpha}^{2}|y,\epsilon,\alpha\right)p\left(\sigma_{\alpha}^{2}\right)\\&=\left(\sigma_{\alpha}^{2}\right)^{-\frac{T}{2}}\exp\left(-\frac{1}{2}\sigma_{\alpha}^{-2}\left(X_{\epsilon}\alpha-\epsilon\right)'\left(X_{\epsilon}\alpha-\epsilon\right)\right)\left(\sigma_{\alpha}^{2}\right)^{-\frac{\nu_{\alpha}+2}{2}}\exp\left(-\frac{1}{2}\frac{s_{\alpha}}{\sigma_{\alpha}^{2}}\right)\\&=\left(\sigma_{\alpha}^{2}\right)^{-\frac{T+\nu_{\alpha}+2}{2}}\exp\left(-\frac{1}{2}\sigma_{\alpha}^{-2}\left(\left(X_{\epsilon}\alpha-\epsilon\right)'\left(X_{\epsilon}\alpha-\epsilon\right)+s_{\alpha}\right)\right)\\&=\left(\sigma_{\alpha}^{2}\right)^{-\frac{\overline{\nu}_{\alpha}+2}{2}}\exp\left(-\frac{1}{2}\frac{\overline{s}_{\alpha}}{\sigma_{\alpha}^{2}}\right)
-\end{align}
-
-Hence we have the full-conditional posterior as:
-\begin{align}
-p\left(\alpha|y,\epsilon,\sigma_{\alpha}^{2}\right)&=\mathcal{IG}2\left(\overline{s}_{\alpha},\overline{\nu}_{\alpha}\right)\\\overline{s}_{\alpha}&=\left(X_{\epsilon}\alpha-\epsilon\right)'\left(X_{\epsilon}\alpha-\epsilon\right)+s_{\alpha}\\\overline{\nu}&=\nu_{\alpha}+T
+p\left(\alpha|y,\epsilon,\sigma_{\alpha}^{2}\right)
+&=\mathcal{N}_{p}\left(\overline{\alpha},\overline{V}_{\alpha}\right)\mathcal{I}\left(\alpha\in A\right)\\
+\overline{V}_{\alpha}&=\left[\sigma_{e}^{-2}X_{\epsilon}'X_{\epsilon}+\sigma_{\alpha}^{-2}\mathbf{I}_{p}^{-1}\right]^{-1}\\
+\overline{\alpha}&=\overline{V}_{\alpha}\left[\sigma_{e}^{-2}X_{\epsilon}'\epsilon+\sigma_{\alpha}^{-2}\underline{\alpha}\right]
 \end{align}
 
 
 ```{r}
-#| echo: true
-#| message: false
-#| warning: false
-#| eval: false
 
-# Assuming we have set a list of priors and we have the data
-
-# Bayesian UC function
-
-UC.Gibbs = function(Y,X,priors,S,initial.sigma2){
-  # Gibbs sampler for a simple unobserved component model
+sample_alpha = function(epsilon, X_epsilon, priors, sigma2_e){
   
-  posterior = matrix(NA, sum(S), 2)
-  colnames(posterior) = c("alpha", "sigma2")
+  p = ncol(X_epsilon) 
   
-  draw  = c(NA, initial.sigma2)
-  names(draw) = c("alpha", "sigma2")
+  # full conditional posterior distribution alpha
+  V.alpha.bar = solve((1/priors[2]) * diag(p) + (1/sigma2_e)* t(X_epsilon)%*%X_epsilon)
+  alpha.bar        = V.alpha.bar*( priors[1]/priors[2] + (1/sigma2_e)*as.numeric(t(X_epsilon)%*%epsilon) )
+  draw         = mvtnorm::rmvnorm(1, alpha.bar, V.alpha.bar)
   
-  for (s in 1:sum(S)){
-    # full conditional posterior distribution alpha
-    V.alpha.bar = 1/((1/priors[2]) + (1/draw[2])* as.numeric(t(X)%*%X))
-    alpha.bar        = V.alpha.bar*( priors[1]/priors[2] + (1/draw[2])*as.numeric(t(X)%*%epsilon) )
-    draw[1]         = rnorm(1, mean=beta.bar, sd=sqrt(sigma2.alpha.bar))
-    
-    # full conditional posterior distribution sigma2
-    s.bar           = priors[3] + as.numeric(t(draw[1]*X-epsilon)%*%(draw[1]*X-epsilon))
-    nu.bar          = priors[4] + nrow(Y)
-    draw[2]         = s.bar/rchisq(1, nu.bar)
-    
-    posterior[s,]   = draw
-  }
-  
-  posterior   = posterior[-(1:S[1]),]
-  return(posterior)
+  return(draw)
 }
 
 ```
